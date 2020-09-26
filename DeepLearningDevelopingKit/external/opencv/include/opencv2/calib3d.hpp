@@ -143,4 +143,41 @@ and \f$\tau_y\f$, respectively,
 R(\tau_x, \tau_y) =
 \vecthreethree{\cos(\tau_y)}{0}{-\sin(\tau_y)}{0}{1}{0}{\sin(\tau_y)}{0}{\cos(\tau_y)}
 \vecthreethree{1}{0}{0}{0}{\cos(\tau_x)}{\sin(\tau_x)}{0}{-\sin(\tau_x)}{\cos(\tau_x)} =
-\vecthreethree{\cos(\tau_y)}{\sin(\tau_y)\sin(\tau_x)}{-\sin(\tau_y)\cos(\tau_
+\vecthreethree{\cos(\tau_y)}{\sin(\tau_y)\sin(\tau_x)}{-\sin(\tau_y)\cos(\tau_x)}
+{0}{\cos(\tau_x)}{\sin(\tau_x)}
+{\sin(\tau_y)}{-\cos(\tau_y)\sin(\tau_x)}{\cos(\tau_y)\cos(\tau_x)}.
+\f]
+
+In the functions below the coefficients are passed or returned as
+
+\f[(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f]
+
+vector. That is, if the vector contains four elements, it means that \f$k_3=0\f$ . The distortion
+coefficients do not depend on the scene viewed. Thus, they also belong to the intrinsic camera
+parameters. And they remain the same regardless of the captured image resolution. If, for example, a
+camera has been calibrated on images of 320 x 240 resolution, absolutely the same distortion
+coefficients can be used for 640 x 480 images from the same camera while \f$f_x\f$, \f$f_y\f$, \f$c_x\f$, and
+\f$c_y\f$ need to be scaled appropriately.
+
+The functions below use the above model to do the following:
+
+-   Project 3D points to the image plane given intrinsic and extrinsic parameters.
+-   Compute extrinsic parameters given intrinsic parameters, a few 3D points, and their
+projections.
+-   Estimate intrinsic and extrinsic camera parameters from several views of a known calibration
+pattern (every view is described by several 3D-2D point correspondences).
+-   Estimate the relative position and orientation of the stereo camera "heads" and compute the
+*rectification* transformation that makes the camera optical axes parallel.
+
+@note
+   -   A calibration sample for 3 cameras in horizontal position can be found at
+        opencv_source_code/samples/cpp/3calibration.cpp
+    -   A calibration sample based on a sequence of images can be found at
+        opencv_source_code/samples/cpp/calibration.cpp
+    -   A calibration sample in order to do 3D reconstruction can be found at
+        opencv_source_code/samples/cpp/build3dmodel.cpp
+    -   A calibration sample of an artificially generated camera and chessboard patterns can be
+        found at opencv_source_code/samples/cpp/calibration_artificial.cpp
+    -   A calibration example on stereo calibration can be found at
+        opencv_source_code/samples/cpp/stereo_calib.cpp
+    -   A ca
