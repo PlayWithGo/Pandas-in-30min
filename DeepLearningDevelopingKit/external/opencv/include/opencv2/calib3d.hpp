@@ -180,4 +180,61 @@ pattern (every view is described by several 3D-2D point correspondences).
         found at opencv_source_code/samples/cpp/calibration_artificial.cpp
     -   A calibration example on stereo calibration can be found at
         opencv_source_code/samples/cpp/stereo_calib.cpp
-    -   A ca
+    -   A calibration example on stereo matching can be found at
+        opencv_source_code/samples/cpp/stereo_match.cpp
+    -   (Python) A camera calibration sample can be found at
+        opencv_source_code/samples/python/calibrate.py
+
+  @{
+    @defgroup calib3d_fisheye Fisheye camera model
+
+    Definitions: Let P be a point in 3D of coordinates X in the world reference frame (stored in the
+    matrix X) The coordinate vector of P in the camera reference frame is:
+
+    \f[Xc = R X + T\f]
+
+    where R is the rotation matrix corresponding to the rotation vector om: R = rodrigues(om); call x, y
+    and z the 3 coordinates of Xc:
+
+    \f[x = Xc_1 \\ y = Xc_2 \\ z = Xc_3\f]
+
+    The pinhole projection coordinates of P is [a; b] where
+
+    \f[a = x / z \ and \ b = y / z \\ r^2 = a^2 + b^2 \\ \theta = atan(r)\f]
+
+    Fisheye distortion:
+
+    \f[\theta_d = \theta (1 + k_1 \theta^2 + k_2 \theta^4 + k_3 \theta^6 + k_4 \theta^8)\f]
+
+    The distorted point coordinates are [x'; y'] where
+
+    \f[x' = (\theta_d / r) a \\ y' = (\theta_d / r) b \f]
+
+    Finally, conversion into pixel coordinates: The final pixel coordinates vector [u; v] where:
+
+    \f[u = f_x (x' + \alpha y') + c_x \\
+    v = f_y y' + c_y\f]
+
+    @defgroup calib3d_c C API
+
+  @}
+ */
+
+namespace cv
+{
+
+//! @addtogroup calib3d
+//! @{
+
+//! type of the robust estimation algorithm
+enum { LMEDS  = 4, //!< least-median of squares algorithm
+       RANSAC = 8, //!< RANSAC algorithm
+       RHO    = 16 //!< RHO algorithm
+     };
+
+enum { SOLVEPNP_ITERATIVE = 0,
+       SOLVEPNP_EPNP      = 1, //!< EPnP: Efficient Perspective-n-Point Camera Pose Estimation @cite lepetit2009epnp
+       SOLVEPNP_P3P       = 2, //!< Complete Solution Classification for the Perspective-Three-Point Problem @cite gao2003complete
+       SOLVEPNP_DLS       = 3, //!< A Direct Least-Squares (DLS) Method for PnP  @cite hesch2011direct
+       SOLVEPNP_UPNP      = 4, //!< Exhaustive Linearization for Robust Camera Pose and Focal Length Estimation @cite penate2013exhaustive
+       SOLVEPNP_AP3P      = 5, //!< An Efficient Algebraic Solution
