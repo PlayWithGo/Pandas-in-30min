@@ -237,4 +237,57 @@ enum { SOLVEPNP_ITERATIVE = 0,
        SOLVEPNP_P3P       = 2, //!< Complete Solution Classification for the Perspective-Three-Point Problem @cite gao2003complete
        SOLVEPNP_DLS       = 3, //!< A Direct Least-Squares (DLS) Method for PnP  @cite hesch2011direct
        SOLVEPNP_UPNP      = 4, //!< Exhaustive Linearization for Robust Camera Pose and Focal Length Estimation @cite penate2013exhaustive
-       SOLVEPNP_AP3P      = 5, //!< An Efficient Algebraic Solution
+       SOLVEPNP_AP3P      = 5, //!< An Efficient Algebraic Solution to the Perspective-Three-Point Problem @cite Ke17
+       SOLVEPNP_MAX_COUNT      //!< Used for count
+};
+
+enum { CALIB_CB_ADAPTIVE_THRESH = 1,
+       CALIB_CB_NORMALIZE_IMAGE = 2,
+       CALIB_CB_FILTER_QUADS    = 4,
+       CALIB_CB_FAST_CHECK      = 8
+     };
+
+enum { CALIB_CB_SYMMETRIC_GRID  = 1,
+       CALIB_CB_ASYMMETRIC_GRID = 2,
+       CALIB_CB_CLUSTERING      = 4
+     };
+
+enum { CALIB_USE_INTRINSIC_GUESS = 0x00001,
+       CALIB_FIX_ASPECT_RATIO    = 0x00002,
+       CALIB_FIX_PRINCIPAL_POINT = 0x00004,
+       CALIB_ZERO_TANGENT_DIST   = 0x00008,
+       CALIB_FIX_FOCAL_LENGTH    = 0x00010,
+       CALIB_FIX_K1              = 0x00020,
+       CALIB_FIX_K2              = 0x00040,
+       CALIB_FIX_K3              = 0x00080,
+       CALIB_FIX_K4              = 0x00800,
+       CALIB_FIX_K5              = 0x01000,
+       CALIB_FIX_K6              = 0x02000,
+       CALIB_RATIONAL_MODEL      = 0x04000,
+       CALIB_THIN_PRISM_MODEL    = 0x08000,
+       CALIB_FIX_S1_S2_S3_S4     = 0x10000,
+       CALIB_TILTED_MODEL        = 0x40000,
+       CALIB_FIX_TAUX_TAUY       = 0x80000,
+       CALIB_USE_QR              = 0x100000, //!< use QR instead of SVD decomposition for solving. Faster but potentially less precise
+       CALIB_FIX_TANGENT_DIST    = 0x200000,
+       // only for stereo
+       CALIB_FIX_INTRINSIC       = 0x00100,
+       CALIB_SAME_FOCAL_LENGTH   = 0x00200,
+       // for stereo rectification
+       CALIB_ZERO_DISPARITY      = 0x00400,
+       CALIB_USE_LU              = (1 << 17), //!< use LU instead of SVD decomposition for solving. much faster but potentially less precise
+       CALIB_USE_EXTRINSIC_GUESS = (1 << 22), //!< for stereoCalibrate
+     };
+
+//! the algorithm for finding fundamental matrix
+enum { FM_7POINT = 1, //!< 7-point algorithm
+       FM_8POINT = 2, //!< 8-point algorithm
+       FM_LMEDS  = 4, //!< least-median algorithm. 7-point algorithm is used.
+       FM_RANSAC = 8  //!< RANSAC algorithm. It needs at least 15 points. 7-point algorithm is used.
+     };
+
+
+
+/** @brief Converts a rotation matrix to a rotation vector or vice versa.
+
+@param src Input rotation vector (3x1 or 1x3) or rotat
