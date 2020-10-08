@@ -290,4 +290,40 @@ enum { FM_7POINT = 1, //!< 7-point algorithm
 
 /** @brief Converts a rotation matrix to a rotation vector or vice versa.
 
-@param src Input rotation vector (3x1 or 1x3) or rotat
+@param src Input rotation vector (3x1 or 1x3) or rotation matrix (3x3).
+@param dst Output rotation matrix (3x3) or rotation vector (3x1 or 1x3), respectively.
+@param jacobian Optional output Jacobian matrix, 3x9 or 9x3, which is a matrix of partial
+derivatives of the output array components with respect to the input array components.
+
+\f[\begin{array}{l} \theta \leftarrow norm(r) \\ r  \leftarrow r/ \theta \\ R =  \cos{\theta} I + (1- \cos{\theta} ) r r^T +  \sin{\theta} \vecthreethree{0}{-r_z}{r_y}{r_z}{0}{-r_x}{-r_y}{r_x}{0} \end{array}\f]
+
+Inverse transformation can be also done easily, since
+
+\f[\sin ( \theta ) \vecthreethree{0}{-r_z}{r_y}{r_z}{0}{-r_x}{-r_y}{r_x}{0} = \frac{R - R^T}{2}\f]
+
+A rotation vector is a convenient and most compact representation of a rotation matrix (since any
+rotation matrix has just 3 degrees of freedom). The representation is used in the global 3D geometry
+optimization procedures like calibrateCamera, stereoCalibrate, or solvePnP .
+ */
+CV_EXPORTS_W void Rodrigues( InputArray src, OutputArray dst, OutputArray jacobian = noArray() );
+
+/** @example pose_from_homography.cpp
+  An example program about pose estimation from coplanar points
+
+  Check @ref tutorial_homography "the corresponding tutorial" for more details
+ */
+
+/** @brief Finds a perspective transformation between two planes.
+
+@param srcPoints Coordinates of the points in the original plane, a matrix of the type CV_32FC2
+or vector\<Point2f\> .
+@param dstPoints Coordinates of the points in the target plane, a matrix of the type CV_32FC2 or
+a vector\<Point2f\> .
+@param method Method used to compute a homography matrix. The following methods are possible:
+-   **0** - a regular method using all the points, i.e., the least squares method
+-   **RANSAC** - RANSAC-based robust method
+-   **LMEDS** - Least-Median robust method
+-   **RHO** - PROSAC-based robust method
+@param ransacReprojThreshold Maximum allowed reprojection error to treat a point pair as an inlier
+(used in the RANSAC and RHO methods only). That is, if
+\f[\| \texttt{dstPoints} _i -  \texttt{convertPointsHomogeneous} ( \texttt{H} * \texttt{srcPoints} _i) \|_2  >  \texttt{ransacReprojThreshold
