@@ -326,4 +326,37 @@ a vector\<Point2f\> .
 -   **RHO** - PROSAC-based robust method
 @param ransacReprojThreshold Maximum allowed reprojection error to treat a point pair as an inlier
 (used in the RANSAC and RHO methods only). That is, if
-\f[\| \texttt{dstPoints} _i -  \texttt{convertPointsHomogeneous} ( \texttt{H} * \texttt{srcPoints} _i) \|_2  >  \texttt{ransacReprojThreshold
+\f[\| \texttt{dstPoints} _i -  \texttt{convertPointsHomogeneous} ( \texttt{H} * \texttt{srcPoints} _i) \|_2  >  \texttt{ransacReprojThreshold}\f]
+then the point \f$i\f$ is considered as an outlier. If srcPoints and dstPoints are measured in pixels,
+it usually makes sense to set this parameter somewhere in the range of 1 to 10.
+@param mask Optional output mask set by a robust method ( RANSAC or LMEDS ). Note that the input
+mask values are ignored.
+@param maxIters The maximum number of RANSAC iterations.
+@param confidence Confidence level, between 0 and 1.
+
+The function finds and returns the perspective transformation \f$H\f$ between the source and the
+destination planes:
+
+\f[s_i  \vecthree{x'_i}{y'_i}{1} \sim H  \vecthree{x_i}{y_i}{1}\f]
+
+so that the back-projection error
+
+\f[\sum _i \left ( x'_i- \frac{h_{11} x_i + h_{12} y_i + h_{13}}{h_{31} x_i + h_{32} y_i + h_{33}} \right )^2+ \left ( y'_i- \frac{h_{21} x_i + h_{22} y_i + h_{23}}{h_{31} x_i + h_{32} y_i + h_{33}} \right )^2\f]
+
+is minimized. If the parameter method is set to the default value 0, the function uses all the point
+pairs to compute an initial homography estimate with a simple least-squares scheme.
+
+However, if not all of the point pairs ( \f$srcPoints_i\f$, \f$dstPoints_i\f$ ) fit the rigid perspective
+transformation (that is, there are some outliers), this initial estimate will be poor. In this case,
+you can use one of the three robust methods. The methods RANSAC, LMeDS and RHO try many different
+random subsets of the corresponding point pairs (of four pairs each, collinear pairs are discarded), estimate the homography matrix
+using this subset and a simple least-squares algorithm, and then compute the quality/goodness of the
+computed homography (which is the number of inliers for RANSAC or the least median re-projection error for
+LMeDS). The best subset is then used to produce the initial estimate of the homography matrix and
+the mask of inliers/outliers.
+
+Regardless of the method, robust or not, the computed homography matrix is refined further (using
+inliers only in case of a robust method) with the Levenberg-Marquardt method to reduce the
+re-projection error even more.
+
+The methods RANSAC and RH
