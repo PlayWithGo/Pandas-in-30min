@@ -359,4 +359,42 @@ Regardless of the method, robust or not, the computed homography matrix is refin
 inliers only in case of a robust method) with the Levenberg-Marquardt method to reduce the
 re-projection error even more.
 
-The methods RANSAC and RH
+The methods RANSAC and RHO can handle practically any ratio of outliers but need a threshold to
+distinguish inliers from outliers. The method LMeDS does not need any threshold but it works
+correctly only when there are more than 50% of inliers. Finally, if there are no outliers and the
+noise is rather small, use the default method (method=0).
+
+The function is used to find initial intrinsic and extrinsic matrices. Homography matrix is
+determined up to a scale. Thus, it is normalized so that \f$h_{33}=1\f$. Note that whenever an \f$H\f$ matrix
+cannot be estimated, an empty one will be returned.
+
+@sa
+getAffineTransform, estimateAffine2D, estimateAffinePartial2D, getPerspectiveTransform, warpPerspective,
+perspectiveTransform
+ */
+CV_EXPORTS_W Mat findHomography( InputArray srcPoints, InputArray dstPoints,
+                                 int method = 0, double ransacReprojThreshold = 3,
+                                 OutputArray mask=noArray(), const int maxIters = 2000,
+                                 const double confidence = 0.995);
+
+/** @overload */
+CV_EXPORTS Mat findHomography( InputArray srcPoints, InputArray dstPoints,
+                               OutputArray mask, int method = 0, double ransacReprojThreshold = 3 );
+
+/** @brief Computes an RQ decomposition of 3x3 matrices.
+
+@param src 3x3 input matrix.
+@param mtxR Output 3x3 upper-triangular matrix.
+@param mtxQ Output 3x3 orthogonal matrix.
+@param Qx Optional output 3x3 rotation matrix around x-axis.
+@param Qy Optional output 3x3 rotation matrix around y-axis.
+@param Qz Optional output 3x3 rotation matrix around z-axis.
+
+The function computes a RQ decomposition using the given rotations. This function is used in
+decomposeProjectionMatrix to decompose the left 3x3 submatrix of a projection matrix into a camera
+and a rotation matrix.
+
+It optionally returns three rotation matrices, one for each axis, and the three Euler angles in
+degrees (as the return value) that could be used in OpenGL. Note, there is always more than one
+sequence of rotations about the three principal axes that results in the same orientation of an
+object, e.g. see @cite Slaba
