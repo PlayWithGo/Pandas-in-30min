@@ -397,4 +397,39 @@ and a rotation matrix.
 It optionally returns three rotation matrices, one for each axis, and the three Euler angles in
 degrees (as the return value) that could be used in OpenGL. Note, there is always more than one
 sequence of rotations about the three principal axes that results in the same orientation of an
-object, e.g. see @cite Slaba
+object, e.g. see @cite Slabaugh . Returned tree rotation matrices and corresponding three Euler angles
+are only one of the possible solutions.
+ */
+CV_EXPORTS_W Vec3d RQDecomp3x3( InputArray src, OutputArray mtxR, OutputArray mtxQ,
+                                OutputArray Qx = noArray(),
+                                OutputArray Qy = noArray(),
+                                OutputArray Qz = noArray());
+
+/** @brief Decomposes a projection matrix into a rotation matrix and a camera matrix.
+
+@param projMatrix 3x4 input projection matrix P.
+@param cameraMatrix Output 3x3 camera matrix K.
+@param rotMatrix Output 3x3 external rotation matrix R.
+@param transVect Output 4x1 translation vector T.
+@param rotMatrixX Optional 3x3 rotation matrix around x-axis.
+@param rotMatrixY Optional 3x3 rotation matrix around y-axis.
+@param rotMatrixZ Optional 3x3 rotation matrix around z-axis.
+@param eulerAngles Optional three-element vector containing three Euler angles of rotation in
+degrees.
+
+The function computes a decomposition of a projection matrix into a calibration and a rotation
+matrix and the position of a camera.
+
+It optionally returns three rotation matrices, one for each axis, and three Euler angles that could
+be used in OpenGL. Note, there is always more than one sequence of rotations about the three
+principal axes that results in the same orientation of an object, e.g. see @cite Slabaugh . Returned
+tree rotation matrices and corresponding three Euler angles are only one of the possible solutions.
+
+The function is based on RQDecomp3x3 .
+ */
+CV_EXPORTS_W void decomposeProjectionMatrix( InputArray projMatrix, OutputArray cameraMatrix,
+                                             OutputArray rotMatrix, OutputArray transVect,
+                                             OutputArray rotMatrixX = noArray(),
+                                             OutputArray rotMatrixY = noArray(),
+                                             OutputArray rotMatrixZ = noArray(),
+ 
