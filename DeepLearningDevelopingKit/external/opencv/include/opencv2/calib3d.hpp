@@ -432,4 +432,47 @@ CV_EXPORTS_W void decomposeProjectionMatrix( InputArray projMatrix, OutputArray 
                                              OutputArray rotMatrixX = noArray(),
                                              OutputArray rotMatrixY = noArray(),
                                              OutputArray rotMatrixZ = noArray(),
- 
+                                             OutputArray eulerAngles =noArray() );
+
+/** @brief Computes partial derivatives of the matrix product for each multiplied matrix.
+
+@param A First multiplied matrix.
+@param B Second multiplied matrix.
+@param dABdA First output derivative matrix d(A\*B)/dA of size
+\f$\texttt{A.rows*B.cols} \times {A.rows*A.cols}\f$ .
+@param dABdB Second output derivative matrix d(A\*B)/dB of size
+\f$\texttt{A.rows*B.cols} \times {B.rows*B.cols}\f$ .
+
+The function computes partial derivatives of the elements of the matrix product \f$A*B\f$ with regard to
+the elements of each of the two input matrices. The function is used to compute the Jacobian
+matrices in stereoCalibrate but can also be used in any other similar optimization function.
+ */
+CV_EXPORTS_W void matMulDeriv( InputArray A, InputArray B, OutputArray dABdA, OutputArray dABdB );
+
+/** @brief Combines two rotation-and-shift transformations.
+
+@param rvec1 First rotation vector.
+@param tvec1 First translation vector.
+@param rvec2 Second rotation vector.
+@param tvec2 Second translation vector.
+@param rvec3 Output rotation vector of the superposition.
+@param tvec3 Output translation vector of the superposition.
+@param dr3dr1
+@param dr3dt1
+@param dr3dr2
+@param dr3dt2
+@param dt3dr1
+@param dt3dt1
+@param dt3dr2
+@param dt3dt2 Optional output derivatives of rvec3 or tvec3 with regard to rvec1, rvec2, tvec1 and
+tvec2, respectively.
+
+The functions compute:
+
+\f[\begin{array}{l} \texttt{rvec3} =  \mathrm{rodrigues} ^{-1} \left ( \mathrm{rodrigues} ( \texttt{rvec2} )  \cdot \mathrm{rodrigues} ( \texttt{rvec1} ) \right )  \\ \texttt{tvec3} =  \mathrm{rodrigues} ( \texttt{rvec2} )  \cdot \texttt{tvec1} +  \texttt{tvec2} \end{array} ,\f]
+
+where \f$\mathrm{rodrigues}\f$ denotes a rotation vector to a rotation matrix transformation, and
+\f$\mathrm{rodrigues}^{-1}\f$ denotes the inverse transformation. See Rodrigues for details.
+
+Also, the functions can compute the derivatives of the output vectors with regards to the input
+vectors (see matMulDeriv ). The functions are use
