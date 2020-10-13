@@ -475,4 +475,36 @@ where \f$\mathrm{rodrigues}\f$ denotes a rotation vector to a rotation matrix tr
 \f$\mathrm{rodrigues}^{-1}\f$ denotes the inverse transformation. See Rodrigues for details.
 
 Also, the functions can compute the derivatives of the output vectors with regards to the input
-vectors (see matMulDeriv ). The functions are use
+vectors (see matMulDeriv ). The functions are used inside stereoCalibrate but can also be used in
+your own code where Levenberg-Marquardt or another gradient-based solver is used to optimize a
+function that contains a matrix multiplication.
+ */
+CV_EXPORTS_W void composeRT( InputArray rvec1, InputArray tvec1,
+                             InputArray rvec2, InputArray tvec2,
+                             OutputArray rvec3, OutputArray tvec3,
+                             OutputArray dr3dr1 = noArray(), OutputArray dr3dt1 = noArray(),
+                             OutputArray dr3dr2 = noArray(), OutputArray dr3dt2 = noArray(),
+                             OutputArray dt3dr1 = noArray(), OutputArray dt3dt1 = noArray(),
+                             OutputArray dt3dr2 = noArray(), OutputArray dt3dt2 = noArray() );
+
+/** @brief Projects 3D points to an image plane.
+
+@param objectPoints Array of object points, 3xN/Nx3 1-channel or 1xN/Nx1 3-channel (or
+vector\<Point3f\> ), where N is the number of points in the view.
+@param rvec Rotation vector. See Rodrigues for details.
+@param tvec Translation vector.
+@param cameraMatrix Camera matrix \f$A = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$ .
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements. If the vector is empty, the zero distortion coefficients are assumed.
+@param imagePoints Output array of image points, 2xN/Nx2 1-channel or 1xN/Nx1 2-channel, or
+vector\<Point2f\> .
+@param jacobian Optional output 2Nx(10+\<numDistCoeffs\>) jacobian matrix of derivatives of image
+points with respect to components of the rotation vector, translation vector, focal lengths,
+coordinates of the principal point and the distortion coefficients. In the old interface different
+components of the jacobian are returned via different output parameters.
+@param aspectRatio Optional "fixed aspect ratio" parameter. If the parameter is not 0, the
+function assumes that the aspect ratio (*fx/fy*) is fixed and correspondingly adjusts the jacobian
+matrix.
+
+The function computes projections of 3D points to the image
