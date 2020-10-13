@@ -507,4 +507,36 @@ components of the jacobian are returned via different output parameters.
 function assumes that the aspect ratio (*fx/fy*) is fixed and correspondingly adjusts the jacobian
 matrix.
 
-The function computes projections of 3D points to the image
+The function computes projections of 3D points to the image plane given intrinsic and extrinsic
+camera parameters. Optionally, the function computes Jacobians - matrices of partial derivatives of
+image points coordinates (as functions of all the input parameters) with respect to the particular
+parameters, intrinsic and/or extrinsic. The Jacobians are used during the global optimization in
+calibrateCamera, solvePnP, and stereoCalibrate . The function itself can also be used to compute a
+re-projection error given the current intrinsic and extrinsic parameters.
+
+@note By setting rvec=tvec=(0,0,0) or by setting cameraMatrix to a 3x3 identity matrix, or by
+passing zero distortion coefficients, you can get various useful partial cases of the function. This
+means that you can compute the distorted coordinates for a sparse set of points or apply a
+perspective transformation (and also compute the derivatives) in the ideal zero-distortion setup.
+ */
+CV_EXPORTS_W void projectPoints( InputArray objectPoints,
+                                 InputArray rvec, InputArray tvec,
+                                 InputArray cameraMatrix, InputArray distCoeffs,
+                                 OutputArray imagePoints,
+                                 OutputArray jacobian = noArray(),
+                                 double aspectRatio = 0 );
+
+/** @example homography_from_camera_displacement.cpp
+  An example program about homography from the camera displacement
+
+  Check @ref tutorial_homography "the corresponding tutorial" for more details
+ */
+
+/** @brief Finds an object pose from 3D-2D point correspondences.
+
+@param objectPoints Array of object points in the object coordinate space, Nx3 1-channel or
+1xN/Nx1 3-channel, where N is the number of points. vector\<Point3f\> can be also passed here.
+@param imagePoints Array of corresponding image points, Nx2 1-channel or 1xN/Nx1 2-channel,
+where N is the number of points. vector\<Point2f\> can be also passed here.
+@param cameraMatrix Input camera matrix \f$A = \vecthreethree{fx}{0}{cx}{0}{fy}{cy}{0}{0}{1}\f$ .
+@param distCoeffs Input vector 
