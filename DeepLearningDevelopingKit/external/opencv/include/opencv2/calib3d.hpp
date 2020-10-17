@@ -687,4 +687,34 @@ a 3D point expressed in the world frame into the camera frame:
        of the P3P problem, the last one is used to retain the best solution that minimizes the reprojection error).
    -   With **SOLVEPNP_ITERATIVE** method and `useExtrinsicGuess=true`, the minimum number of points is 3 (3 points
        are sufficient to compute a pose but there are up to 4 solutions). The initial solution should be close to the
-     
+       global solution to converge.
+ */
+CV_EXPORTS_W bool solvePnP( InputArray objectPoints, InputArray imagePoints,
+                            InputArray cameraMatrix, InputArray distCoeffs,
+                            OutputArray rvec, OutputArray tvec,
+                            bool useExtrinsicGuess = false, int flags = SOLVEPNP_ITERATIVE );
+
+/** @brief Finds an object pose from 3D-2D point correspondences using the RANSAC scheme.
+
+@param objectPoints Array of object points in the object coordinate space, Nx3 1-channel or
+1xN/Nx1 3-channel, where N is the number of points. vector\<Point3f\> can be also passed here.
+@param imagePoints Array of corresponding image points, Nx2 1-channel or 1xN/Nx1 2-channel,
+where N is the number of points. vector\<Point2f\> can be also passed here.
+@param cameraMatrix Input camera matrix \f$A = \vecthreethree{fx}{0}{cx}{0}{fy}{cy}{0}{0}{1}\f$ .
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements. If the vector is NULL/empty, the zero distortion coefficients are
+assumed.
+@param rvec Output rotation vector (see Rodrigues ) that, together with tvec , brings points from
+the model coordinate system to the camera coordinate system.
+@param tvec Output translation vector.
+@param useExtrinsicGuess Parameter used for SOLVEPNP_ITERATIVE. If true (1), the function uses
+the provided rvec and tvec values as initial approximations of the rotation and translation
+vectors, respectively, and further optimizes them.
+@param iterationsCount Number of iterations.
+@param reprojectionError Inlier threshold value used by the RANSAC procedure. The parameter value
+is the maximum allowed distance between the observed and computed point projections to consider it
+an inlier.
+@param confidence The probability that the algorithm produces a useful result.
+@param inliers Output vector that contains indices of inliers in objectPoints and imagePoints .
+@param flags Method for solving a PnP problem (see sol
