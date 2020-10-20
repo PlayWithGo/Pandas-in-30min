@@ -747,4 +747,35 @@ CV_EXPORTS_W bool solvePnPRansac( InputArray objectPoints, InputArray imagePoint
 @param objectPoints Array of object points in the object coordinate space, 3x3 1-channel or
 1x3/3x1 3-channel. vector\<Point3f\> can be also passed here.
 @param imagePoints Array of corresponding image points, 3x2 1-channel or 1x3/3x1 2-channel.
- vector\<Point2f\
+ vector\<Point2f\> can be also passed here.
+@param cameraMatrix Input camera matrix \f$A = \vecthreethree{fx}{0}{cx}{0}{fy}{cy}{0}{0}{1}\f$ .
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements. If the vector is NULL/empty, the zero distortion coefficients are
+assumed.
+@param rvecs Output rotation vectors (see Rodrigues ) that, together with tvecs , brings points from
+the model coordinate system to the camera coordinate system. A P3P problem has up to 4 solutions.
+@param tvecs Output translation vectors.
+@param flags Method for solving a P3P problem:
+-   **SOLVEPNP_P3P** Method is based on the paper of X.S. Gao, X.-R. Hou, J. Tang, H.-F. Chang
+"Complete Solution Classification for the Perspective-Three-Point Problem" (@cite gao2003complete).
+-   **SOLVEPNP_AP3P** Method is based on the paper of Tong Ke and Stergios I. Roumeliotis.
+"An Efficient Algebraic Solution to the Perspective-Three-Point Problem" (@cite Ke17).
+
+The function estimates the object pose given 3 object points, their corresponding image
+projections, as well as the camera matrix and the distortion coefficients.
+ */
+CV_EXPORTS_W int solveP3P( InputArray objectPoints, InputArray imagePoints,
+                           InputArray cameraMatrix, InputArray distCoeffs,
+                           OutputArrayOfArrays rvecs, OutputArrayOfArrays tvecs,
+                           int flags );
+
+/** @brief Finds an initial camera matrix from 3D-2D point correspondences.
+
+@param objectPoints Vector of vectors of the calibration pattern points in the calibration pattern
+coordinate space. In the old interface all the per-view vectors are concatenated. See
+calibrateCamera for details.
+@param imagePoints Vector of vectors of the projections of the calibration pattern points. In the
+old interface all the per-view vectors are concatenated.
+@param imageSize Image size in pixels used to initialize the principal point.
+@param aspectRatio If it is zero or negative, both \f$f_x\f$ and \f$f_y\f$ are
