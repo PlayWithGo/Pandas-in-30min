@@ -778,4 +778,37 @@ calibrateCamera for details.
 @param imagePoints Vector of vectors of the projections of the calibration pattern points. In the
 old interface all the per-view vectors are concatenated.
 @param imageSize Image size in pixels used to initialize the principal point.
-@param aspectRatio If it is zero or negative, both \f$f_x\f$ and \f$f_y\f$ are
+@param aspectRatio If it is zero or negative, both \f$f_x\f$ and \f$f_y\f$ are estimated independently.
+Otherwise, \f$f_x = f_y * \texttt{aspectRatio}\f$ .
+
+The function estimates and returns an initial camera matrix for the camera calibration process.
+Currently, the function only supports planar calibration patterns, which are patterns where each
+object point has z-coordinate =0.
+ */
+CV_EXPORTS_W Mat initCameraMatrix2D( InputArrayOfArrays objectPoints,
+                                     InputArrayOfArrays imagePoints,
+                                     Size imageSize, double aspectRatio = 1.0 );
+
+/** @brief Finds the positions of internal corners of the chessboard.
+
+@param image Source chessboard view. It must be an 8-bit grayscale or color image.
+@param patternSize Number of inner corners per a chessboard row and column
+( patternSize = cvSize(points_per_row,points_per_colum) = cvSize(columns,rows) ).
+@param corners Output array of detected corners.
+@param flags Various operation flags that can be zero or a combination of the following values:
+-   **CALIB_CB_ADAPTIVE_THRESH** Use adaptive thresholding to convert the image to black
+and white, rather than a fixed threshold level (computed from the average image brightness).
+-   **CALIB_CB_NORMALIZE_IMAGE** Normalize the image gamma with equalizeHist before
+applying fixed or adaptive thresholding.
+-   **CALIB_CB_FILTER_QUADS** Use additional criteria (like contour area, perimeter,
+square-like shape) to filter out false quads extracted at the contour retrieval stage.
+-   **CALIB_CB_FAST_CHECK** Run a fast check on the image that looks for chessboard corners,
+and shortcut the call if none is found. This can drastically speed up the call in the
+degenerate condition when no chessboard is observed.
+
+The function attempts to determine whether the input image is a view of the chessboard pattern and
+locate the internal chessboard corners. The function returns a non-zero value if all of the corners
+are found and they are placed in a certain order (row by row, left to right in every row).
+Otherwise, if the function fails to find all the corners or reorder them, it returns 0. For example,
+a regular chessboard has 8 x 8 squares and 7 x 7 internal corners, that is, points where the black
+squares
