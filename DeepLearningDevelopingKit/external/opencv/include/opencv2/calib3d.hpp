@@ -811,4 +811,43 @@ locate the internal chessboard corners. The function returns a non-zero value if
 are found and they are placed in a certain order (row by row, left to right in every row).
 Otherwise, if the function fails to find all the corners or reorder them, it returns 0. For example,
 a regular chessboard has 8 x 8 squares and 7 x 7 internal corners, that is, points where the black
-squares
+squares touch each other. The detected coordinates are approximate, and to determine their positions
+more accurately, the function calls cornerSubPix. You also may use the function cornerSubPix with
+different parameters if returned coordinates are not accurate enough.
+
+Sample usage of detecting and drawing chessboard corners: :
+@code
+    Size patternsize(8,6); //interior number of corners
+    Mat gray = ....; //source image
+    vector<Point2f> corners; //this will be filled by the detected corners
+
+    //CALIB_CB_FAST_CHECK saves a lot of time on images
+    //that do not contain any chessboard corners
+    bool patternfound = findChessboardCorners(gray, patternsize, corners,
+            CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
+            + CALIB_CB_FAST_CHECK);
+
+    if(patternfound)
+      cornerSubPix(gray, corners, Size(11, 11), Size(-1, -1),
+        TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+
+    drawChessboardCorners(img, patternsize, Mat(corners), patternfound);
+@endcode
+@note The function requires white space (like a square-thick border, the wider the better) around
+the board to make the detection more robust in various environments. Otherwise, if there is no
+border and the background is dark, the outer black squares cannot be segmented properly and so the
+square grouping and ordering algorithm fails.
+ */
+CV_EXPORTS_W bool findChessboardCorners( InputArray image, Size patternSize, OutputArray corners,
+                                         int flags = CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE );
+
+//! finds subpixel-accurate positions of the chessboard corners
+CV_EXPORTS bool find4QuadCornerSubpix( InputArray img, InputOutputArray corners, Size region_size );
+
+/** @brief Renders the detected chessboard corners.
+
+@param image Destination image. It must be an 8-bit color image.
+@param patternSize Number of inner corners per a chessboard row and column
+(patternSize = cv::Size(points_per_row,points_per_column)).
+@param corners Array of detected corners, the output of findChessboardCorners.
+@param pattern
