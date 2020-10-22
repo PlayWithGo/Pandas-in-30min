@@ -850,4 +850,54 @@ CV_EXPORTS bool find4QuadCornerSubpix( InputArray img, InputOutputArray corners,
 @param patternSize Number of inner corners per a chessboard row and column
 (patternSize = cv::Size(points_per_row,points_per_column)).
 @param corners Array of detected corners, the output of findChessboardCorners.
-@param pattern
+@param patternWasFound Parameter indicating whether the complete board was found or not. The
+return value of findChessboardCorners should be passed here.
+
+The function draws individual chessboard corners detected either as red circles if the board was not
+found, or as colored corners connected with lines if the board was found.
+ */
+CV_EXPORTS_W void drawChessboardCorners( InputOutputArray image, Size patternSize,
+                                         InputArray corners, bool patternWasFound );
+
+struct CV_EXPORTS_W_SIMPLE CirclesGridFinderParameters
+{
+    CV_WRAP CirclesGridFinderParameters();
+    CV_PROP_RW cv::Size2f densityNeighborhoodSize;
+    CV_PROP_RW float minDensity;
+    CV_PROP_RW int kmeansAttempts;
+    CV_PROP_RW int minDistanceToAddKeypoint;
+    CV_PROP_RW int keypointScale;
+    CV_PROP_RW float minGraphConfidence;
+    CV_PROP_RW float vertexGain;
+    CV_PROP_RW float vertexPenalty;
+    CV_PROP_RW float existingVertexGain;
+    CV_PROP_RW float edgeGain;
+    CV_PROP_RW float edgePenalty;
+    CV_PROP_RW float convexHullFactor;
+    CV_PROP_RW float minRNGEdgeSwitchDist;
+
+    enum GridType
+    {
+      SYMMETRIC_GRID, ASYMMETRIC_GRID
+    };
+    GridType gridType;
+};
+
+struct CV_EXPORTS_W_SIMPLE CirclesGridFinderParameters2 : public CirclesGridFinderParameters
+{
+    CV_WRAP CirclesGridFinderParameters2();
+
+    CV_PROP_RW float squareSize; //!< Distance between two adjacent points. Used by CALIB_CB_CLUSTERING.
+    CV_PROP_RW float maxRectifiedDistance; //!< Max deviation from predicion. Used by CALIB_CB_CLUSTERING.
+};
+
+/** @brief Finds centers in the grid of circles.
+
+@param image grid view of input circles; it must be an 8-bit grayscale or color image.
+@param patternSize number of circles per row and column
+( patternSize = Size(points_per_row, points_per_colum) ).
+@param centers output array of detected centers.
+@param flags various operation flags that can be one of the following values:
+-   **CALIB_CB_SYMMETRIC_GRID** uses symmetric pattern of circles.
+-   **CALIB_CB_ASYMMETRIC_GRID** uses asymmetric pattern of circles.
+-   **CALIB_CB_CLUSTERING** uses a special algori
