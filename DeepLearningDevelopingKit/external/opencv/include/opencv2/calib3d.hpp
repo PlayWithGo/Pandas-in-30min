@@ -900,4 +900,43 @@ struct CV_EXPORTS_W_SIMPLE CirclesGridFinderParameters2 : public CirclesGridFind
 @param flags various operation flags that can be one of the following values:
 -   **CALIB_CB_SYMMETRIC_GRID** uses symmetric pattern of circles.
 -   **CALIB_CB_ASYMMETRIC_GRID** uses asymmetric pattern of circles.
--   **CALIB_CB_CLUSTERING** uses a special algori
+-   **CALIB_CB_CLUSTERING** uses a special algorithm for grid detection. It is more robust to
+perspective distortions but much more sensitive to background clutter.
+@param blobDetector feature detector that finds blobs like dark circles on light background.
+@param parameters struct for finding circles in a grid pattern.
+
+The function attempts to determine whether the input image contains a grid of circles. If it is, the
+function locates centers of the circles. The function returns a non-zero value if all of the centers
+have been found and they have been placed in a certain order (row by row, left to right in every
+row). Otherwise, if the function fails to find all the corners or reorder them, it returns 0.
+
+Sample usage of detecting and drawing the centers of circles: :
+@code
+    Size patternsize(7,7); //number of centers
+    Mat gray = ....; //source image
+    vector<Point2f> centers; //this will be filled by the detected centers
+
+    bool patternfound = findCirclesGrid(gray, patternsize, centers);
+
+    drawChessboardCorners(img, patternsize, Mat(centers), patternfound);
+@endcode
+@note The function requires white space (like a square-thick border, the wider the better) around
+the board to make the detection more robust in various environments.
+ */
+CV_EXPORTS_W bool findCirclesGrid( InputArray image, Size patternSize,
+                                   OutputArray centers, int flags,
+                                   const Ptr<FeatureDetector> &blobDetector,
+                                   CirclesGridFinderParameters parameters);
+
+/** @overload */
+CV_EXPORTS_W bool findCirclesGrid2( InputArray image, Size patternSize,
+                                   OutputArray centers, int flags,
+                                   const Ptr<FeatureDetector> &blobDetector,
+                                   CirclesGridFinderParameters2 parameters);
+
+/** @overload */
+CV_EXPORTS_W bool findCirclesGrid( InputArray image, Size patternSize,
+                                   OutputArray centers, int flags = CALIB_CB_SYMMETRIC_GRID,
+                                   const Ptr<FeatureDetector> &blobDetector = SimpleBlobDetector::create());
+
+/** @brief Fi
