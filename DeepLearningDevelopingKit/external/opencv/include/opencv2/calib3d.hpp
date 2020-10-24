@@ -939,4 +939,31 @@ CV_EXPORTS_W bool findCirclesGrid( InputArray image, Size patternSize,
                                    OutputArray centers, int flags = CALIB_CB_SYMMETRIC_GRID,
                                    const Ptr<FeatureDetector> &blobDetector = SimpleBlobDetector::create());
 
-/** @brief Fi
+/** @brief Finds the camera intrinsic and extrinsic parameters from several views of a calibration pattern.
+
+@param objectPoints In the new interface it is a vector of vectors of calibration pattern points in
+the calibration pattern coordinate space (e.g. std::vector<std::vector<cv::Vec3f>>). The outer
+vector contains as many elements as the number of the pattern views. If the same calibration pattern
+is shown in each view and it is fully visible, all the vectors will be the same. Although, it is
+possible to use partially occluded patterns, or even different patterns in different views. Then,
+the vectors will be different. The points are 3D, but since they are in a pattern coordinate system,
+then, if the rig is planar, it may make sense to put the model to a XY coordinate plane so that
+Z-coordinate of each input object point is 0.
+In the old interface all the vectors of object points from different views are concatenated
+together.
+@param imagePoints In the new interface it is a vector of vectors of the projections of calibration
+pattern points (e.g. std::vector<std::vector<cv::Vec2f>>). imagePoints.size() and
+objectPoints.size() and imagePoints[i].size() must be equal to objectPoints[i].size() for each i.
+In the old interface all the vectors of object points from different views are concatenated
+together.
+@param imageSize Size of the image used only to initialize the intrinsic camera matrix.
+@param cameraMatrix Output 3x3 floating-point camera matrix
+\f$A = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ . If CV\_CALIB\_USE\_INTRINSIC\_GUESS
+and/or CALIB_FIX_ASPECT_RATIO are specified, some or all of fx, fy, cx, cy must be
+initialized before calling the function.
+@param distCoeffs Output vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements.
+@param rvecs Output vector of rotation vectors (see Rodrigues ) estimated for each pattern view
+(e.g. std::vector<cv::Mat>>). That is, each k-th rotation vector together with the corresponding
+k-th translation vector (see the next output p
