@@ -966,4 +966,29 @@ initialized before calling the function.
 4, 5, 8, 12 or 14 elements.
 @param rvecs Output vector of rotation vectors (see Rodrigues ) estimated for each pattern view
 (e.g. std::vector<cv::Mat>>). That is, each k-th rotation vector together with the corresponding
-k-th translation vector (see the next output p
+k-th translation vector (see the next output parameter description) brings the calibration pattern
+from the model coordinate space (in which object points are specified) to the world coordinate
+space, that is, a real position of the calibration pattern in the k-th pattern view (k=0.. *M* -1).
+@param tvecs Output vector of translation vectors estimated for each pattern view.
+@param stdDeviationsIntrinsics Output vector of standard deviations estimated for intrinsic parameters.
+ Order of deviations values:
+\f$(f_x, f_y, c_x, c_y, k_1, k_2, p_1, p_2, k_3, k_4, k_5, k_6 , s_1, s_2, s_3,
+ s_4, \tau_x, \tau_y)\f$ If one of parameters is not estimated, it's deviation is equals to zero.
+@param stdDeviationsExtrinsics Output vector of standard deviations estimated for extrinsic parameters.
+ Order of deviations values: \f$(R_1, T_1, \dotsc , R_M, T_M)\f$ where M is number of pattern views,
+ \f$R_i, T_i\f$ are concatenated 1x3 vectors.
+ @param perViewErrors Output vector of the RMS re-projection error estimated for each pattern view.
+@param flags Different flags that may be zero or a combination of the following values:
+-   **CALIB_USE_INTRINSIC_GUESS** cameraMatrix contains valid initial values of
+fx, fy, cx, cy that are optimized further. Otherwise, (cx, cy) is initially set to the image
+center ( imageSize is used), and focal distances are computed in a least-squares fashion.
+Note, that if intrinsic parameters are known, there is no need to use this function just to
+estimate extrinsic parameters. Use solvePnP instead.
+-   **CALIB_FIX_PRINCIPAL_POINT** The principal point is not changed during the global
+optimization. It stays at the center or at a different location specified when
+CALIB_USE_INTRINSIC_GUESS is set too.
+-   **CALIB_FIX_ASPECT_RATIO** The functions considers only fy as a free parameter. The
+ratio fx/fy stays the same as in the input cameraMatrix . When
+CALIB_USE_INTRINSIC_GUESS is not set, the actual input values of fx and fy are
+ignored, only their ratio is computed and used further.
+-   **CALIB_ZERO_TANGENT_DIST** Tangential distortion c
