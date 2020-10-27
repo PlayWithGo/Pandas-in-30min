@@ -991,4 +991,33 @@ CALIB_USE_INTRINSIC_GUESS is set too.
 ratio fx/fy stays the same as in the input cameraMatrix . When
 CALIB_USE_INTRINSIC_GUESS is not set, the actual input values of fx and fy are
 ignored, only their ratio is computed and used further.
--   **CALIB_ZERO_TANGENT_DIST** Tangential distortion c
+-   **CALIB_ZERO_TANGENT_DIST** Tangential distortion coefficients \f$(p_1, p_2)\f$ are set
+to zeros and stay zero.
+-   **CALIB_FIX_K1,...,CALIB_FIX_K6** The corresponding radial distortion
+coefficient is not changed during the optimization. If CALIB_USE_INTRINSIC_GUESS is
+set, the coefficient from the supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+-   **CALIB_RATIONAL_MODEL** Coefficients k4, k5, and k6 are enabled. To provide the
+backward compatibility, this extra flag should be explicitly specified to make the
+calibration function use the rational model and return 8 coefficients. If the flag is not
+set, the function computes and returns only 5 distortion coefficients.
+-   **CALIB_THIN_PRISM_MODEL** Coefficients s1, s2, s3 and s4 are enabled. To provide the
+backward compatibility, this extra flag should be explicitly specified to make the
+calibration function use the thin prism model and return 12 coefficients. If the flag is not
+set, the function computes and returns only 5 distortion coefficients.
+-   **CALIB_FIX_S1_S2_S3_S4** The thin prism distortion coefficients are not changed during
+the optimization. If CALIB_USE_INTRINSIC_GUESS is set, the coefficient from the
+supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+-   **CALIB_TILTED_MODEL** Coefficients tauX and tauY are enabled. To provide the
+backward compatibility, this extra flag should be explicitly specified to make the
+calibration function use the tilted sensor model and return 14 coefficients. If the flag is not
+set, the function computes and returns only 5 distortion coefficients.
+-   **CALIB_FIX_TAUX_TAUY** The coefficients of the tilted sensor model are not changed during
+the optimization. If CALIB_USE_INTRINSIC_GUESS is set, the coefficient from the
+supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+@param criteria Termination criteria for the iterative optimization algorithm.
+
+@return the overall RMS re-projection error.
+
+The function estimates the intrinsic camera parameters and extrinsic parameters for each of the
+views. The algorithm is based on @cite Zhang2000 and @cite BouguetMCT . The coordinates of 3D object
+points and
