@@ -1053,4 +1053,35 @@ The algorithm performs the following steps:
    findChessboardCorners, solvePnP, initCameraMatrix2D, stereoCalibrate, undistort
  */
 CV_EXPORTS_AS(calibrateCameraExtended) double calibrateCamera( InputArrayOfArrays objectPoints,
-                                     InputArrayOfArr
+                                     InputArrayOfArrays imagePoints, Size imageSize,
+                                     InputOutputArray cameraMatrix, InputOutputArray distCoeffs,
+                                     OutputArrayOfArrays rvecs, OutputArrayOfArrays tvecs,
+                                     OutputArray stdDeviationsIntrinsics,
+                                     OutputArray stdDeviationsExtrinsics,
+                                     OutputArray perViewErrors,
+                                     int flags = 0, TermCriteria criteria = TermCriteria(
+                                        TermCriteria::COUNT + TermCriteria::EPS, 30, DBL_EPSILON) );
+
+/** @overload double calibrateCamera( InputArrayOfArrays objectPoints,
+                                     InputArrayOfArrays imagePoints, Size imageSize,
+                                     InputOutputArray cameraMatrix, InputOutputArray distCoeffs,
+                                     OutputArrayOfArrays rvecs, OutputArrayOfArrays tvecs,
+                                     OutputArray stdDeviations, OutputArray perViewErrors,
+                                     int flags = 0, TermCriteria criteria = TermCriteria(
+                                        TermCriteria::COUNT + TermCriteria::EPS, 30, DBL_EPSILON) )
+ */
+CV_EXPORTS_W double calibrateCamera( InputArrayOfArrays objectPoints,
+                                     InputArrayOfArrays imagePoints, Size imageSize,
+                                     InputOutputArray cameraMatrix, InputOutputArray distCoeffs,
+                                     OutputArrayOfArrays rvecs, OutputArrayOfArrays tvecs,
+                                     int flags = 0, TermCriteria criteria = TermCriteria(
+                                        TermCriteria::COUNT + TermCriteria::EPS, 30, DBL_EPSILON) );
+
+/** @brief Computes useful camera characteristics from the camera matrix.
+
+@param cameraMatrix Input camera matrix that can be estimated by calibrateCamera or
+stereoCalibrate .
+@param imageSize Input image size in pixels.
+@param apertureWidth Physical width in mm of the sensor.
+@param apertureHeight Physical height in mm of the sensor.
+@param fovx
