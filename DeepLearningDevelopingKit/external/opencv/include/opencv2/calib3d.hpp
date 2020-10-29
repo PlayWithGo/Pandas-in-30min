@@ -1084,4 +1084,39 @@ stereoCalibrate .
 @param imageSize Input image size in pixels.
 @param apertureWidth Physical width in mm of the sensor.
 @param apertureHeight Physical height in mm of the sensor.
-@param fovx
+@param fovx Output field of view in degrees along the horizontal sensor axis.
+@param fovy Output field of view in degrees along the vertical sensor axis.
+@param focalLength Focal length of the lens in mm.
+@param principalPoint Principal point in mm.
+@param aspectRatio \f$f_y/f_x\f$
+
+The function computes various useful camera characteristics from the previously estimated camera
+matrix.
+
+@note
+   Do keep in mind that the unity measure 'mm' stands for whatever unit of measure one chooses for
+    the chessboard pitch (it can thus be any value).
+ */
+CV_EXPORTS_W void calibrationMatrixValues( InputArray cameraMatrix, Size imageSize,
+                                           double apertureWidth, double apertureHeight,
+                                           CV_OUT double& fovx, CV_OUT double& fovy,
+                                           CV_OUT double& focalLength, CV_OUT Point2d& principalPoint,
+                                           CV_OUT double& aspectRatio );
+
+/** @brief Calibrates the stereo camera.
+
+@param objectPoints Vector of vectors of the calibration pattern points.
+@param imagePoints1 Vector of vectors of the projections of the calibration pattern points,
+observed by the first camera.
+@param imagePoints2 Vector of vectors of the projections of the calibration pattern points,
+observed by the second camera.
+@param cameraMatrix1 Input/output first camera matrix:
+\f$\vecthreethree{f_x^{(j)}}{0}{c_x^{(j)}}{0}{f_y^{(j)}}{c_y^{(j)}}{0}{0}{1}\f$ , \f$j = 0,\, 1\f$ . If
+any of CALIB_USE_INTRINSIC_GUESS , CALIB_FIX_ASPECT_RATIO ,
+CALIB_FIX_INTRINSIC , or CALIB_FIX_FOCAL_LENGTH are specified, some or all of the
+matrix components must be initialized. See the flags description for details.
+@param distCoeffs1 Input/output vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements. The output vector length depends on the flags.
+@param cameraMatrix2 Input/output second camera matrix. The parameter is similar to cameraMatrix1
+@param distCoeffs2 Input/output lens dist
