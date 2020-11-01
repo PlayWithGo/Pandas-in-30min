@@ -1119,4 +1119,33 @@ matrix components must be initialized. See the flags description for details.
 \f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
 4, 5, 8, 12 or 14 elements. The output vector length depends on the flags.
 @param cameraMatrix2 Input/output second camera matrix. The parameter is similar to cameraMatrix1
-@param distCoeffs2 Input/output lens dist
+@param distCoeffs2 Input/output lens distortion coefficients for the second camera. The parameter
+is similar to distCoeffs1 .
+@param imageSize Size of the image used only to initialize intrinsic camera matrix.
+@param R Output rotation matrix between the 1st and the 2nd camera coordinate systems.
+@param T Output translation vector between the coordinate systems of the cameras.
+@param E Output essential matrix.
+@param F Output fundamental matrix.
+@param perViewErrors Output vector of the RMS re-projection error estimated for each pattern view.
+@param flags Different flags that may be zero or a combination of the following values:
+-   **CALIB_FIX_INTRINSIC** Fix cameraMatrix? and distCoeffs? so that only R, T, E , and F
+matrices are estimated.
+-   **CALIB_USE_INTRINSIC_GUESS** Optimize some or all of the intrinsic parameters
+according to the specified flags. Initial values are provided by the user.
+-   **CALIB_USE_EXTRINSIC_GUESS** R, T contain valid initial values that are optimized further.
+Otherwise R, T are initialized to the median value of the pattern views (each dimension separately).
+-   **CALIB_FIX_PRINCIPAL_POINT** Fix the principal points during the optimization.
+-   **CALIB_FIX_FOCAL_LENGTH** Fix \f$f^{(j)}_x\f$ and \f$f^{(j)}_y\f$ .
+-   **CALIB_FIX_ASPECT_RATIO** Optimize \f$f^{(j)}_y\f$ . Fix the ratio \f$f^{(j)}_x/f^{(j)}_y\f$
+.
+-   **CALIB_SAME_FOCAL_LENGTH** Enforce \f$f^{(0)}_x=f^{(1)}_x\f$ and \f$f^{(0)}_y=f^{(1)}_y\f$ .
+-   **CALIB_ZERO_TANGENT_DIST** Set tangential distortion coefficients for each camera to
+zeros and fix there.
+-   **CALIB_FIX_K1,...,CALIB_FIX_K6** Do not change the corresponding radial
+distortion coefficient during the optimization. If CALIB_USE_INTRINSIC_GUESS is set,
+the coefficient from the supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+-   **CALIB_RATIONAL_MODEL** Enable coefficients k4, k5, and k6. To provide the backward
+compatibility, this extra flag should be explicitly specified to make the calibration
+function use the rational model and return 8 coefficients. If the flag is not set, the
+function computes and returns only 5 distortion coefficients.
+-   **CALIB_THIN_PRISM_MODEL** Coefficients s1, s2, s3 
