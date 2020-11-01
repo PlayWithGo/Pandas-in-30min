@@ -1148,4 +1148,35 @@ the coefficient from the supplied distCoeffs matrix is used. Otherwise, it is se
 compatibility, this extra flag should be explicitly specified to make the calibration
 function use the rational model and return 8 coefficients. If the flag is not set, the
 function computes and returns only 5 distortion coefficients.
--   **CALIB_THIN_PRISM_MODEL** Coefficients s1, s2, s3 
+-   **CALIB_THIN_PRISM_MODEL** Coefficients s1, s2, s3 and s4 are enabled. To provide the
+backward compatibility, this extra flag should be explicitly specified to make the
+calibration function use the thin prism model and return 12 coefficients. If the flag is not
+set, the function computes and returns only 5 distortion coefficients.
+-   **CALIB_FIX_S1_S2_S3_S4** The thin prism distortion coefficients are not changed during
+the optimization. If CALIB_USE_INTRINSIC_GUESS is set, the coefficient from the
+supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+-   **CALIB_TILTED_MODEL** Coefficients tauX and tauY are enabled. To provide the
+backward compatibility, this extra flag should be explicitly specified to make the
+calibration function use the tilted sensor model and return 14 coefficients. If the flag is not
+set, the function computes and returns only 5 distortion coefficients.
+-   **CALIB_FIX_TAUX_TAUY** The coefficients of the tilted sensor model are not changed during
+the optimization. If CALIB_USE_INTRINSIC_GUESS is set, the coefficient from the
+supplied distCoeffs matrix is used. Otherwise, it is set to 0.
+@param criteria Termination criteria for the iterative optimization algorithm.
+
+The function estimates transformation between two cameras making a stereo pair. If you have a stereo
+camera where the relative position and orientation of two cameras is fixed, and if you computed
+poses of an object relative to the first camera and to the second camera, (R1, T1) and (R2, T2),
+respectively (this can be done with solvePnP ), then those poses definitely relate to each other.
+This means that, given ( \f$R_1\f$,\f$T_1\f$ ), it should be possible to compute ( \f$R_2\f$,\f$T_2\f$ ). You only
+need to know the position and orientation of the second camera relative to the first camera. This is
+what the described function does. It computes ( \f$R\f$,\f$T\f$ ) so that:
+
+\f[R_2=R*R_1\f]
+\f[T_2=R*T_1 + T,\f]
+
+Optionally, it computes the essential matrix E:
+
+\f[E= \vecthreethree{0}{-T_2}{T_1}{T_2}{0}{-T_0}{-T_1}{T_0}{0} *R\f]
+
+where \f$T_i\f$ are components of the translation vector \f$T\f$ : \f$T=[T_0
