@@ -1179,4 +1179,34 @@ Optionally, it computes the essential matrix E:
 
 \f[E= \vecthreethree{0}{-T_2}{T_1}{T_2}{0}{-T_0}{-T_1}{T_0}{0} *R\f]
 
-where \f$T_i\f$ are components of the translation vector \f$T\f$ : \f$T=[T_0
+where \f$T_i\f$ are components of the translation vector \f$T\f$ : \f$T=[T_0, T_1, T_2]^T\f$ . And the function
+can also compute the fundamental matrix F:
+
+\f[F = cameraMatrix2^{-T} E cameraMatrix1^{-1}\f]
+
+Besides the stereo-related information, the function can also perform a full calibration of each of
+two cameras. However, due to the high dimensionality of the parameter space and noise in the input
+data, the function can diverge from the correct solution. If the intrinsic parameters can be
+estimated with high accuracy for each of the cameras individually (for example, using
+calibrateCamera ), you are recommended to do so and then pass CALIB_FIX_INTRINSIC flag to the
+function along with the computed intrinsic parameters. Otherwise, if all the parameters are
+estimated at once, it makes sense to restrict some parameters, for example, pass
+CALIB_SAME_FOCAL_LENGTH and CALIB_ZERO_TANGENT_DIST flags, which is usually a
+reasonable assumption.
+
+Similarly to calibrateCamera , the function minimizes the total re-projection error for all the
+points in all the available views from both cameras. The function returns the final value of the
+re-projection error.
+ */
+CV_EXPORTS_AS(stereoCalibrateExtended) double stereoCalibrate( InputArrayOfArrays objectPoints,
+                                     InputArrayOfArrays imagePoints1, InputArrayOfArrays imagePoints2,
+                                     InputOutputArray cameraMatrix1, InputOutputArray distCoeffs1,
+                                     InputOutputArray cameraMatrix2, InputOutputArray distCoeffs2,
+                                     Size imageSize, InputOutputArray R,InputOutputArray T, OutputArray E, OutputArray F,
+                                     OutputArray perViewErrors, int flags = CALIB_FIX_INTRINSIC,
+                                     TermCriteria criteria = TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 1e-6) );
+
+/// @overload
+CV_EXPORTS_W double stereoCalibrate( InputArrayOfArrays objectPoints,
+                                     InputArrayOfArrays imagePoints1, InputArrayOfArrays imagePoints2,
+                                     InputOutput
