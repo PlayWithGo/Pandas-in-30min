@@ -1239,4 +1239,30 @@ useful image area.
 @param alpha Free scaling parameter. If it is -1 or absent, the function performs the default
 scaling. Otherwise, the parameter should be between 0 and 1. alpha=0 means that the rectified
 images are zoomed and shifted so that only valid pixels are visible (no black areas after
-recti
+rectification). alpha=1 means that the rectified image is decimated and shifted so that all the
+pixels from the original images from the cameras are retained in the rectified images (no source
+image pixels are lost). Obviously, any intermediate value yields an intermediate result between
+those two extreme cases.
+@param newImageSize New image resolution after rectification. The same size should be passed to
+initUndistortRectifyMap (see the stereo_calib.cpp sample in OpenCV samples directory). When (0,0)
+is passed (default), it is set to the original imageSize . Setting it to larger value can help you
+preserve details in the original image, especially when there is a big radial distortion.
+@param validPixROI1 Optional output rectangles inside the rectified images where all the pixels
+are valid. If alpha=0 , the ROIs cover the whole images. Otherwise, they are likely to be smaller
+(see the picture below).
+@param validPixROI2 Optional output rectangles inside the rectified images where all the pixels
+are valid. If alpha=0 , the ROIs cover the whole images. Otherwise, they are likely to be smaller
+(see the picture below).
+
+The function computes the rotation matrices for each camera that (virtually) make both camera image
+planes the same plane. Consequently, this makes all the epipolar lines parallel and thus simplifies
+the dense stereo correspondence problem. The function takes the matrices computed by stereoCalibrate
+as input. As output, it provides two rotation matrices and also two projection matrices in the new
+coordinates. The function distinguishes the following two cases:
+
+-   **Horizontal stereo**: the first and the second camera views are shifted relative to each other
+    mainly along the x axis (with possible small vertical shift). In the rectified images, the
+    corresponding epipolar lines in the left and right cameras are horizontal and have the same
+    y-coordinate. P1 and P2 look like:
+
+    \f[\texttt{P1} = \begin{bmatrix} f & 0 & cx_1 & 0 \\ 
