@@ -1265,4 +1265,39 @@ coordinates. The function distinguishes the following two cases:
     corresponding epipolar lines in the left and right cameras are horizontal and have the same
     y-coordinate. P1 and P2 look like:
 
-    \f[\texttt{P1} = \begin{bmatrix} f & 0 & cx_1 & 0 \\ 
+    \f[\texttt{P1} = \begin{bmatrix} f & 0 & cx_1 & 0 \\ 0 & f & cy & 0 \\ 0 & 0 & 1 & 0 \end{bmatrix}\f]
+
+    \f[\texttt{P2} = \begin{bmatrix} f & 0 & cx_2 & T_x*f \\ 0 & f & cy & 0 \\ 0 & 0 & 1 & 0 \end{bmatrix} ,\f]
+
+    where \f$T_x\f$ is a horizontal shift between the cameras and \f$cx_1=cx_2\f$ if
+    CALIB_ZERO_DISPARITY is set.
+
+-   **Vertical stereo**: the first and the second camera views are shifted relative to each other
+    mainly in vertical direction (and probably a bit in the horizontal direction too). The epipolar
+    lines in the rectified images are vertical and have the same x-coordinate. P1 and P2 look like:
+
+    \f[\texttt{P1} = \begin{bmatrix} f & 0 & cx & 0 \\ 0 & f & cy_1 & 0 \\ 0 & 0 & 1 & 0 \end{bmatrix}\f]
+
+    \f[\texttt{P2} = \begin{bmatrix} f & 0 & cx & 0 \\ 0 & f & cy_2 & T_y*f \\ 0 & 0 & 1 & 0 \end{bmatrix} ,\f]
+
+    where \f$T_y\f$ is a vertical shift between the cameras and \f$cy_1=cy_2\f$ if CALIB_ZERO_DISPARITY is
+    set.
+
+As you can see, the first three columns of P1 and P2 will effectively be the new "rectified" camera
+matrices. The matrices, together with R1 and R2 , can then be passed to initUndistortRectifyMap to
+initialize the rectification map for each camera.
+
+See below the screenshot from the stereo_calib.cpp sample. Some red horizontal lines pass through
+the corresponding image regions. This means that the images are well rectified, which is what most
+stereo correspondence algorithms rely on. The green rectangles are roi1 and roi2 . You see that
+their interiors are all valid pixels.
+
+![image](pics/stereo_undistort.jpg)
+ */
+CV_EXPORTS_W void stereoRectify( InputArray cameraMatrix1, InputArray distCoeffs1,
+                                 InputArray cameraMatrix2, InputArray distCoeffs2,
+                                 Size imageSize, InputArray R, InputArray T,
+                                 OutputArray R1, OutputArray R2,
+                                 OutputArray P1, OutputArray P2,
+                                 OutputArray Q, int flags = CALIB_ZERO_DISPARITY,
+                                 double alpha = -1, Size newImageSize = Size(),
