@@ -1330,4 +1330,35 @@ homography matrices H1 and H2 . The function implements the algorithm @cite Hart
     it would be better to correct it before computing the fundamental matrix and calling this
     function. For example, distortion coefficients can be estimated for each head of stereo camera
     separately by using calibrateCamera . Then, the images can be corrected using undistort , or
-    just the poin
+    just the point coordinates can be corrected with undistortPoints .
+ */
+CV_EXPORTS_W bool stereoRectifyUncalibrated( InputArray points1, InputArray points2,
+                                             InputArray F, Size imgSize,
+                                             OutputArray H1, OutputArray H2,
+                                             double threshold = 5 );
+
+//! computes the rectification transformations for 3-head camera, where all the heads are on the same line.
+CV_EXPORTS_W float rectify3Collinear( InputArray cameraMatrix1, InputArray distCoeffs1,
+                                      InputArray cameraMatrix2, InputArray distCoeffs2,
+                                      InputArray cameraMatrix3, InputArray distCoeffs3,
+                                      InputArrayOfArrays imgpt1, InputArrayOfArrays imgpt3,
+                                      Size imageSize, InputArray R12, InputArray T12,
+                                      InputArray R13, InputArray T13,
+                                      OutputArray R1, OutputArray R2, OutputArray R3,
+                                      OutputArray P1, OutputArray P2, OutputArray P3,
+                                      OutputArray Q, double alpha, Size newImgSize,
+                                      CV_OUT Rect* roi1, CV_OUT Rect* roi2, int flags );
+
+/** @brief Returns the new camera matrix based on the free scaling parameter.
+
+@param cameraMatrix Input camera matrix.
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6 [, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$ of
+4, 5, 8, 12 or 14 elements. If the vector is NULL/empty, the zero distortion coefficients are
+assumed.
+@param imageSize Original image size.
+@param alpha Free scaling parameter between 0 (when all the pixels in the undistorted image are
+valid) and 1 (when all the source image pixels are retained in the undistorted image). See
+stereoRectify for details.
+@param newImgSize Image size after rectification. By default, it is set to imageSize .
+@param validPixROI Optional output
