@@ -1361,4 +1361,39 @@ assumed.
 valid) and 1 (when all the source image pixels are retained in the undistorted image). See
 stereoRectify for details.
 @param newImgSize Image size after rectification. By default, it is set to imageSize .
-@param validPixROI Optional output
+@param validPixROI Optional output rectangle that outlines all-good-pixels region in the
+undistorted image. See roi1, roi2 description in stereoRectify .
+@param centerPrincipalPoint Optional flag that indicates whether in the new camera matrix the
+principal point should be at the image center or not. By default, the principal point is chosen to
+best fit a subset of the source image (determined by alpha) to the corrected image.
+@return new_camera_matrix Output new camera matrix.
+
+The function computes and returns the optimal new camera matrix based on the free scaling parameter.
+By varying this parameter, you may retrieve only sensible pixels alpha=0 , keep all the original
+image pixels if there is valuable information in the corners alpha=1 , or get something in between.
+When alpha\>0 , the undistorted result is likely to have some black pixels corresponding to
+"virtual" pixels outside of the captured distorted image. The original camera matrix, distortion
+coefficients, the computed new camera matrix, and newImageSize should be passed to
+initUndistortRectifyMap to produce the maps for remap .
+ */
+CV_EXPORTS_W Mat getOptimalNewCameraMatrix( InputArray cameraMatrix, InputArray distCoeffs,
+                                            Size imageSize, double alpha, Size newImgSize = Size(),
+                                            CV_OUT Rect* validPixROI = 0,
+                                            bool centerPrincipalPoint = false);
+
+/** @brief Converts points from Euclidean to homogeneous space.
+
+@param src Input vector of N-dimensional points.
+@param dst Output vector of N+1-dimensional points.
+
+The function converts points from Euclidean to homogeneous space by appending 1's to the tuple of
+point coordinates. That is, each point (x1, x2, ..., xn) is converted to (x1, x2, ..., xn, 1).
+ */
+CV_EXPORTS_W void convertPointsToHomogeneous( InputArray src, OutputArray dst );
+
+/** @brief Converts points from homogeneous to Euclidean space.
+
+@param src Input vector of N-dimensional points.
+@param dst Output vector of N-1-dimensional points.
+
+The function converts points homogeneous to Euclidean space using pers
