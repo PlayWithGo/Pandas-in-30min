@@ -1396,4 +1396,46 @@ CV_EXPORTS_W void convertPointsToHomogeneous( InputArray src, OutputArray dst );
 @param src Input vector of N-dimensional points.
 @param dst Output vector of N-1-dimensional points.
 
-The function converts points homogeneous to Euclidean space using pers
+The function converts points homogeneous to Euclidean space using perspective projection. That is,
+each point (x1, x2, ... x(n-1), xn) is converted to (x1/xn, x2/xn, ..., x(n-1)/xn). When xn=0, the
+output point coordinates will be (0,0,0,...).
+ */
+CV_EXPORTS_W void convertPointsFromHomogeneous( InputArray src, OutputArray dst );
+
+/** @brief Converts points to/from homogeneous coordinates.
+
+@param src Input array or vector of 2D, 3D, or 4D points.
+@param dst Output vector of 2D, 3D, or 4D points.
+
+The function converts 2D or 3D points from/to homogeneous coordinates by calling either
+convertPointsToHomogeneous or convertPointsFromHomogeneous.
+
+@note The function is obsolete. Use one of the previous two functions instead.
+ */
+CV_EXPORTS void convertPointsHomogeneous( InputArray src, OutputArray dst );
+
+/** @brief Calculates a fundamental matrix from the corresponding points in two images.
+
+@param points1 Array of N points from the first image. The point coordinates should be
+floating-point (single or double precision).
+@param points2 Array of the second image points of the same size and format as points1 .
+@param method Method for computing a fundamental matrix.
+-   **CV_FM_7POINT** for a 7-point algorithm. \f$N = 7\f$
+-   **CV_FM_8POINT** for an 8-point algorithm. \f$N \ge 8\f$
+-   **CV_FM_RANSAC** for the RANSAC algorithm. \f$N \ge 8\f$
+-   **CV_FM_LMEDS** for the LMedS algorithm. \f$N \ge 8\f$
+@param ransacReprojThreshold Parameter used only for RANSAC. It is the maximum distance from a point to an epipolar
+line in pixels, beyond which the point is considered an outlier and is not used for computing the
+final fundamental matrix. It can be set to something like 1-3, depending on the accuracy of the
+point localization, image resolution, and the image noise.
+@param confidence Parameter used for the RANSAC and LMedS methods only. It specifies a desirable level
+of confidence (probability) that the estimated matrix is correct.
+@param mask
+
+The epipolar geometry is described by the following equation:
+
+\f[[p_2; 1]^T F [p_1; 1] = 0\f]
+
+where \f$F\f$ is a fundamental matrix, \f$p_1\f$ and \f$p_2\f$ are corresponding points in the first and the
+second images, respectively.
+
