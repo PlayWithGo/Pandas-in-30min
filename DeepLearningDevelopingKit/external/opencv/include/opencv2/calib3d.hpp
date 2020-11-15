@@ -1301,3 +1301,33 @@ CV_EXPORTS_W void stereoRectify( InputArray cameraMatrix1, InputArray distCoeffs
                                  OutputArray P1, OutputArray P2,
                                  OutputArray Q, int flags = CALIB_ZERO_DISPARITY,
                                  double alpha = -1, Size newImageSize = Size(),
+                                 CV_OUT Rect* validPixROI1 = 0, CV_OUT Rect* validPixROI2 = 0 );
+
+/** @brief Computes a rectification transform for an uncalibrated stereo camera.
+
+@param points1 Array of feature points in the first image.
+@param points2 The corresponding points in the second image. The same formats as in
+findFundamentalMat are supported.
+@param F Input fundamental matrix. It can be computed from the same set of point pairs using
+findFundamentalMat .
+@param imgSize Size of the image.
+@param H1 Output rectification homography matrix for the first image.
+@param H2 Output rectification homography matrix for the second image.
+@param threshold Optional threshold used to filter out the outliers. If the parameter is greater
+than zero, all the point pairs that do not comply with the epipolar geometry (that is, the points
+for which \f$|\texttt{points2[i]}^T*\texttt{F}*\texttt{points1[i]}|>\texttt{threshold}\f$ ) are
+rejected prior to computing the homographies. Otherwise, all the points are considered inliers.
+
+The function computes the rectification transformations without knowing intrinsic parameters of the
+cameras and their relative position in the space, which explains the suffix "uncalibrated". Another
+related difference from stereoRectify is that the function outputs not the rectification
+transformations in the object (3D) space, but the planar perspective transformations encoded by the
+homography matrices H1 and H2 . The function implements the algorithm @cite Hartley99 .
+
+@note
+   While the algorithm does not need to know the intrinsic parameters of the cameras, it heavily
+    depends on the epipolar geometry. Therefore, if the camera lenses have a significant distortion,
+    it would be better to correct it before computing the fundamental matrix and calling this
+    function. For example, distortion coefficients can be estimated for each head of stereo camera
+    separately by using calibrateCamera . Then, the images can be corrected using undistort , or
+    just the poin
