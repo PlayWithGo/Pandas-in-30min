@@ -1439,3 +1439,49 @@ The epipolar geometry is described by the following equation:
 where \f$F\f$ is a fundamental matrix, \f$p_1\f$ and \f$p_2\f$ are corresponding points in the first and the
 second images, respectively.
 
+The function calculates the fundamental matrix using one of four methods listed above and returns
+the found fundamental matrix. Normally just one matrix is found. But in case of the 7-point
+algorithm, the function may return up to 3 solutions ( \f$9 \times 3\f$ matrix that stores all 3
+matrices sequentially).
+
+The calculated fundamental matrix may be passed further to computeCorrespondEpilines that finds the
+epipolar lines corresponding to the specified points. It can also be passed to
+stereoRectifyUncalibrated to compute the rectification transformation. :
+@code
+    // Example. Estimation of fundamental matrix using the RANSAC algorithm
+    int point_count = 100;
+    vector<Point2f> points1(point_count);
+    vector<Point2f> points2(point_count);
+
+    // initialize the points here ...
+    for( int i = 0; i < point_count; i++ )
+    {
+        points1[i] = ...;
+        points2[i] = ...;
+    }
+
+    Mat fundamental_matrix =
+     findFundamentalMat(points1, points2, FM_RANSAC, 3, 0.99);
+@endcode
+ */
+CV_EXPORTS_W Mat findFundamentalMat( InputArray points1, InputArray points2,
+                                     int method = FM_RANSAC,
+                                     double ransacReprojThreshold = 3., double confidence = 0.99,
+                                     OutputArray mask = noArray() );
+
+/** @overload */
+CV_EXPORTS Mat findFundamentalMat( InputArray points1, InputArray points2,
+                                   OutputArray mask, int method = FM_RANSAC,
+                                   double ransacReprojThreshold = 3., double confidence = 0.99 );
+
+/** @brief Calculates an essential matrix from the corresponding points in two images.
+
+@param points1 Array of N (N \>= 5) 2D points from the first image. The point coordinates should
+be floating-point (single or double precision).
+@param points2 Array of the second image points of the same size and format as points1 .
+@param cameraMatrix Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ .
+Note that this function assumes that points1 and points2 are feature points from cameras with the
+same camera matrix.
+@param method Method for computing an essential matrix.
+-   **RANSAC** for the RANSAC algorithm.
+-   **LMEDS** for the L
