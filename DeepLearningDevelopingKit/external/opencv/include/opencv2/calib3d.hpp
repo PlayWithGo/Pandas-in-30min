@@ -1643,4 +1643,43 @@ floating-point (single or double precision).
 Note that this function assumes that points1 and points2 are feature points from cameras with the
 same camera matrix.
 @param R Recovered relative rotation.
-@param t Recovered relative translati
+@param t Recovered relative translation.
+@param distanceThresh threshold distance which is used to filter out far away points (i.e. infinite points).
+@param mask Input/output mask for inliers in points1 and points2.
+:   If it is not empty, then it marks inliers in points1 and points2 for then given essential
+matrix E. Only these inliers will be used to recover pose. In the output mask only inliers
+which pass the cheirality check.
+@param triangulatedPoints 3d points which were reconstructed by triangulation.
+ */
+
+CV_EXPORTS_W int recoverPose( InputArray E, InputArray points1, InputArray points2,
+                            InputArray cameraMatrix, OutputArray R, OutputArray t, double distanceThresh, InputOutputArray mask = noArray(),
+                            OutputArray triangulatedPoints = noArray());
+
+/** @brief For points in an image of a stereo pair, computes the corresponding epilines in the other image.
+
+@param points Input points. \f$N \times 1\f$ or \f$1 \times N\f$ matrix of type CV_32FC2 or
+vector\<Point2f\> .
+@param whichImage Index of the image (1 or 2) that contains the points .
+@param F Fundamental matrix that can be estimated using findFundamentalMat or stereoRectify .
+@param lines Output vector of the epipolar lines corresponding to the points in the other image.
+Each line \f$ax + by + c=0\f$ is encoded by 3 numbers \f$(a, b, c)\f$ .
+
+For every point in one of the two images of a stereo pair, the function finds the equation of the
+corresponding epipolar line in the other image.
+
+From the fundamental matrix definition (see findFundamentalMat ), line \f$l^{(2)}_i\f$ in the second
+image for the point \f$p^{(1)}_i\f$ in the first image (when whichImage=1 ) is computed as:
+
+\f[l^{(2)}_i = F p^{(1)}_i\f]
+
+And vice versa, when whichImage=2, \f$l^{(1)}_i\f$ is computed from \f$p^{(2)}_i\f$ as:
+
+\f[l^{(1)}_i = F^T p^{(2)}_i\f]
+
+Line coefficients are defined up to a scale. They are normalized so that \f$a_i^2+b_i^2=1\f$ .
+ */
+CV_EXPORTS_W void computeCorrespondEpilines( InputArray points, int whichImage,
+                                             InputArray F, OutputArray lines );
+
+/** @brief Reconstructs
