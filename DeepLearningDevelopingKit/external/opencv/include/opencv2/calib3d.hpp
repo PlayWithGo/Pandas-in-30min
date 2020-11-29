@@ -1600,4 +1600,47 @@ points1 and points2 are the same input for findEssentialMat. :
     recoverPose(E, points1, points2, cameraMatrix, R, t, mask);
 @endcode
  */
-CV_EXPORTS_W int recoverPose( InputArray E, InputArray points1, InputArray points2
+CV_EXPORTS_W int recoverPose( InputArray E, InputArray points1, InputArray points2,
+                            InputArray cameraMatrix, OutputArray R, OutputArray t,
+                            InputOutputArray mask = noArray() );
+
+/** @overload
+@param E The input essential matrix.
+@param points1 Array of N 2D points from the first image. The point coordinates should be
+floating-point (single or double precision).
+@param points2 Array of the second image points of the same size and format as points1 .
+@param R Recovered relative rotation.
+@param t Recovered relative translation.
+@param focal Focal length of the camera. Note that this function assumes that points1 and points2
+are feature points from cameras with same focal length and principal point.
+@param pp principal point of the camera.
+@param mask Input/output mask for inliers in points1 and points2.
+:   If it is not empty, then it marks inliers in points1 and points2 for then given essential
+matrix E. Only these inliers will be used to recover pose. In the output mask only inliers
+which pass the cheirality check.
+
+This function differs from the one above that it computes camera matrix from focal length and
+principal point:
+
+\f[K =
+\begin{bmatrix}
+f & 0 & x_{pp}  \\
+0 & f & y_{pp}  \\
+0 & 0 & 1
+\end{bmatrix}\f]
+ */
+CV_EXPORTS_W int recoverPose( InputArray E, InputArray points1, InputArray points2,
+                            OutputArray R, OutputArray t,
+                            double focal = 1.0, Point2d pp = Point2d(0, 0),
+                            InputOutputArray mask = noArray() );
+
+/** @overload
+@param E The input essential matrix.
+@param points1 Array of N 2D points from the first image. The point coordinates should be
+floating-point (single or double precision).
+@param points2 Array of the second image points of the same size and format as points1.
+@param cameraMatrix Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ .
+Note that this function assumes that points1 and points2 are feature points from cameras with the
+same camera matrix.
+@param R Recovered relative rotation.
+@param t Recovered relative translati
