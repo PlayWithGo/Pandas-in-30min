@@ -1556,4 +1556,48 @@ decomposing E, you can only get the direction of the translation, so the functio
 CV_EXPORTS_W void decomposeEssentialMat( InputArray E, OutputArray R1, OutputArray R2, OutputArray t );
 
 /** @brief Recover relative camera rotation and translation from an estimated essential matrix and the
-corr
+corresponding points in two images, using cheirality check. Returns the number of inliers which pass
+the check.
+
+@param E The input essential matrix.
+@param points1 Array of N 2D points from the first image. The point coordinates should be
+floating-point (single or double precision).
+@param points2 Array of the second image points of the same size and format as points1 .
+@param cameraMatrix Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ .
+Note that this function assumes that points1 and points2 are feature points from cameras with the
+same camera matrix.
+@param R Recovered relative rotation.
+@param t Recovered relative translation.
+@param mask Input/output mask for inliers in points1 and points2.
+:   If it is not empty, then it marks inliers in points1 and points2 for then given essential
+matrix E. Only these inliers will be used to recover pose. In the output mask only inliers
+which pass the cheirality check.
+This function decomposes an essential matrix using decomposeEssentialMat and then verifies possible
+pose hypotheses by doing cheirality check. The cheirality check basically means that the
+triangulated 3D points should have positive depth. Some details can be found in @cite Nister03 .
+
+This function can be used to process output E and mask from findEssentialMat. In this scenario,
+points1 and points2 are the same input for findEssentialMat. :
+@code
+    // Example. Estimation of fundamental matrix using the RANSAC algorithm
+    int point_count = 100;
+    vector<Point2f> points1(point_count);
+    vector<Point2f> points2(point_count);
+
+    // initialize the points here ...
+    for( int i = 0; i < point_count; i++ )
+    {
+        points1[i] = ...;
+        points2[i] = ...;
+    }
+
+    // cametra matrix with both focal lengths = 1, and principal point = (0, 0)
+    Mat cameraMatrix = Mat::eye(3, 3, CV_64F);
+
+    Mat E, R, t, mask;
+
+    E = findEssentialMat(points1, points2, cameraMatrix, RANSAC, 0.999, 1.0, mask);
+    recoverPose(E, points1, points2, cameraMatrix, R, t, mask);
+@endcode
+ */
+CV_EXPORTS_W int recoverPose( InputArray E, InputArray points1, InputArray points2
