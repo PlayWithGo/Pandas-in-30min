@@ -1515,4 +1515,45 @@ be floating-point (single or double precision).
 @param focal focal length of the camera. Note that this function assumes that points1 and points2
 are feature points from cameras with same focal length and principal point.
 @param pp principal point of the camera.
-@param method Method for computing a funda
+@param method Method for computing a fundamental matrix.
+-   **RANSAC** for the RANSAC algorithm.
+-   **LMEDS** for the LMedS algorithm.
+@param threshold Parameter used for RANSAC. It is the maximum distance from a point to an epipolar
+line in pixels, beyond which the point is considered an outlier and is not used for computing the
+final fundamental matrix. It can be set to something like 1-3, depending on the accuracy of the
+point localization, image resolution, and the image noise.
+@param prob Parameter used for the RANSAC or LMedS methods only. It specifies a desirable level of
+confidence (probability) that the estimated matrix is correct.
+@param mask Output array of N elements, every element of which is set to 0 for outliers and to 1
+for the other points. The array is computed only in the RANSAC and LMedS methods.
+
+This function differs from the one above that it computes camera matrix from focal length and
+principal point:
+
+\f[K =
+\begin{bmatrix}
+f & 0 & x_{pp}  \\
+0 & f & y_{pp}  \\
+0 & 0 & 1
+\end{bmatrix}\f]
+ */
+CV_EXPORTS_W Mat findEssentialMat( InputArray points1, InputArray points2,
+                                 double focal = 1.0, Point2d pp = Point2d(0, 0),
+                                 int method = RANSAC, double prob = 0.999,
+                                 double threshold = 1.0, OutputArray mask = noArray() );
+
+/** @brief Decompose an essential matrix to possible rotations and translation.
+
+@param E The input essential matrix.
+@param R1 One possible rotation matrix.
+@param R2 Another possible rotation matrix.
+@param t One possible translation.
+
+This function decompose an essential matrix E using svd decomposition @cite HartleyZ00 . Generally 4
+possible poses exists for a given E. They are \f$[R_1, t]\f$, \f$[R_1, -t]\f$, \f$[R_2, t]\f$, \f$[R_2, -t]\f$. By
+decomposing E, you can only get the direction of the translation, so the function returns unit t.
+ */
+CV_EXPORTS_W void decomposeEssentialMat( InputArray E, OutputArray R1, OutputArray R2, OutputArray t );
+
+/** @brief Recover relative camera rotation and translation from an estimated essential matrix and the
+corr
