@@ -1755,4 +1755,43 @@ CV_EXPORTS_W void validateDisparity( InputOutputArray disparity, InputArray cost
 floating-point disparity image. If 16-bit signed format is used, the values are assumed to have no
 fractional bits.
 @param _3dImage Output 3-channel floating-point image of the same size as disparity . Each
-element of
+element of _3dImage(x,y) contains 3D coordinates of the point (x,y) computed from the disparity
+map.
+@param Q \f$4 \times 4\f$ perspective transformation matrix that can be obtained with stereoRectify.
+@param handleMissingValues Indicates, whether the function should handle missing values (i.e.
+points where the disparity was not computed). If handleMissingValues=true, then pixels with the
+minimal disparity that corresponds to the outliers (see StereoMatcher::compute ) are transformed
+to 3D points with a very large Z value (currently set to 10000).
+@param ddepth The optional output array depth. If it is -1, the output image will have CV_32F
+depth. ddepth can also be set to CV_16S, CV_32S or CV_32F.
+
+The function transforms a single-channel disparity map to a 3-channel image representing a 3D
+surface. That is, for each pixel (x,y) and the corresponding disparity d=disparity(x,y) , it
+computes:
+
+\f[\begin{array}{l} [X \; Y \; Z \; W]^T =  \texttt{Q} *[x \; y \; \texttt{disparity} (x,y) \; 1]^T  \\ \texttt{\_3dImage} (x,y) = (X/W, \; Y/W, \; Z/W) \end{array}\f]
+
+The matrix Q can be an arbitrary \f$4 \times 4\f$ matrix (for example, the one computed by
+stereoRectify). To reproject a sparse set of points {(x,y,d),...} to 3D space, use
+perspectiveTransform .
+ */
+CV_EXPORTS_W void reprojectImageTo3D( InputArray disparity,
+                                      OutputArray _3dImage, InputArray Q,
+                                      bool handleMissingValues = false,
+                                      int ddepth = -1 );
+
+/** @brief Calculates the Sampson Distance between two points.
+
+The function cv::sampsonDistance calculates and returns the first order approximation of the geometric error as:
+\f[
+sd( \texttt{pt1} , \texttt{pt2} )=
+\frac{(\texttt{pt2}^t \cdot \texttt{F} \cdot \texttt{pt1})^2}
+{((\texttt{F} \cdot \texttt{pt1})(0))^2 +
+((\texttt{F} \cdot \texttt{pt1})(1))^2 +
+((\texttt{F}^t \cdot \texttt{pt2})(0))^2 +
+((\texttt{F}^t \cdot \texttt{pt2})(1))^2}
+\f]
+The fundamental matrix may be calculated using the cv::findFundamentalMat function. See @cite HartleyZ00 11.4.3 for details.
+@param pt1 first homogeneous 2d point
+@param pt2 second homogeneous 2d point
+@param
