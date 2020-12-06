@@ -1720,4 +1720,39 @@ error \f$d(points1[i], newPoints1[i])^2 + d(points2[i],newPoints2[i])^2\f$ (wher
 geometric distance between points \f$a\f$ and \f$b\f$ ) subject to the epipolar constraint
 \f$newPoints2^T * F * newPoints1 = 0\f$ .
  */
-CV_EXPORTS_W void correctMatches( InputArray F, I
+CV_EXPORTS_W void correctMatches( InputArray F, InputArray points1, InputArray points2,
+                                  OutputArray newPoints1, OutputArray newPoints2 );
+
+/** @brief Filters off small noise blobs (speckles) in the disparity map
+
+@param img The input 16-bit signed disparity image
+@param newVal The disparity value used to paint-off the speckles
+@param maxSpeckleSize The maximum speckle size to consider it a speckle. Larger blobs are not
+affected by the algorithm
+@param maxDiff Maximum difference between neighbor disparity pixels to put them into the same
+blob. Note that since StereoBM, StereoSGBM and may be other algorithms return a fixed-point
+disparity map, where disparity values are multiplied by 16, this scale factor should be taken into
+account when specifying this parameter value.
+@param buf The optional temporary buffer to avoid memory allocation within the function.
+ */
+CV_EXPORTS_W void filterSpeckles( InputOutputArray img, double newVal,
+                                  int maxSpeckleSize, double maxDiff,
+                                  InputOutputArray buf = noArray() );
+
+//! computes valid disparity ROI from the valid ROIs of the rectified images (that are returned by cv::stereoRectify())
+CV_EXPORTS_W Rect getValidDisparityROI( Rect roi1, Rect roi2,
+                                        int minDisparity, int numberOfDisparities,
+                                        int SADWindowSize );
+
+//! validates disparity using the left-right check. The matrix "cost" should be computed by the stereo correspondence algorithm
+CV_EXPORTS_W void validateDisparity( InputOutputArray disparity, InputArray cost,
+                                     int minDisparity, int numberOfDisparities,
+                                     int disp12MaxDisp = 1 );
+
+/** @brief Reprojects a disparity image to 3D space.
+
+@param disparity Input single-channel 8-bit unsigned, 16-bit signed, 32-bit signed or 32-bit
+floating-point disparity image. If 16-bit signed format is used, the values are assumed to have no
+fractional bits.
+@param _3dImage Output 3-channel floating-point image of the same size as disparity . Each
+element of
