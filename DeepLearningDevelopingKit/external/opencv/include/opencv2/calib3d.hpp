@@ -1794,4 +1794,88 @@ sd( \texttt{pt1} , \texttt{pt2} )=
 The fundamental matrix may be calculated using the cv::findFundamentalMat function. See @cite HartleyZ00 11.4.3 for details.
 @param pt1 first homogeneous 2d point
 @param pt2 second homogeneous 2d point
-@param
+@param F fundamental matrix
+@return The computed Sampson distance.
+*/
+CV_EXPORTS_W double sampsonDistance(InputArray pt1, InputArray pt2, InputArray F);
+
+/** @brief Computes an optimal affine transformation between two 3D point sets.
+
+It computes
+\f[
+\begin{bmatrix}
+x\\
+y\\
+z\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13}\\
+a_{21} & a_{22} & a_{23}\\
+a_{31} & a_{32} & a_{33}\\
+\end{bmatrix}
+\begin{bmatrix}
+X\\
+Y\\
+Z\\
+\end{bmatrix}
++
+\begin{bmatrix}
+b_1\\
+b_2\\
+b_3\\
+\end{bmatrix}
+\f]
+
+@param src First input 3D point set containing \f$(X,Y,Z)\f$.
+@param dst Second input 3D point set containing \f$(x,y,z)\f$.
+@param out Output 3D affine transformation matrix \f$3 \times 4\f$ of the form
+\f[
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} & b_1\\
+a_{21} & a_{22} & a_{23} & b_2\\
+a_{31} & a_{32} & a_{33} & b_3\\
+\end{bmatrix}
+\f]
+@param inliers Output vector indicating which points are inliers (1-inlier, 0-outlier).
+@param ransacThreshold Maximum reprojection error in the RANSAC algorithm to consider a point as
+an inlier.
+@param confidence Confidence level, between 0 and 1, for the estimated transformation. Anything
+between 0.95 and 0.99 is usually good enough. Values too close to 1 can slow down the estimation
+significantly. Values lower than 0.8-0.9 can result in an incorrectly estimated transformation.
+
+The function estimates an optimal 3D affine transformation between two 3D point sets using the
+RANSAC algorithm.
+ */
+CV_EXPORTS_W  int estimateAffine3D(InputArray src, InputArray dst,
+                                   OutputArray out, OutputArray inliers,
+                                   double ransacThreshold = 3, double confidence = 0.99);
+
+/** @brief Computes an optimal affine transformation between two 2D point sets.
+
+It computes
+\f[
+\begin{bmatrix}
+x\\
+y\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{11} & a_{12}\\
+a_{21} & a_{22}\\
+\end{bmatrix}
+\begin{bmatrix}
+X\\
+Y\\
+\end{bmatrix}
++
+\begin{bmatrix}
+b_1\\
+b_2\\
+\end{bmatrix}
+\f]
+
+@param from First input 2D point set containing \f$(X,Y)\f$.
+@param to Second input 2D point set containing \f$(x,y)\f$.
+@param inliers Output vector indicating which points are inliers (1-inlier, 0-outlier).
+@param method Robu
