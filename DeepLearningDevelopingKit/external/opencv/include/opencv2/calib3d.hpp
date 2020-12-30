@@ -2003,4 +2003,56 @@ public:
 
     /** @brief Computes disparity map for the specified stereo pair
 
-    @param left Left 
+    @param left Left 8-bit single-channel image.
+    @param right Right image of the same size and the same type as the left one.
+    @param disparity Output disparity map. It has the same size as the input images. Some algorithms,
+    like StereoBM or StereoSGBM compute 16-bit fixed-point disparity map (where each disparity value
+    has 4 fractional bits), whereas other algorithms output 32-bit floating-point disparity map.
+     */
+    CV_WRAP virtual void compute( InputArray left, InputArray right,
+                                  OutputArray disparity ) = 0;
+
+    CV_WRAP virtual int getMinDisparity() const = 0;
+    CV_WRAP virtual void setMinDisparity(int minDisparity) = 0;
+
+    CV_WRAP virtual int getNumDisparities() const = 0;
+    CV_WRAP virtual void setNumDisparities(int numDisparities) = 0;
+
+    CV_WRAP virtual int getBlockSize() const = 0;
+    CV_WRAP virtual void setBlockSize(int blockSize) = 0;
+
+    CV_WRAP virtual int getSpeckleWindowSize() const = 0;
+    CV_WRAP virtual void setSpeckleWindowSize(int speckleWindowSize) = 0;
+
+    CV_WRAP virtual int getSpeckleRange() const = 0;
+    CV_WRAP virtual void setSpeckleRange(int speckleRange) = 0;
+
+    CV_WRAP virtual int getDisp12MaxDiff() const = 0;
+    CV_WRAP virtual void setDisp12MaxDiff(int disp12MaxDiff) = 0;
+};
+
+
+/** @brief Class for computing stereo correspondence using the block matching algorithm, introduced and
+contributed to OpenCV by K. Konolige.
+ */
+class CV_EXPORTS_W StereoBM : public StereoMatcher
+{
+public:
+    enum { PREFILTER_NORMALIZED_RESPONSE = 0,
+           PREFILTER_XSOBEL              = 1
+         };
+
+    CV_WRAP virtual int getPreFilterType() const = 0;
+    CV_WRAP virtual void setPreFilterType(int preFilterType) = 0;
+
+    CV_WRAP virtual int getPreFilterSize() const = 0;
+    CV_WRAP virtual void setPreFilterSize(int preFilterSize) = 0;
+
+    CV_WRAP virtual int getPreFilterCap() const = 0;
+    CV_WRAP virtual void setPreFilterCap(int preFilterCap) = 0;
+
+    CV_WRAP virtual int getTextureThreshold() const = 0;
+    CV_WRAP virtual void setTextureThreshold(int textureThreshold) = 0;
+
+    CV_WRAP virtual int getUniquenessRatio() const = 0;
+    CV_WRAP vi
