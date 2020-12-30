@@ -1956,4 +1956,51 @@ translations in \f$ x, y \f$ axes respectively.
 
 @note
 The RANSAC method can handle practically any ratio of outliers but need a threshold to
-distinguish inliers from outliers. The method LMeDS does not need a
+distinguish inliers from outliers. The method LMeDS does not need any threshold but it works
+correctly only when there are more than 50% of inliers.
+
+@sa estimateAffine2D, getAffineTransform
+*/
+CV_EXPORTS_W cv::Mat estimateAffinePartial2D(InputArray from, InputArray to, OutputArray inliers = noArray(),
+                                  int method = RANSAC, double ransacReprojThreshold = 3,
+                                  size_t maxIters = 2000, double confidence = 0.99,
+                                  size_t refineIters = 10);
+
+/** @example decompose_homography.cpp
+  An example program with homography decomposition.
+
+  Check @ref tutorial_homography "the corresponding tutorial" for more details.
+ */
+
+/** @brief Decompose a homography matrix to rotation(s), translation(s) and plane normal(s).
+
+@param H The input homography matrix between two images.
+@param K The input intrinsic camera calibration matrix.
+@param rotations Array of rotation matrices.
+@param translations Array of translation matrices.
+@param normals Array of plane normal matrices.
+
+This function extracts relative camera motion between two views observing a planar object from the
+homography H induced by the plane. The intrinsic camera matrix K must also be provided. The function
+may return up to four mathematical solution sets. At least two of the solutions may further be
+invalidated if point correspondences are available by applying positive depth constraint (all points
+must be in front of the camera). The decomposition method is described in detail in @cite Malis .
+ */
+CV_EXPORTS_W int decomposeHomographyMat(InputArray H,
+                                        InputArray K,
+                                        OutputArrayOfArrays rotations,
+                                        OutputArrayOfArrays translations,
+                                        OutputArrayOfArrays normals);
+
+/** @brief The base class for stereo correspondence algorithms.
+ */
+class CV_EXPORTS_W StereoMatcher : public Algorithm
+{
+public:
+    enum { DISP_SHIFT = 4,
+           DISP_SCALE = (1 << DISP_SHIFT)
+         };
+
+    /** @brief Computes disparity map for the specified stereo pair
+
+    @param left Left 
