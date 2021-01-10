@@ -2055,4 +2055,42 @@ public:
     CV_WRAP virtual void setTextureThreshold(int textureThreshold) = 0;
 
     CV_WRAP virtual int getUniquenessRatio() const = 0;
-    CV_WRAP vi
+    CV_WRAP virtual void setUniquenessRatio(int uniquenessRatio) = 0;
+
+    CV_WRAP virtual int getSmallerBlockSize() const = 0;
+    CV_WRAP virtual void setSmallerBlockSize(int blockSize) = 0;
+
+    CV_WRAP virtual Rect getROI1() const = 0;
+    CV_WRAP virtual void setROI1(Rect roi1) = 0;
+
+    CV_WRAP virtual Rect getROI2() const = 0;
+    CV_WRAP virtual void setROI2(Rect roi2) = 0;
+
+    /** @brief Creates StereoBM object
+
+    @param numDisparities the disparity search range. For each pixel algorithm will find the best
+    disparity from 0 (default minimum disparity) to numDisparities. The search range can then be
+    shifted by changing the minimum disparity.
+    @param blockSize the linear size of the blocks compared by the algorithm. The size should be odd
+    (as the block is centered at the current pixel). Larger block size implies smoother, though less
+    accurate disparity map. Smaller block size gives more detailed disparity map, but there is higher
+    chance for algorithm to find a wrong correspondence.
+
+    The function create StereoBM object. You can then call StereoBM::compute() to compute disparity for
+    a specific stereo pair.
+     */
+    CV_WRAP static Ptr<StereoBM> create(int numDisparities = 0, int blockSize = 21);
+};
+
+/** @brief The class implements the modified H. Hirschmuller algorithm @cite HH08 that differs from the original
+one as follows:
+
+-   By default, the algorithm is single-pass, which means that you consider only 5 directions
+instead of 8. Set mode=StereoSGBM::MODE_HH in createStereoSGBM to run the full variant of the
+algorithm but beware that it may consume a lot of memory.
+-   The algorithm matches blocks, not individual pixels. Though, setting blockSize=1 reduces the
+blocks to single pixels.
+-   Mutual information cost function is not implemented. Instead, a simpler Birchfield-Tomasi
+sub-pixel metric from @cite BT98 is used. Though, the color images are supported as well.
+-   Some pre- and post- processing steps from K. Konolige algorithm StereoBM are included, for
+example: pre-filtering (StereoBM::PREFILTER_XSOBEL type) and post-filtering (u
