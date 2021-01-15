@@ -2140,4 +2140,31 @@ public:
     between neighbor pixels. P2 is the penalty on the disparity change by more than 1 between neighbor
     pixels. The algorithm requires P2 \> P1 . See stereo_match.cpp sample where some reasonably good
     P1 and P2 values are shown (like 8\*number_of_image_channels\*SADWindowSize\*SADWindowSize and
-    32\*number_of_im
+    32\*number_of_image_channels\*SADWindowSize\*SADWindowSize , respectively).
+    @param disp12MaxDiff Maximum allowed difference (in integer pixel units) in the left-right
+    disparity check. Set it to a non-positive value to disable the check.
+    @param preFilterCap Truncation value for the prefiltered image pixels. The algorithm first
+    computes x-derivative at each pixel and clips its value by [-preFilterCap, preFilterCap] interval.
+    The result values are passed to the Birchfield-Tomasi pixel cost function.
+    @param uniquenessRatio Margin in percentage by which the best (minimum) computed cost function
+    value should "win" the second best value to consider the found match correct. Normally, a value
+    within the 5-15 range is good enough.
+    @param speckleWindowSize Maximum size of smooth disparity regions to consider their noise speckles
+    and invalidate. Set it to 0 to disable speckle filtering. Otherwise, set it somewhere in the
+    50-200 range.
+    @param speckleRange Maximum disparity variation within each connected component. If you do speckle
+    filtering, set the parameter to a positive value, it will be implicitly multiplied by 16.
+    Normally, 1 or 2 is good enough.
+    @param mode Set it to StereoSGBM::MODE_HH to run the full-scale two-pass dynamic programming
+    algorithm. It will consume O(W\*H\*numDisparities) bytes, which is large for 640x480 stereo and
+    huge for HD-size pictures. By default, it is set to false .
+
+    The first constructor initializes StereoSGBM with all the default parameters. So, you only have to
+    set StereoSGBM::numDisparities at minimum. The second constructor enables you to set each parameter
+    to a custom value.
+     */
+    CV_WRAP static Ptr<StereoSGBM> create(int minDisparity = 0, int numDisparities = 16, int blockSize = 3,
+                                          int P1 = 0, int P2 = 0, int disp12MaxDiff = 0,
+                                          int preFilterCap = 0, int uniquenessRatio = 0,
+                                          int speckleWindowSize = 0, int speckleRange = 0,
+                         
