@@ -2093,4 +2093,51 @@ blocks to single pixels.
 -   Mutual information cost function is not implemented. Instead, a simpler Birchfield-Tomasi
 sub-pixel metric from @cite BT98 is used. Though, the color images are supported as well.
 -   Some pre- and post- processing steps from K. Konolige algorithm StereoBM are included, for
-example: pre-filtering (StereoBM::PREFILTER_XSOBEL type) and post-filtering (u
+example: pre-filtering (StereoBM::PREFILTER_XSOBEL type) and post-filtering (uniqueness
+check, quadratic interpolation and speckle filtering).
+
+@note
+   -   (Python) An example illustrating the use of the StereoSGBM matching algorithm can be found
+        at opencv_source_code/samples/python/stereo_match.py
+ */
+class CV_EXPORTS_W StereoSGBM : public StereoMatcher
+{
+public:
+    enum
+    {
+        MODE_SGBM = 0,
+        MODE_HH   = 1,
+        MODE_SGBM_3WAY = 2,
+        MODE_HH4  = 3
+    };
+
+    CV_WRAP virtual int getPreFilterCap() const = 0;
+    CV_WRAP virtual void setPreFilterCap(int preFilterCap) = 0;
+
+    CV_WRAP virtual int getUniquenessRatio() const = 0;
+    CV_WRAP virtual void setUniquenessRatio(int uniquenessRatio) = 0;
+
+    CV_WRAP virtual int getP1() const = 0;
+    CV_WRAP virtual void setP1(int P1) = 0;
+
+    CV_WRAP virtual int getP2() const = 0;
+    CV_WRAP virtual void setP2(int P2) = 0;
+
+    CV_WRAP virtual int getMode() const = 0;
+    CV_WRAP virtual void setMode(int mode) = 0;
+
+    /** @brief Creates StereoSGBM object
+
+    @param minDisparity Minimum possible disparity value. Normally, it is zero but sometimes
+    rectification algorithms can shift images, so this parameter needs to be adjusted accordingly.
+    @param numDisparities Maximum disparity minus minimum disparity. The value is always greater than
+    zero. In the current implementation, this parameter must be divisible by 16.
+    @param blockSize Matched block size. It must be an odd number \>=1 . Normally, it should be
+    somewhere in the 3..11 range.
+    @param P1 The first parameter controlling the disparity smoothness. See below.
+    @param P2 The second parameter controlling the disparity smoothness. The larger the values are,
+    the smoother the disparity is. P1 is the penalty on the disparity change by plus or minus 1
+    between neighbor pixels. P2 is the penalty on the disparity change by more than 1 between neighbor
+    pixels. The algorithm requires P2 \> P1 . See stereo_match.cpp sample where some reasonably good
+    P1 and P2 values are shown (like 8\*number_of_image_channels\*SADWindowSize\*SADWindowSize and
+    32\*number_of_im
