@@ -2214,4 +2214,40 @@ namespace fisheye
     parameters, intrinsic and/or extrinsic.
      */
     CV_EXPORTS void projectPoints(InputArray objectPoints, OutputArray imagePoints, const Affine3d& affine,
- 
+        InputArray K, InputArray D, double alpha = 0, OutputArray jacobian = noArray());
+
+    /** @overload */
+    CV_EXPORTS_W void projectPoints(InputArray objectPoints, OutputArray imagePoints, InputArray rvec, InputArray tvec,
+        InputArray K, InputArray D, double alpha = 0, OutputArray jacobian = noArray());
+
+    /** @brief Distorts 2D points using fisheye model.
+
+    @param undistorted Array of object points, 1xN/Nx1 2-channel (or vector\<Point2f\> ), where N is
+    the number of points in the view.
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param alpha The skew coefficient.
+    @param distorted Output array of image points, 1xN/Nx1 2-channel, or vector\<Point2f\> .
+
+    Note that the function assumes the camera matrix of the undistorted points to be identity.
+    This means if you want to transform back points undistorted with undistortPoints() you have to
+    multiply them with \f$P^{-1}\f$.
+     */
+    CV_EXPORTS_W void distortPoints(InputArray undistorted, OutputArray distorted, InputArray K, InputArray D, double alpha = 0);
+
+    /** @brief Undistorts 2D points using fisheye model
+
+    @param distorted Array of object points, 1xN/Nx1 2-channel (or vector\<Point2f\> ), where N is the
+    number of points in the view.
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param R Rectification transformation in the object space: 3x3 1-channel, or vector: 3x1/1x3
+    1-channel or 1x1 3-channel
+    @param P New camera matrix (3x3) or new projection matrix (3x4)
+    @param undistorted Output array of image points, 1xN/Nx1 2-channel, or vector\<Point2f\> .
+     */
+    CV_EXPORTS_W void undistortPoints(InputArray distorted, OutputArray undistorted,
+        InputArray K, InputArray D, InputArray R = noArray(), InputArray P  = noArray());
+
+    /** @brief Computes undistortion and rectification maps for image transform by cv::remap(). If D is empty zero
+    distortion is 
