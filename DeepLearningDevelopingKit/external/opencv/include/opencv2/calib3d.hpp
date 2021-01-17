@@ -2167,4 +2167,51 @@ public:
                                           int P1 = 0, int P2 = 0, int disp12MaxDiff = 0,
                                           int preFilterCap = 0, int uniquenessRatio = 0,
                                           int speckleWindowSize = 0, int speckleRange = 0,
-                         
+                                          int mode = StereoSGBM::MODE_SGBM);
+};
+
+//! @} calib3d
+
+/** @brief The methods in this namespace use a so-called fisheye camera model.
+  @ingroup calib3d_fisheye
+*/
+namespace fisheye
+{
+//! @addtogroup calib3d_fisheye
+//! @{
+
+    enum{
+        CALIB_USE_INTRINSIC_GUESS   = 1 << 0,
+        CALIB_RECOMPUTE_EXTRINSIC   = 1 << 1,
+        CALIB_CHECK_COND            = 1 << 2,
+        CALIB_FIX_SKEW              = 1 << 3,
+        CALIB_FIX_K1                = 1 << 4,
+        CALIB_FIX_K2                = 1 << 5,
+        CALIB_FIX_K3                = 1 << 6,
+        CALIB_FIX_K4                = 1 << 7,
+        CALIB_FIX_INTRINSIC         = 1 << 8,
+        CALIB_FIX_PRINCIPAL_POINT   = 1 << 9
+    };
+
+    /** @brief Projects points using fisheye model
+
+    @param objectPoints Array of object points, 1xN/Nx1 3-channel (or vector\<Point3f\> ), where N is
+    the number of points in the view.
+    @param imagePoints Output array of image points, 2xN/Nx2 1-channel or 1xN/Nx1 2-channel, or
+    vector\<Point2f\>.
+    @param affine
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param alpha The skew coefficient.
+    @param jacobian Optional output 2Nx15 jacobian matrix of derivatives of image points with respect
+    to components of the focal lengths, coordinates of the principal point, distortion coefficients,
+    rotation vector, translation vector, and the skew. In the old interface different components of
+    the jacobian are returned via different output parameters.
+
+    The function computes projections of 3D points to the image plane given intrinsic and extrinsic
+    camera parameters. Optionally, the function computes Jacobians - matrices of partial derivatives of
+    image points coordinates (as functions of all the input parameters) with respect to the particular
+    parameters, intrinsic and/or extrinsic.
+     */
+    CV_EXPORTS void projectPoints(InputArray objectPoints, OutputArray imagePoints, const Affine3d& affine,
+ 
