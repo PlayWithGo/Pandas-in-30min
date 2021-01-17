@@ -2250,4 +2250,40 @@ namespace fisheye
         InputArray K, InputArray D, InputArray R = noArray(), InputArray P  = noArray());
 
     /** @brief Computes undistortion and rectification maps for image transform by cv::remap(). If D is empty zero
-    distortion is 
+    distortion is used, if R or P is empty identity matrixes are used.
+
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param R Rectification transformation in the object space: 3x3 1-channel, or vector: 3x1/1x3
+    1-channel or 1x1 3-channel
+    @param P New camera matrix (3x3) or new projection matrix (3x4)
+    @param size Undistorted image size.
+    @param m1type Type of the first output map that can be CV_32FC1 or CV_16SC2 . See convertMaps()
+    for details.
+    @param map1 The first output map.
+    @param map2 The second output map.
+     */
+    CV_EXPORTS_W void initUndistortRectifyMap(InputArray K, InputArray D, InputArray R, InputArray P,
+        const cv::Size& size, int m1type, OutputArray map1, OutputArray map2);
+
+    /** @brief Transforms an image to compensate for fisheye lens distortion.
+
+    @param distorted image with fisheye lens distortion.
+    @param undistorted Output image with compensated fisheye lens distortion.
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param Knew Camera matrix of the distorted image. By default, it is the identity matrix but you
+    may additionally scale and shift the result by using a different matrix.
+    @param new_size
+
+    The function transforms an image to compensate radial and tangential lens distortion.
+
+    The function is simply a combination of fisheye::initUndistortRectifyMap (with unity R ) and remap
+    (with bilinear interpolation). See the former function for details of the transformation being
+    performed.
+
+    See below the results of undistortImage.
+       -   a\) result of undistort of perspective camera model (all possible coefficients (k_1, k_2, k_3,
+            k_4, k_5, k_6) of distortion were optimized under calibration)
+        -   b\) result of fisheye::undistortImage of fisheye camera model (all possible coefficients (k_1, k_2,
+            k_3, k_4) of fisheye d
