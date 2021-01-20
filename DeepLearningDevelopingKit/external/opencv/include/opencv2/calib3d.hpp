@@ -2323,4 +2323,29 @@ namespace fisheye
     @param image_size Size of the image used only to initialize the intrinsic camera matrix.
     @param K Output 3x3 floating-point camera matrix
     \f$A = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ . If
-    fisheye::CALIB_USE_INTRINSIC_GUESS/ is spe
+    fisheye::CALIB_USE_INTRINSIC_GUESS/ is specified, some or all of fx, fy, cx, cy must be
+    initialized before calling the function.
+    @param D Output vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param rvecs Output vector of rotation vectors (see Rodrigues ) estimated for each pattern view.
+    That is, each k-th rotation vector together with the corresponding k-th translation vector (see
+    the next output parameter description) brings the calibration pattern from the model coordinate
+    space (in which object points are specified) to the world coordinate space, that is, a real
+    position of the calibration pattern in the k-th pattern view (k=0.. *M* -1).
+    @param tvecs Output vector of translation vectors estimated for each pattern view.
+    @param flags Different flags that may be zero or a combination of the following values:
+    -   **fisheye::CALIB_USE_INTRINSIC_GUESS** cameraMatrix contains valid initial values of
+    fx, fy, cx, cy that are optimized further. Otherwise, (cx, cy) is initially set to the image
+    center ( imageSize is used), and focal distances are computed in a least-squares fashion.
+    -   **fisheye::CALIB_RECOMPUTE_EXTRINSIC** Extrinsic will be recomputed after each iteration
+    of intrinsic optimization.
+    -   **fisheye::CALIB_CHECK_COND** The functions will check validity of condition number.
+    -   **fisheye::CALIB_FIX_SKEW** Skew coefficient (alpha) is set to zero and stay zero.
+    -   **fisheye::CALIB_FIX_K1..fisheye::CALIB_FIX_K4** Selected distortion coefficients
+    are set to zeros and stay zero.
+    -   **fisheye::CALIB_FIX_PRINCIPAL_POINT** The principal point is not changed during the global
+optimization. It stays at the center or at a different location specified when CALIB_USE_INTRINSIC_GUESS is set too.
+    @param criteria Termination criteria for the iterative optimization algorithm.
+     */
+    CV_EXPORTS_W double calibrate(InputArrayOfArrays objectPoints, InputArrayOfArrays imagePoints, const Size& image_size,
+        InputOutputArray K, InputOutputArray D, OutputArrayOfArrays rvecs, OutputArrayOfArrays tvecs, int flags = 0,
+    
