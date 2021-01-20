@@ -2286,4 +2286,41 @@ namespace fisheye
        -   a\) result of undistort of perspective camera model (all possible coefficients (k_1, k_2, k_3,
             k_4, k_5, k_6) of distortion were optimized under calibration)
         -   b\) result of fisheye::undistortImage of fisheye camera model (all possible coefficients (k_1, k_2,
-            k_3, k_4) of fisheye d
+            k_3, k_4) of fisheye distortion were optimized under calibration)
+        -   c\) original image was captured with fisheye lens
+
+    Pictures a) and b) almost the same. But if we consider points of image located far from the center
+    of image, we can notice that on image a) these points are distorted.
+
+    ![image](pics/fisheye_undistorted.jpg)
+     */
+    CV_EXPORTS_W void undistortImage(InputArray distorted, OutputArray undistorted,
+        InputArray K, InputArray D, InputArray Knew = cv::noArray(), const Size& new_size = Size());
+
+    /** @brief Estimates new camera matrix for undistortion or rectification.
+
+    @param K Camera matrix \f$K = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{_1}\f$.
+    @param image_size
+    @param D Input vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$.
+    @param R Rectification transformation in the object space: 3x3 1-channel, or vector: 3x1/1x3
+    1-channel or 1x1 3-channel
+    @param P New camera matrix (3x3) or new projection matrix (3x4)
+    @param balance Sets the new focal length in range between the min focal length and the max focal
+    length. Balance is in range of [0, 1].
+    @param new_size
+    @param fov_scale Divisor for new focal length.
+     */
+    CV_EXPORTS_W void estimateNewCameraMatrixForUndistortRectify(InputArray K, InputArray D, const Size &image_size, InputArray R,
+        OutputArray P, double balance = 0.0, const Size& new_size = Size(), double fov_scale = 1.0);
+
+    /** @brief Performs camera calibaration
+
+    @param objectPoints vector of vectors of calibration pattern points in the calibration pattern
+    coordinate space.
+    @param imagePoints vector of vectors of the projections of calibration pattern points.
+    imagePoints.size() and objectPoints.size() and imagePoints[i].size() must be equal to
+    objectPoints[i].size() for each i.
+    @param image_size Size of the image used only to initialize the intrinsic camera matrix.
+    @param K Output 3x3 floating-point camera matrix
+    \f$A = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ . If
+    fisheye::CALIB_USE_INTRINSIC_GUESS/ is spe
