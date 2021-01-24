@@ -2377,4 +2377,34 @@ optimization. It stays at the center or at a different location specified when C
     is passed (default), it is set to the original imageSize . Setting it to larger value can help you
     preserve details in the original image, especially when there is a big radial distortion.
     @param balance Sets the new focal length in range between the min focal length and the max focal
-    length. Balance is in range of [0, 1
+    length. Balance is in range of [0, 1].
+    @param fov_scale Divisor for new focal length.
+     */
+    CV_EXPORTS_W void stereoRectify(InputArray K1, InputArray D1, InputArray K2, InputArray D2, const Size &imageSize, InputArray R, InputArray tvec,
+        OutputArray R1, OutputArray R2, OutputArray P1, OutputArray P2, OutputArray Q, int flags, const Size &newImageSize = Size(),
+        double balance = 0.0, double fov_scale = 1.0);
+
+    /** @brief Performs stereo calibration
+
+    @param objectPoints Vector of vectors of the calibration pattern points.
+    @param imagePoints1 Vector of vectors of the projections of the calibration pattern points,
+    observed by the first camera.
+    @param imagePoints2 Vector of vectors of the projections of the calibration pattern points,
+    observed by the second camera.
+    @param K1 Input/output first camera matrix:
+    \f$\vecthreethree{f_x^{(j)}}{0}{c_x^{(j)}}{0}{f_y^{(j)}}{c_y^{(j)}}{0}{0}{1}\f$ , \f$j = 0,\, 1\f$ . If
+    any of fisheye::CALIB_USE_INTRINSIC_GUESS , fisheye::CALIB_FIX_INTRINSIC are specified,
+    some or all of the matrix components must be initialized.
+    @param D1 Input/output vector of distortion coefficients \f$(k_1, k_2, k_3, k_4)\f$ of 4 elements.
+    @param K2 Input/output second camera matrix. The parameter is similar to K1 .
+    @param D2 Input/output lens distortion coefficients for the second camera. The parameter is
+    similar to D1 .
+    @param imageSize Size of the image used only to initialize intrinsic camera matrix.
+    @param R Output rotation matrix between the 1st and the 2nd camera coordinate systems.
+    @param T Output translation vector between the coordinate systems of the cameras.
+    @param flags Different flags that may be zero or a combination of the following values:
+    -   **fisheye::CALIB_FIX_INTRINSIC** Fix K1, K2? and D1, D2? so that only R, T matrices
+    are estimated.
+    -   **fisheye::CALIB_USE_INTRINSIC_GUESS** K1, K2 contains valid initial values of
+    fx, fy, cx, cy that are optimized further. Otherwise, (cx, cy) is initially set to the image
+    center (imageSize
