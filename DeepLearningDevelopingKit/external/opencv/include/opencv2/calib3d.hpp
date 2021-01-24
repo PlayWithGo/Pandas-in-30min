@@ -2407,4 +2407,27 @@ optimization. It stays at the center or at a different location specified when C
     are estimated.
     -   **fisheye::CALIB_USE_INTRINSIC_GUESS** K1, K2 contains valid initial values of
     fx, fy, cx, cy that are optimized further. Otherwise, (cx, cy) is initially set to the image
-    center (imageSize
+    center (imageSize is used), and focal distances are computed in a least-squares fashion.
+    -   **fisheye::CALIB_RECOMPUTE_EXTRINSIC** Extrinsic will be recomputed after each iteration
+    of intrinsic optimization.
+    -   **fisheye::CALIB_CHECK_COND** The functions will check validity of condition number.
+    -   **fisheye::CALIB_FIX_SKEW** Skew coefficient (alpha) is set to zero and stay zero.
+    -   **fisheye::CALIB_FIX_K1..4** Selected distortion coefficients are set to zeros and stay
+    zero.
+    @param criteria Termination criteria for the iterative optimization algorithm.
+     */
+    CV_EXPORTS_W double stereoCalibrate(InputArrayOfArrays objectPoints, InputArrayOfArrays imagePoints1, InputArrayOfArrays imagePoints2,
+                                  InputOutputArray K1, InputOutputArray D1, InputOutputArray K2, InputOutputArray D2, Size imageSize,
+                                  OutputArray R, OutputArray T, int flags = fisheye::CALIB_FIX_INTRINSIC,
+                                  TermCriteria criteria = TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 100, DBL_EPSILON));
+
+//! @} calib3d_fisheye
+} // end namespace fisheye
+
+} //end namespace cv
+
+#ifndef DISABLE_OPENCV_24_COMPATIBILITY
+#include "opencv2/calib3d/calib3d_c.h"
+#endif
+
+#endif
