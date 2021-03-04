@@ -145,4 +145,96 @@ namespace cv { namespace debug_build_guard { } using namespace debug_build_guard
 #define CV_CPU_AVX_512BW        14
 #define CV_CPU_AVX_512CD        15
 #define CV_CPU_AVX_512DQ        16
-#define CV_CPU_AVX_512ER     
+#define CV_CPU_AVX_512ER        17
+#define CV_CPU_AVX_512IFMA512   18 // deprecated
+#define CV_CPU_AVX_512IFMA      18
+#define CV_CPU_AVX_512PF        19
+#define CV_CPU_AVX_512VBMI      20
+#define CV_CPU_AVX_512VL        21
+
+#define CV_CPU_NEON   100
+
+#define CV_CPU_VSX 200
+
+// CPU features groups
+#define CV_CPU_AVX512_SKX       256
+
+// when adding to this list remember to update the following enum
+#define CV_HARDWARE_MAX_FEATURE 512
+
+/** @brief Available CPU features.
+*/
+enum CpuFeatures {
+    CPU_MMX             = 1,
+    CPU_SSE             = 2,
+    CPU_SSE2            = 3,
+    CPU_SSE3            = 4,
+    CPU_SSSE3           = 5,
+    CPU_SSE4_1          = 6,
+    CPU_SSE4_2          = 7,
+    CPU_POPCNT          = 8,
+    CPU_FP16            = 9,
+    CPU_AVX             = 10,
+    CPU_AVX2            = 11,
+    CPU_FMA3            = 12,
+
+    CPU_AVX_512F        = 13,
+    CPU_AVX_512BW       = 14,
+    CPU_AVX_512CD       = 15,
+    CPU_AVX_512DQ       = 16,
+    CPU_AVX_512ER       = 17,
+    CPU_AVX_512IFMA512  = 18, // deprecated
+    CPU_AVX_512IFMA     = 18,
+    CPU_AVX_512PF       = 19,
+    CPU_AVX_512VBMI     = 20,
+    CPU_AVX_512VL       = 21,
+
+    CPU_NEON            = 100,
+
+    CPU_VSX             = 200,
+
+    CPU_AVX512_SKX      = 256, //!< Skylake-X with AVX-512F/CD/BW/DQ/VL
+
+    CPU_MAX_FEATURE     = 512  // see CV_HARDWARE_MAX_FEATURE
+};
+
+
+#include "cv_cpu_dispatch.h"
+
+
+/* fundamental constants */
+#define CV_PI   3.1415926535897932384626433832795
+#define CV_2PI  6.283185307179586476925286766559
+#define CV_LOG2 0.69314718055994530941723212145818
+
+#if defined __ARM_FP16_FORMAT_IEEE \
+    && !defined __CUDACC__
+#  define CV_FP16_TYPE 1
+#else
+#  define CV_FP16_TYPE 0
+#endif
+
+typedef union Cv16suf
+{
+    short i;
+#if CV_FP16_TYPE
+    __fp16 h;
+#endif
+    struct _fp16Format
+    {
+        unsigned int significand : 10;
+        unsigned int exponent    : 5;
+        unsigned int sign        : 1;
+    } fmt;
+}
+Cv16suf;
+
+typedef union Cv32suf
+{
+    int i;
+    unsigned u;
+    float f;
+    struct _fp32Format
+    {
+        unsigned int significand : 23;
+        unsigned int exponent    : 
