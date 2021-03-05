@@ -237,4 +237,84 @@ typedef union Cv32suf
     struct _fp32Format
     {
         unsigned int significand : 23;
-        unsigned int exponent    : 
+        unsigned int exponent    : 8;
+        unsigned int sign        : 1;
+    } fmt;
+}
+Cv32suf;
+
+typedef union Cv64suf
+{
+    int64 i;
+    uint64 u;
+    double f;
+}
+Cv64suf;
+
+#define OPENCV_ABI_COMPATIBILITY 300
+
+#ifdef __OPENCV_BUILD
+#  define DISABLE_OPENCV_24_COMPATIBILITY
+#endif
+
+#ifdef CVAPI_EXPORTS
+# if (defined _WIN32 || defined WINCE || defined __CYGWIN__)
+#   define CV_EXPORTS __declspec(dllexport)
+# elif defined __GNUC__ && __GNUC__ >= 4
+#   define CV_EXPORTS __attribute__ ((visibility ("default")))
+# endif
+#endif
+
+#ifndef CV_EXPORTS
+# define CV_EXPORTS
+#endif
+
+#ifdef _MSC_VER
+#   define CV_EXPORTS_TEMPLATE
+#else
+#   define CV_EXPORTS_TEMPLATE CV_EXPORTS
+#endif
+
+#ifndef CV_DEPRECATED
+#  if defined(__GNUC__)
+#    define CV_DEPRECATED __attribute__ ((deprecated))
+#  elif defined(_MSC_VER)
+#    define CV_DEPRECATED __declspec(deprecated)
+#  else
+#    define CV_DEPRECATED
+#  endif
+#endif
+
+#ifndef CV_EXTERN_C
+#  ifdef __cplusplus
+#    define CV_EXTERN_C extern "C"
+#  else
+#    define CV_EXTERN_C
+#  endif
+#endif
+
+/* special informative macros for wrapper generators */
+#define CV_EXPORTS_W CV_EXPORTS
+#define CV_EXPORTS_W_SIMPLE CV_EXPORTS
+#define CV_EXPORTS_AS(synonym) CV_EXPORTS
+#define CV_EXPORTS_W_MAP CV_EXPORTS
+#define CV_IN_OUT
+#define CV_OUT
+#define CV_PROP
+#define CV_PROP_RW
+#define CV_WRAP
+#define CV_WRAP_AS(synonym)
+
+/****************************************************************************************\
+*                                  Matrix type (Mat)                                     *
+\****************************************************************************************/
+
+#define CV_MAT_CN_MASK          ((CV_CN_MAX - 1) << CV_CN_SHIFT)
+#define CV_MAT_CN(flags)        ((((flags) & CV_MAT_CN_MASK) >> CV_CN_SHIFT) + 1)
+#define CV_MAT_TYPE_MASK        (CV_DEPTH_MAX*CV_CN_MAX - 1)
+#define CV_MAT_TYPE(flags)      ((flags) & CV_MAT_TYPE_MASK)
+#define CV_MAT_CONT_FLAG_SHIFT  14
+#define CV_MAT_CONT_FLAG        (1 << CV_MAT_CONT_FLAG_SHIFT)
+#define CV_IS_MAT_CONT(flags)   ((flags) & CV_MAT_CONT_FLAG)
+#define CV_IS_CONT_MAT          CV_IS_MAT_CONT
+#define CV_SUBMAT_FLAG_S
