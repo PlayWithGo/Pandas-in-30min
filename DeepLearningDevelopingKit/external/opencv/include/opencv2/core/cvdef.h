@@ -317,4 +317,55 @@ Cv64suf;
 #define CV_MAT_CONT_FLAG        (1 << CV_MAT_CONT_FLAG_SHIFT)
 #define CV_IS_MAT_CONT(flags)   ((flags) & CV_MAT_CONT_FLAG)
 #define CV_IS_CONT_MAT          CV_IS_MAT_CONT
-#define CV_SUBMAT_FLAG_S
+#define CV_SUBMAT_FLAG_SHIFT    15
+#define CV_SUBMAT_FLAG          (1 << CV_SUBMAT_FLAG_SHIFT)
+#define CV_IS_SUBMAT(flags)     ((flags) & CV_MAT_SUBMAT_FLAG)
+
+/** Size of each channel item,
+   0x8442211 = 1000 0100 0100 0010 0010 0001 0001 ~ array of sizeof(arr_type_elem) */
+#define CV_ELEM_SIZE1(type) \
+    ((((sizeof(size_t)<<28)|0x8442211) >> CV_MAT_DEPTH(type)*4) & 15)
+
+/** 0x3a50 = 11 10 10 01 01 00 00 ~ array of log2(sizeof(arr_type_elem)) */
+#define CV_ELEM_SIZE(type) \
+    (CV_MAT_CN(type) << ((((sizeof(size_t)/4+1)*16384|0x3a50) >> CV_MAT_DEPTH(type)*2) & 3))
+
+#ifndef MIN
+#  define MIN(a,b)  ((a) > (b) ? (b) : (a))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b)  ((a) < (b) ? (b) : (a))
+#endif
+
+/****************************************************************************************\
+*                                    static analysys                                     *
+\****************************************************************************************/
+
+// In practice, some macro are not processed correctly (noreturn is not detected).
+// We need to use simplified definition for them.
+#ifndef CV_STATIC_ANALYSIS
+# if defined(__KLOCWORK__) || defined(__clang_analyzer__) || defined(__COVERITY__)
+#   define CV_STATIC_ANALYSIS
+# endif
+#endif
+
+/****************************************************************************************\
+*                                    Thread sanitizer                                    *
+\****************************************************************************************/
+#ifndef CV_THREAD_SANITIZER
+# if defined(__has_feature)
+#   if __has_feature(thread_sanitizer)
+#     define CV_THREAD_SANITIZER
+#   endif
+# endif
+#endif
+
+/****************************************************************************************\
+*          exchange-add operation for atomic operations on reference counters            *
+\****************************************************************************************/
+
+#ifdef CV_XADD
+  // allow to use user-defined macro
+#elif defined __GNUC__ || defined __clang__
+#  if defined __clang__ && __clang_major__ >= 3 && !defi
