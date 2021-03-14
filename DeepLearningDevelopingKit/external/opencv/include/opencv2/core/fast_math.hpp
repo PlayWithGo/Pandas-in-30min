@@ -113,4 +113,79 @@ cvRound( double value )
     }
     return t;
 #elif ((defined _MSC_VER && defined _M_ARM) || defined CV_ICC || \
-        defined __GNUC__) && defined HAVE_TEGRA
+        defined __GNUC__) && defined HAVE_TEGRA_OPTIMIZATION
+    TEGRA_ROUND_DBL(value);
+#elif defined CV_ICC || defined __GNUC__
+# if defined ARM_ROUND_DBL
+    ARM_ROUND_DBL(value);
+# else
+    return (int)lrint(value);
+# endif
+#else
+    /* it's ok if round does not comply with IEEE754 standard;
+       the tests should allow +/-1 difference when the tested functions use round */
+    return (int)(value + (value >= 0 ? 0.5 : -0.5));
+#endif
+}
+
+
+/** @brief Rounds floating-point number to the nearest integer not larger than the original.
+
+ The function computes an integer i such that:
+ \f[i \le \texttt{value} < i+1\f]
+ @param value floating-point number. If the value is outside of INT_MIN ... INT_MAX range, the
+ result is not defined.
+ */
+CV_INLINE int cvFloor( double value )
+{
+    int i = (int)value;
+    return i - (i > value);
+}
+
+/** @brief Rounds floating-point number to the nearest integer not smaller than the original.
+
+ The function computes an integer i such that:
+ \f[i \le \texttt{value} < i+1\f]
+ @param value floating-point number. If the value is outside of INT_MIN ... INT_MAX range, the
+ result is not defined.
+ */
+CV_INLINE int cvCeil( double value )
+{
+    int i = (int)value;
+    return i + (i < value);
+}
+
+/** @brief Determines if the argument is Not A Number.
+
+ @param value The input floating-point value
+
+ The function returns 1 if the argument is Not A Number (as defined by IEEE754 standard), 0
+ otherwise. */
+CV_INLINE int cvIsNaN( double value )
+{
+    Cv64suf ieee754;
+    ieee754.f = value;
+    return ((unsigned)(ieee754.u >> 32) & 0x7fffffff) +
+           ((unsigned)ieee754.u != 0) > 0x7ff00000;
+}
+
+/** @brief Determines if the argument is Infinity.
+
+ @param value The input floating-point value
+
+ The function returns 1 if the argument is a plus or minus infinity (as defined by IEEE754 standard)
+ and 0 otherwise. */
+CV_INLINE int cvIsInf( double value )
+{
+    Cv64suf ieee754;
+    ieee754.f = value;
+    return ((unsigned)(ieee754.u >> 32) & 0x7fffffff) == 0x7ff00000 &&
+            (unsigned)ieee754.u == 0;
+}
+
+#ifdef __cplusplus
+
+/** @overload */
+CV_INLINE int cvRound(float value)
+{
+#if ((de
