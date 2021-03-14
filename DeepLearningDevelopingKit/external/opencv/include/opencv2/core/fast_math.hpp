@@ -188,4 +188,84 @@ CV_INLINE int cvIsInf( double value )
 /** @overload */
 CV_INLINE int cvRound(float value)
 {
-#if ((de
+#if ((defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__ \
+    && defined __SSE2__ && !defined __APPLE__) || CV_SSE2) && !defined(__CUDACC__)
+    __m128 t = _mm_set_ss( value );
+    return _mm_cvtss_si32(t);
+#elif defined _MSC_VER && defined _M_IX86
+    int t;
+    __asm
+    {
+        fld value;
+        fistp t;
+    }
+    return t;
+#elif ((defined _MSC_VER && defined _M_ARM) || defined CV_ICC || \
+        defined __GNUC__) && defined HAVE_TEGRA_OPTIMIZATION
+    TEGRA_ROUND_FLT(value);
+#elif defined CV_ICC || defined __GNUC__
+# if defined ARM_ROUND_FLT
+    ARM_ROUND_FLT(value);
+# else
+    return (int)lrintf(value);
+# endif
+#else
+    /* it's ok if round does not comply with IEEE754 standard;
+     the tests should allow +/-1 difference when the tested functions use round */
+    return (int)(value + (value >= 0 ? 0.5f : -0.5f));
+#endif
+}
+
+/** @overload */
+CV_INLINE int cvRound( int value )
+{
+    return value;
+}
+
+/** @overload */
+CV_INLINE int cvFloor( float value )
+{
+    int i = (int)value;
+    return i - (i > value);
+}
+
+/** @overload */
+CV_INLINE int cvFloor( int value )
+{
+    return value;
+}
+
+/** @overload */
+CV_INLINE int cvCeil( float value )
+{
+    int i = (int)value;
+    return i + (i < value);
+}
+
+/** @overload */
+CV_INLINE int cvCeil( int value )
+{
+    return value;
+}
+
+/** @overload */
+CV_INLINE int cvIsNaN( float value )
+{
+    Cv32suf ieee754;
+    ieee754.f = value;
+    return (ieee754.u & 0x7fffffff) > 0x7f800000;
+}
+
+/** @overload */
+CV_INLINE int cvIsInf( float value )
+{
+    Cv32suf ieee754;
+    ieee754.f = value;
+    return (ieee754.u & 0x7fffffff) == 0x7f800000;
+}
+
+#endif // __cplusplus
+
+//! @} core_utils
+
+#endif
