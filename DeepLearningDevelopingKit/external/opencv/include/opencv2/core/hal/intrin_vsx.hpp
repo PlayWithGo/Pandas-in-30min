@@ -697,3 +697,267 @@ OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_int32x4, vec_int4, int, sum, vec_add)
 OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_int32x4, vec_int4, int, max, vec_max)
 OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_int32x4, vec_int4, int, min, vec_min)
 OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_float32x4, vec_float4, float, sum, vec_add)
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_float32x4, vec_float4, float, max, vec_max)
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_4(v_float32x4, vec_float4, float, min, vec_min)
+
+#define OPENCV_HAL_IMPL_VSX_REDUCE_OP_8(_Tpvec, _Tpvec2, scalartype, suffix, func) \
+inline scalartype v_reduce_##suffix(const _Tpvec& a)                               \
+{                                                                                  \
+    _Tpvec2 rs = func(a.val, vec_sld(a.val, a.val, 8));                            \
+    rs = func(rs, vec_sld(rs, rs, 4));                                             \
+    return vec_extract(func(rs, vec_sld(rs, rs, 2)), 0);                           \
+}
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_8(v_uint16x8, vec_ushort8, ushort, max, vec_max)
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_8(v_uint16x8, vec_ushort8, ushort, min, vec_min)
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_8(v_int16x8, vec_short8, short, max, vec_max)
+OPENCV_HAL_IMPL_VSX_REDUCE_OP_8(v_int16x8, vec_short8, short, min, vec_min)
+
+inline v_float32x4 v_reduce_sum4(const v_float32x4& a, const v_float32x4& b,
+                                 const v_float32x4& c, const v_float32x4& d)
+{
+    vec_float4 ac = vec_add(vec_mergel(a.val, c.val), vec_mergeh(a.val, c.val));
+    ac = vec_add(ac, vec_sld(ac, ac, 8));
+
+    vec_float4 bd = vec_add(vec_mergel(b.val, d.val), vec_mergeh(b.val, d.val));
+    bd = vec_add(bd, vec_sld(bd, bd, 8));
+    return v_float32x4(vec_mergeh(ac, bd));
+}
+
+/** Popcount **/
+template<typename _Tpvec>
+inline v_uint32x4 v_popcount(const _Tpvec& a)
+{ return v_uint32x4(vec_popcntu(vec_uint4_c(a.val))); }
+
+/** Mask **/
+inline int v_signmask(const v_uint8x16& a)
+{
+    vec_uchar16 sv  = vec_sr(a.val, vec_uchar16_sp(7));
+    static const vec_uchar16 slm = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7};
+    sv = vec_sl(sv, slm);
+    vec_uint4 sv4 = vec_sum4s(sv, vec_uint4_z);
+    static const vec_uint4 slm4 = {0, 0, 8, 8};
+    sv4 = vec_sl(sv4, slm4);
+    return vec_extract(vec_sums((vec_int4) sv4, vec_int4_z), 3);
+}
+inline int v_signmask(const v_int8x16& a)
+{ return v_signmask(v_reinterpret_as_u8(a)); }
+
+inline int v_signmask(const v_int16x8& a)
+{
+    static const vec_ushort8 slm = {0, 1, 2, 3, 4, 5, 6, 7};
+    vec_short8 sv = vec_sr(a.val, vec_ushort8_sp(15));
+    sv = vec_sl(sv, slm);
+    vec_int4 svi = vec_int4_z;
+    svi = vec_sums(vec_sum4s(sv, svi), svi);
+    return vec_extract(svi, 3);
+}
+inline int v_signmask(const v_uint16x8& a)
+{ return v_signmask(v_reinterpret_as_s16(a)); }
+
+inline int v_signmask(const v_int32x4& a)
+{
+    static const vec_uint4 slm = {0, 1, 2, 3};
+    vec_int4 sv = vec_sr(a.val, vec_uint4_sp(31));
+    sv = vec_sl(sv, slm);
+    sv = vec_sums(sv, vec_int4_z);
+    return vec_extract(sv, 3);
+}
+inline int v_signmask(const v_uint32x4& a)
+{ return v_signmask(v_reinterpret_as_s32(a)); }
+inline int v_signmask(const v_float32x4& a)
+{ return v_signmask(v_reinterpret_as_s32(a)); }
+
+inline int v_signmask(const v_int64x2& a)
+{
+    VSX_UNUSED(const vec_dword2) sv = vec_sr(a.val, vec_udword2_sp(63));
+    return (int)vec_extract(sv, 0) | (int)vec_extract(sv, 1) << 1;
+}
+inline int v_signmask(const v_uint64x2& a)
+{ return v_signmask(v_reinterpret_as_s64(a)); }
+inline int v_signmask(const v_float64x2& a)
+{ return v_signmask(v_reinterpret_as_s64(a)); }
+
+
+template<typename _Tpvec>
+inline bool v_check_all(const _Tpvec& a)
+{ return vec_all_lt(a.val, _Tpvec().val);}
+inline bool v_check_all(const v_uint8x16 &a)
+{ return v_check_all(v_reinterpret_as_s8(a)); }
+inline bool v_check_all(const v_uint16x8 &a)
+{ return v_check_all(v_reinterpret_as_s16(a)); }
+inline bool v_check_all(const v_uint32x4 &a)
+{ return v_check_all(v_reinterpret_as_s32(a)); }
+
+template<typename _Tpvec>
+inline bool v_check_any(const _Tpvec& a)
+{ return vec_any_lt(a.val, _Tpvec().val);}
+inline bool v_check_any(const v_uint8x16 &a)
+{ return v_check_any(v_reinterpret_as_s8(a)); }
+inline bool v_check_any(const v_uint16x8 &a)
+{ return v_check_any(v_reinterpret_as_s16(a)); }
+inline bool v_check_any(const v_uint32x4 &a)
+{ return v_check_any(v_reinterpret_as_s32(a)); }
+
+////////// Other math /////////
+
+/** Some frequent operations **/
+inline v_float32x4 v_sqrt(const v_float32x4& x)
+{ return v_float32x4(vec_sqrt(x.val)); }
+inline v_float64x2 v_sqrt(const v_float64x2& x)
+{ return v_float64x2(vec_sqrt(x.val)); }
+
+inline v_float32x4 v_invsqrt(const v_float32x4& x)
+{ return v_float32x4(vec_rsqrt(x.val)); }
+inline v_float64x2 v_invsqrt(const v_float64x2& x)
+{ return v_float64x2(vec_rsqrt(x.val)); }
+
+#define OPENCV_HAL_IMPL_VSX_MULADD(_Tpvec)                                  \
+inline _Tpvec v_magnitude(const _Tpvec& a, const _Tpvec& b)                 \
+{ return _Tpvec(vec_sqrt(vec_madd(a.val, a.val, vec_mul(b.val, b.val)))); } \
+inline _Tpvec v_sqr_magnitude(const _Tpvec& a, const _Tpvec& b)             \
+{ return _Tpvec(vec_madd(a.val, a.val, vec_mul(b.val, b.val))); }           \
+inline _Tpvec v_muladd(const _Tpvec& a, const _Tpvec& b, const _Tpvec& c)   \
+{ return _Tpvec(vec_madd(a.val, b.val, c.val)); }
+
+OPENCV_HAL_IMPL_VSX_MULADD(v_float32x4)
+OPENCV_HAL_IMPL_VSX_MULADD(v_float64x2)
+
+// TODO: exp, log, sin, cos
+
+/** Absolute values **/
+inline v_uint8x16 v_abs(const v_int8x16& x)
+{ return v_uint8x16(vec_uchar16_c(vec_abs(x.val))); }
+
+inline v_uint16x8 v_abs(const v_int16x8& x)
+{ return v_uint16x8(vec_ushort8_c(vec_abs(x.val))); }
+
+inline v_uint32x4 v_abs(const v_int32x4& x)
+{ return v_uint32x4(vec_uint4_c(vec_abs(x.val))); }
+
+inline v_float32x4 v_abs(const v_float32x4& x)
+{ return v_float32x4(vec_abs(x.val)); }
+
+inline v_float64x2 v_abs(const v_float64x2& x)
+{ return v_float64x2(vec_abs(x.val)); }
+
+OPENCV_HAL_IMPL_VSX_BIN_FUNC(v_absdiff, vec_absd)
+
+#define OPENCV_HAL_IMPL_VSX_BIN_FUNC2(_Tpvec, _Tpvec2, cast, func, intrin)  \
+inline _Tpvec2 func(const _Tpvec& a, const _Tpvec& b)                       \
+{ return _Tpvec2(cast(intrin(a.val, b.val))); }
+
+OPENCV_HAL_IMPL_VSX_BIN_FUNC2(v_int8x16, v_uint8x16, vec_uchar16_c, v_absdiff, vec_absd)
+OPENCV_HAL_IMPL_VSX_BIN_FUNC2(v_int16x8, v_uint16x8, vec_ushort8_c, v_absdiff, vec_absd)
+OPENCV_HAL_IMPL_VSX_BIN_FUNC2(v_int32x4, v_uint32x4, vec_uint4_c, v_absdiff, vec_absd)
+OPENCV_HAL_IMPL_VSX_BIN_FUNC2(v_int64x2, v_uint64x2, vec_udword2_c, v_absdiff, vec_absd)
+
+////////// Conversions /////////
+
+/** Rounding **/
+inline v_int32x4 v_round(const v_float32x4& a)
+{ return v_int32x4(vec_cts(vec_round(a.val))); }
+
+inline v_int32x4 v_round(const v_float64x2& a)
+{ return v_int32x4(vec_mergesqo(vec_ctso(vec_round(a.val)), vec_int4_z)); }
+
+inline v_int32x4 v_floor(const v_float32x4& a)
+{ return v_int32x4(vec_cts(vec_floor(a.val))); }
+
+inline v_int32x4 v_floor(const v_float64x2& a)
+{ return v_int32x4(vec_mergesqo(vec_ctso(vec_floor(a.val)), vec_int4_z)); }
+
+inline v_int32x4 v_ceil(const v_float32x4& a)
+{ return v_int32x4(vec_cts(vec_ceil(a.val))); }
+
+inline v_int32x4 v_ceil(const v_float64x2& a)
+{ return v_int32x4(vec_mergesqo(vec_ctso(vec_ceil(a.val)), vec_int4_z)); }
+
+inline v_int32x4 v_trunc(const v_float32x4& a)
+{ return v_int32x4(vec_cts(a.val)); }
+
+inline v_int32x4 v_trunc(const v_float64x2& a)
+{ return v_int32x4(vec_mergesqo(vec_ctso(a.val), vec_int4_z)); }
+
+/** To float **/
+inline v_float32x4 v_cvt_f32(const v_int32x4& a)
+{ return v_float32x4(vec_ctf(a.val)); }
+
+inline v_float32x4 v_cvt_f32(const v_float64x2& a)
+{ return v_float32x4(vec_mergesqo(vec_cvfo(a.val), vec_float4_z)); }
+
+inline v_float64x2 v_cvt_f64(const v_int32x4& a)
+{ return v_float64x2(vec_ctdo(vec_mergeh(a.val, a.val))); }
+
+inline v_float64x2 v_cvt_f64_high(const v_int32x4& a)
+{ return v_float64x2(vec_ctdo(vec_mergel(a.val, a.val))); }
+
+inline v_float64x2 v_cvt_f64(const v_float32x4& a)
+{ return v_float64x2(vec_cvfo(vec_mergeh(a.val, a.val))); }
+
+inline v_float64x2 v_cvt_f64_high(const v_float32x4& a)
+{ return v_float64x2(vec_cvfo(vec_mergel(a.val, a.val))); }
+
+/** Reinterpret **/
+/** its up there with load and store operations **/
+
+////////// Matrix operations /////////
+
+inline v_int32x4 v_dotprod(const v_int16x8& a, const v_int16x8& b)
+{ return v_int32x4(vec_msum(a.val, b.val, vec_int4_z)); }
+
+inline v_float32x4 v_matmul(const v_float32x4& v, const v_float32x4& m0,
+                            const v_float32x4& m1, const v_float32x4& m2,
+                            const v_float32x4& m3)
+{
+    const vec_float4 v0 = vec_splat(v.val, 0);
+    const vec_float4 v1 = vec_splat(v.val, 1);
+    const vec_float4 v2 = vec_splat(v.val, 2);
+    VSX_UNUSED(const vec_float4) v3 = vec_splat(v.val, 3);
+    return v_float32x4(vec_madd(v0, m0.val, vec_madd(v1, m1.val, vec_madd(v2, m2.val, vec_mul(v3, m3.val)))));
+}
+
+inline v_float32x4 v_matmuladd(const v_float32x4& v, const v_float32x4& m0,
+                               const v_float32x4& m1, const v_float32x4& m2,
+                               const v_float32x4& a)
+{
+    const vec_float4 v0 = vec_splat(v.val, 0);
+    const vec_float4 v1 = vec_splat(v.val, 1);
+    const vec_float4 v2 = vec_splat(v.val, 2);
+    return v_float32x4(vec_madd(v0, m0.val, vec_madd(v1, m1.val, vec_madd(v2, m2.val, a.val))));
+}
+
+#define OPENCV_HAL_IMPL_VSX_TRANSPOSE4x4(_Tpvec, _Tpvec2)                        \
+inline void v_transpose4x4(const _Tpvec& a0, const _Tpvec& a1,                   \
+                           const _Tpvec& a2, const _Tpvec& a3,                   \
+                           _Tpvec& b0, _Tpvec& b1, _Tpvec& b2, _Tpvec& b3)       \
+{                                                                                \
+    _Tpvec2 a02 = vec_mergeh(a0.val, a2.val);                                    \
+    _Tpvec2 a13 = vec_mergeh(a1.val, a3.val);                                    \
+    b0.val = vec_mergeh(a02, a13);                                               \
+    b1.val = vec_mergel(a02, a13);                                               \
+    a02 = vec_mergel(a0.val, a2.val);                                            \
+    a13 = vec_mergel(a1.val, a3.val);                                            \
+    b2.val  = vec_mergeh(a02, a13);                                              \
+    b3.val  = vec_mergel(a02, a13);                                              \
+}
+OPENCV_HAL_IMPL_VSX_TRANSPOSE4x4(v_uint32x4, vec_uint4)
+OPENCV_HAL_IMPL_VSX_TRANSPOSE4x4(v_int32x4, vec_int4)
+OPENCV_HAL_IMPL_VSX_TRANSPOSE4x4(v_float32x4, vec_float4)
+
+//! @name Check SIMD support
+//! @{
+//! @brief Check CPU capability of SIMD operation
+static inline bool hasSIMD128()
+{
+    return (CV_CPU_HAS_SUPPORT_VSX) ? true : false;
+}
+
+//! @}
+
+CV_CPU_OPTIMIZATION_HAL_NAMESPACE_END
+
+//! @endcond
+
+}
+
+#endif // OPENCV_HAL_VSX_HPP
