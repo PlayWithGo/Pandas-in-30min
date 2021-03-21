@@ -125,4 +125,52 @@ it, according to the assertion statement inside) :
         _dst.create(src.size(), src.type());
         Mat dst = _dst.getMat();
 
-        for( int i = 0
+        for( int i = 0; i < src.rows; i++ )
+            for( int j = 0; j < src.cols; j++ )
+            {
+                Point2f pt = src.at<Point2f>(i, j);
+                dst.at<Point2f>(i, j) = Point2f(m.at<float>(0, 0)*pt.x +
+                                                m.at<float>(0, 1)*pt.y +
+                                                m.at<float>(0, 2),
+                                                m.at<float>(1, 0)*pt.x +
+                                                m.at<float>(1, 1)*pt.y +
+                                                m.at<float>(1, 2));
+            }
+    }
+@endcode
+There is another related type, InputArrayOfArrays, which is currently defined as a synonym for
+InputArray:
+@code
+    typedef InputArray InputArrayOfArrays;
+@endcode
+It denotes function arguments that are either vectors of vectors or vectors of matrices. A separate
+synonym is needed to generate Python/Java etc. wrappers properly. At the function implementation
+level their use is similar, but _InputArray::getMat(idx) should be used to get header for the
+idx-th component of the outer vector and _InputArray::size().area() should be used to find the
+number of components (vectors/matrices) of the outer vector.
+ */
+class CV_EXPORTS _InputArray
+{
+public:
+    enum {
+        KIND_SHIFT = 16,
+        FIXED_TYPE = 0x8000 << KIND_SHIFT,
+        FIXED_SIZE = 0x4000 << KIND_SHIFT,
+        KIND_MASK = 31 << KIND_SHIFT,
+
+        NONE              = 0 << KIND_SHIFT,
+        MAT               = 1 << KIND_SHIFT,
+        MATX              = 2 << KIND_SHIFT,
+        STD_VECTOR        = 3 << KIND_SHIFT,
+        STD_VECTOR_VECTOR = 4 << KIND_SHIFT,
+        STD_VECTOR_MAT    = 5 << KIND_SHIFT,
+        EXPR              = 6 << KIND_SHIFT,
+        OPENGL_BUFFER     = 7 << KIND_SHIFT,
+        CUDA_HOST_MEM     = 8 << KIND_SHIFT,
+        CUDA_GPU_MAT      = 9 << KIND_SHIFT,
+        UMAT              =10 << KIND_SHIFT,
+        STD_VECTOR_UMAT   =11 << KIND_SHIFT,
+        STD_BOOL_VECTOR   =12 << KIND_SHIFT,
+        STD_VECTOR_CUDA_GPU_MAT = 13 << KIND_SHIFT,
+        STD_ARRAY         =14 << KIND_SHIFT,
+        STD_ARR
