@@ -88,4 +88,41 @@ do not describe it in details. There are a few key things, though, that should b
 -   When you see in the reference manual or in OpenCV source code a function that takes
     InputArray, it means that you can actually pass `Mat`, `Matx`, `vector<T>` etc. (see above the
     complete list).
--   Optional input arguments: If some of the input arrays
+-   Optional input arguments: If some of the input arrays may be empty, pass cv::noArray() (or
+    simply cv::Mat() as you probably did before).
+-   The class is designed solely for passing parameters. That is, normally you *should not*
+    declare class members, local and global variables of this type.
+-   If you want to design your own function or a class method that can operate of arrays of
+    multiple types, you can use InputArray (or OutputArray) for the respective parameters. Inside
+    a function you should use _InputArray::getMat() method to construct a matrix header for the
+    array (without copying data). _InputArray::kind() can be used to distinguish Mat from
+    `vector<>` etc., but normally it is not needed.
+
+Here is how you can use a function that takes InputArray :
+@code
+    std::vector<Point2f> vec;
+    // points or a circle
+    for( int i = 0; i < 30; i++ )
+        vec.push_back(Point2f((float)(100 + 30*cos(i*CV_PI*2/5)),
+                              (float)(100 - 30*sin(i*CV_PI*2/5))));
+    cv::transform(vec, vec, cv::Matx23f(0.707, -0.707, 10, 0.707, 0.707, 20));
+@endcode
+That is, we form an STL vector containing points, and apply in-place affine transformation to the
+vector using the 2x3 matrix created inline as `Matx<float, 2, 3>` instance.
+
+Here is how such a function can be implemented (for simplicity, we implement a very specific case of
+it, according to the assertion statement inside) :
+@code
+    void myAffineTransform(InputArray _src, OutputArray _dst, InputArray _m)
+    {
+        // get Mat headers for input arrays. This is O(1) operation,
+        // unless _src and/or _m are matrix expressions.
+        Mat src = _src.getMat(), m = _m.getMat();
+        CV_Assert( src.type() == CV_32FC2 && m.type() == CV_32F && m.size() == Size(3, 2) );
+
+        // [re]create the output array so that it has the proper size and type.
+        // In case of Mat it calls Mat::create, in case of STL vector it calls vector::resize.
+        _dst.create(src.size(), src.type());
+        Mat dst = _dst.getMat();
+
+        for( int i = 0
