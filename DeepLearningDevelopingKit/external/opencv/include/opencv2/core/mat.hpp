@@ -30,4 +30,62 @@
 //
 // This software is provided by the copyright holders and contributors "as is" and
 // any express or implied warranties, including, but not limited to, the implied
-// warranties of merchantability and fitness for a 
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the Intel Corporation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_CORE_MAT_HPP
+#define OPENCV_CORE_MAT_HPP
+
+#ifndef __cplusplus
+#  error mat.hpp header must be compiled as C++
+#endif
+
+#include "opencv2/core/matx.hpp"
+#include "opencv2/core/types.hpp"
+
+#include "opencv2/core/bufferpool.hpp"
+
+#ifdef CV_CXX11
+#include <type_traits>
+#endif
+
+namespace cv
+{
+
+//! @addtogroup core_basic
+//! @{
+
+enum { ACCESS_READ=1<<24, ACCESS_WRITE=1<<25,
+    ACCESS_RW=3<<24, ACCESS_MASK=ACCESS_RW, ACCESS_FAST=1<<26 };
+
+CV__DEBUG_NS_BEGIN
+
+class CV_EXPORTS _OutputArray;
+
+//////////////////////// Input/Output Array Arguments /////////////////////////////////
+
+/** @brief This is the proxy class for passing read-only input arrays into OpenCV functions.
+
+It is defined as:
+@code
+    typedef const _InputArray& InputArray;
+@endcode
+where _InputArray is a class that can be constructed from `Mat`, `Mat_<T>`, `Matx<T, m, n>`,
+`std::vector<T>`, `std::vector<std::vector<T> >`, `std::vector<Mat>`, `std::vector<Mat_<T> >`,
+`UMat`, `std::vector<UMat>` or `double`. It can also be constructed from a matrix expression.
+
+Since this is mostly implementation-level class, and its interface may change in future versions, we
+do not describe it in details. There are a few key things, though, that should be kept in mind:
+
+-   When you see in the reference manual or in OpenCV source code a function that takes
+    InputArray, it means that you can actually pass `Mat`, `Matx`, `vector<T>` etc. (see above the
+    complete list).
+-   Optional input arguments: If some of the input arrays
