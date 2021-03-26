@@ -173,4 +173,58 @@ public:
         STD_BOOL_VECTOR   =12 << KIND_SHIFT,
         STD_VECTOR_CUDA_GPU_MAT = 13 << KIND_SHIFT,
         STD_ARRAY         =14 << KIND_SHIFT,
-        STD_ARR
+        STD_ARRAY_MAT     =15 << KIND_SHIFT
+    };
+
+    _InputArray();
+    _InputArray(int _flags, void* _obj);
+    _InputArray(const Mat& m);
+    _InputArray(const MatExpr& expr);
+    _InputArray(const std::vector<Mat>& vec);
+    template<typename _Tp> _InputArray(const Mat_<_Tp>& m);
+    template<typename _Tp> _InputArray(const std::vector<_Tp>& vec);
+    _InputArray(const std::vector<bool>& vec);
+    template<typename _Tp> _InputArray(const std::vector<std::vector<_Tp> >& vec);
+    _InputArray(const std::vector<std::vector<bool> >&);
+    template<typename _Tp> _InputArray(const std::vector<Mat_<_Tp> >& vec);
+    template<typename _Tp> _InputArray(const _Tp* vec, int n);
+    template<typename _Tp, int m, int n> _InputArray(const Matx<_Tp, m, n>& matx);
+    _InputArray(const double& val);
+    _InputArray(const cuda::GpuMat& d_mat);
+    _InputArray(const std::vector<cuda::GpuMat>& d_mat_array);
+    _InputArray(const ogl::Buffer& buf);
+    _InputArray(const cuda::HostMem& cuda_mem);
+    template<typename _Tp> _InputArray(const cudev::GpuMat_<_Tp>& m);
+    _InputArray(const UMat& um);
+    _InputArray(const std::vector<UMat>& umv);
+
+#ifdef CV_CXX_STD_ARRAY
+    template<typename _Tp, std::size_t _Nm> _InputArray(const std::array<_Tp, _Nm>& arr);
+    template<std::size_t _Nm> _InputArray(const std::array<Mat, _Nm>& arr);
+#endif
+
+    Mat getMat(int idx=-1) const;
+    Mat getMat_(int idx=-1) const;
+    UMat getUMat(int idx=-1) const;
+    void getMatVector(std::vector<Mat>& mv) const;
+    void getUMatVector(std::vector<UMat>& umv) const;
+    void getGpuMatVector(std::vector<cuda::GpuMat>& gpumv) const;
+    cuda::GpuMat getGpuMat() const;
+    ogl::Buffer getOGlBuffer() const;
+
+    int getFlags() const;
+    void* getObj() const;
+    Size getSz() const;
+
+    int kind() const;
+    int dims(int i=-1) const;
+    int cols(int i=-1) const;
+    int rows(int i=-1) const;
+    Size size(int i=-1) const;
+    int sizend(int* sz, int i=-1) const;
+    bool sameSize(const _InputArray& arr) const;
+    size_t total(int i=-1) const;
+    int type(int i=-1) const;
+    int depth(int i=-1) const;
+    int channels(int i=-1) const;
+    bool isContinuous(int i=-
