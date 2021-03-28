@@ -284,4 +284,48 @@ public:
     enum
     {
         DEPTH_MASK_8U = 1 << CV_8U,
-        DEPTH_MAS
+        DEPTH_MASK_8S = 1 << CV_8S,
+        DEPTH_MASK_16U = 1 << CV_16U,
+        DEPTH_MASK_16S = 1 << CV_16S,
+        DEPTH_MASK_32S = 1 << CV_32S,
+        DEPTH_MASK_32F = 1 << CV_32F,
+        DEPTH_MASK_64F = 1 << CV_64F,
+        DEPTH_MASK_ALL = (DEPTH_MASK_64F<<1)-1,
+        DEPTH_MASK_ALL_BUT_8S = DEPTH_MASK_ALL & ~DEPTH_MASK_8S,
+        DEPTH_MASK_FLT = DEPTH_MASK_32F + DEPTH_MASK_64F
+    };
+
+    _OutputArray();
+    _OutputArray(int _flags, void* _obj);
+    _OutputArray(Mat& m);
+    _OutputArray(std::vector<Mat>& vec);
+    _OutputArray(cuda::GpuMat& d_mat);
+    _OutputArray(std::vector<cuda::GpuMat>& d_mat);
+    _OutputArray(ogl::Buffer& buf);
+    _OutputArray(cuda::HostMem& cuda_mem);
+    template<typename _Tp> _OutputArray(cudev::GpuMat_<_Tp>& m);
+    template<typename _Tp> _OutputArray(std::vector<_Tp>& vec);
+    _OutputArray(std::vector<bool>& vec);
+    template<typename _Tp> _OutputArray(std::vector<std::vector<_Tp> >& vec);
+    _OutputArray(std::vector<std::vector<bool> >&);
+    template<typename _Tp> _OutputArray(std::vector<Mat_<_Tp> >& vec);
+    template<typename _Tp> _OutputArray(Mat_<_Tp>& m);
+    template<typename _Tp> _OutputArray(_Tp* vec, int n);
+    template<typename _Tp, int m, int n> _OutputArray(Matx<_Tp, m, n>& matx);
+    _OutputArray(UMat& m);
+    _OutputArray(std::vector<UMat>& vec);
+
+    _OutputArray(const Mat& m);
+    _OutputArray(const std::vector<Mat>& vec);
+    _OutputArray(const cuda::GpuMat& d_mat);
+    _OutputArray(const std::vector<cuda::GpuMat>& d_mat);
+    _OutputArray(const ogl::Buffer& buf);
+    _OutputArray(const cuda::HostMem& cuda_mem);
+    template<typename _Tp> _OutputArray(const cudev::GpuMat_<_Tp>& m);
+    template<typename _Tp> _OutputArray(const std::vector<_Tp>& vec);
+    template<typename _Tp> _OutputArray(const std::vector<std::vector<_Tp> >& vec);
+    template<typename _Tp> _OutputArray(const std::vector<Mat_<_Tp> >& vec);
+    template<typename _Tp> _OutputArray(const Mat_<_Tp>& m);
+    template<typename _Tp> _OutputArray(const _Tp* vec, int n);
+    template<typename _Tp, int m, int n> _OutputArray(const Matx<_Tp, m, n>& matx);
+    _Output
