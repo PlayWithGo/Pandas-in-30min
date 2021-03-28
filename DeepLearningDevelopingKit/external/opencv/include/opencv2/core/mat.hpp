@@ -227,4 +227,61 @@ public:
     int type(int i=-1) const;
     int depth(int i=-1) const;
     int channels(int i=-1) const;
-    bool isContinuous(int i=-
+    bool isContinuous(int i=-1) const;
+    bool isSubmatrix(int i=-1) const;
+    bool empty() const;
+    void copyTo(const _OutputArray& arr) const;
+    void copyTo(const _OutputArray& arr, const _InputArray & mask) const;
+    size_t offset(int i=-1) const;
+    size_t step(int i=-1) const;
+    bool isMat() const;
+    bool isUMat() const;
+    bool isMatVector() const;
+    bool isUMatVector() const;
+    bool isMatx() const;
+    bool isVector() const;
+    bool isGpuMatVector() const;
+    ~_InputArray();
+
+protected:
+    int flags;
+    void* obj;
+    Size sz;
+
+    void init(int _flags, const void* _obj);
+    void init(int _flags, const void* _obj, Size _sz);
+};
+
+
+/** @brief This type is very similar to InputArray except that it is used for input/output and output function
+parameters.
+
+Just like with InputArray, OpenCV users should not care about OutputArray, they just pass `Mat`,
+`vector<T>` etc. to the functions. The same limitation as for `InputArray`: *Do not explicitly
+create OutputArray instances* applies here too.
+
+If you want to make your function polymorphic (i.e. accept different arrays as output parameters),
+it is also not very difficult. Take the sample above as the reference. Note that
+_OutputArray::create() needs to be called before _OutputArray::getMat(). This way you guarantee
+that the output array is properly allocated.
+
+Optional output parameters. If you do not need certain output array to be computed and returned to
+you, pass cv::noArray(), just like you would in the case of optional input array. At the
+implementation level, use _OutputArray::needed() to check if certain output array needs to be
+computed or not.
+
+There are several synonyms for OutputArray that are used to assist automatic Python/Java/... wrapper
+generators:
+@code
+    typedef OutputArray OutputArrayOfArrays;
+    typedef OutputArray InputOutputArray;
+    typedef OutputArray InputOutputArrayOfArrays;
+@endcode
+ */
+class CV_EXPORTS _OutputArray : public _InputArray
+{
+public:
+    enum
+    {
+        DEPTH_MASK_8U = 1 << CV_8U,
+        DEPTH_MAS
