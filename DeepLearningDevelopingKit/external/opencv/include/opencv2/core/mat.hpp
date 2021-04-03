@@ -328,4 +328,53 @@ public:
     template<typename _Tp> _OutputArray(const Mat_<_Tp>& m);
     template<typename _Tp> _OutputArray(const _Tp* vec, int n);
     template<typename _Tp, int m, int n> _OutputArray(const Matx<_Tp, m, n>& matx);
-    _Output
+    _OutputArray(const UMat& m);
+    _OutputArray(const std::vector<UMat>& vec);
+
+#ifdef CV_CXX_STD_ARRAY
+    template<typename _Tp, std::size_t _Nm> _OutputArray(std::array<_Tp, _Nm>& arr);
+    template<typename _Tp, std::size_t _Nm> _OutputArray(const std::array<_Tp, _Nm>& arr);
+    template<std::size_t _Nm> _OutputArray(std::array<Mat, _Nm>& arr);
+    template<std::size_t _Nm> _OutputArray(const std::array<Mat, _Nm>& arr);
+#endif
+
+    bool fixedSize() const;
+    bool fixedType() const;
+    bool needed() const;
+    Mat& getMatRef(int i=-1) const;
+    UMat& getUMatRef(int i=-1) const;
+    cuda::GpuMat& getGpuMatRef() const;
+    std::vector<cuda::GpuMat>& getGpuMatVecRef() const;
+    ogl::Buffer& getOGlBufferRef() const;
+    cuda::HostMem& getHostMemRef() const;
+    void create(Size sz, int type, int i=-1, bool allowTransposed=false, int fixedDepthMask=0) const;
+    void create(int rows, int cols, int type, int i=-1, bool allowTransposed=false, int fixedDepthMask=0) const;
+    void create(int dims, const int* size, int type, int i=-1, bool allowTransposed=false, int fixedDepthMask=0) const;
+    void createSameSize(const _InputArray& arr, int mtype) const;
+    void release() const;
+    void clear() const;
+    void setTo(const _InputArray& value, const _InputArray & mask = _InputArray()) const;
+
+    void assign(const UMat& u) const;
+    void assign(const Mat& m) const;
+
+    void assign(const std::vector<UMat>& v) const;
+    void assign(const std::vector<Mat>& v) const;
+};
+
+
+class CV_EXPORTS _InputOutputArray : public _OutputArray
+{
+public:
+    _InputOutputArray();
+    _InputOutputArray(int _flags, void* _obj);
+    _InputOutputArray(Mat& m);
+    _InputOutputArray(std::vector<Mat>& vec);
+    _InputOutputArray(cuda::GpuMat& d_mat);
+    _InputOutputArray(ogl::Buffer& buf);
+    _InputOutputArray(cuda::HostMem& cuda_mem);
+    template<typename _Tp> _InputOutputArray(cudev::GpuMat_<_Tp>& m);
+    template<typename _Tp> _InputOutputArray(std::vector<_Tp>& vec);
+    _InputOutputArray(std::vector<bool>& vec);
+    template<typename _Tp> _InputOutputArray(std::vector<std::vector<_Tp> >& vec);
+    template<typename _Tp> _InputOutputArray(std::v
