@@ -377,4 +377,49 @@ public:
     template<typename _Tp> _InputOutputArray(std::vector<_Tp>& vec);
     _InputOutputArray(std::vector<bool>& vec);
     template<typename _Tp> _InputOutputArray(std::vector<std::vector<_Tp> >& vec);
-    template<typename _Tp> _InputOutputArray(std::v
+    template<typename _Tp> _InputOutputArray(std::vector<Mat_<_Tp> >& vec);
+    template<typename _Tp> _InputOutputArray(Mat_<_Tp>& m);
+    template<typename _Tp> _InputOutputArray(_Tp* vec, int n);
+    template<typename _Tp, int m, int n> _InputOutputArray(Matx<_Tp, m, n>& matx);
+    _InputOutputArray(UMat& m);
+    _InputOutputArray(std::vector<UMat>& vec);
+
+    _InputOutputArray(const Mat& m);
+    _InputOutputArray(const std::vector<Mat>& vec);
+    _InputOutputArray(const cuda::GpuMat& d_mat);
+    _InputOutputArray(const std::vector<cuda::GpuMat>& d_mat);
+    _InputOutputArray(const ogl::Buffer& buf);
+    _InputOutputArray(const cuda::HostMem& cuda_mem);
+    template<typename _Tp> _InputOutputArray(const cudev::GpuMat_<_Tp>& m);
+    template<typename _Tp> _InputOutputArray(const std::vector<_Tp>& vec);
+    template<typename _Tp> _InputOutputArray(const std::vector<std::vector<_Tp> >& vec);
+    template<typename _Tp> _InputOutputArray(const std::vector<Mat_<_Tp> >& vec);
+    template<typename _Tp> _InputOutputArray(const Mat_<_Tp>& m);
+    template<typename _Tp> _InputOutputArray(const _Tp* vec, int n);
+    template<typename _Tp, int m, int n> _InputOutputArray(const Matx<_Tp, m, n>& matx);
+    _InputOutputArray(const UMat& m);
+    _InputOutputArray(const std::vector<UMat>& vec);
+
+#ifdef CV_CXX_STD_ARRAY
+    template<typename _Tp, std::size_t _Nm> _InputOutputArray(std::array<_Tp, _Nm>& arr);
+    template<typename _Tp, std::size_t _Nm> _InputOutputArray(const std::array<_Tp, _Nm>& arr);
+    template<std::size_t _Nm> _InputOutputArray(std::array<Mat, _Nm>& arr);
+    template<std::size_t _Nm> _InputOutputArray(const std::array<Mat, _Nm>& arr);
+#endif
+
+};
+
+CV__DEBUG_NS_END
+
+typedef const _InputArray& InputArray;
+typedef InputArray InputArrayOfArrays;
+typedef const _OutputArray& OutputArray;
+typedef OutputArray OutputArrayOfArrays;
+typedef const _InputOutputArray& InputOutputArray;
+typedef InputOutputArray InputOutputArrayOfArrays;
+
+CV_EXPORTS InputOutputArray noArray();
+
+/////////////////////////////////// MatAllocator //////////////////////////////////////
+
+//! Usage fl
