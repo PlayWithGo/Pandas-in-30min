@@ -422,4 +422,48 @@ CV_EXPORTS InputOutputArray noArray();
 
 /////////////////////////////////// MatAllocator //////////////////////////////////////
 
-//! Usage fl
+//! Usage flags for allocator
+enum UMatUsageFlags
+{
+    USAGE_DEFAULT = 0,
+
+    // buffer allocation policy is platform and usage specific
+    USAGE_ALLOCATE_HOST_MEMORY = 1 << 0,
+    USAGE_ALLOCATE_DEVICE_MEMORY = 1 << 1,
+    USAGE_ALLOCATE_SHARED_MEMORY = 1 << 2, // It is not equal to: USAGE_ALLOCATE_HOST_MEMORY | USAGE_ALLOCATE_DEVICE_MEMORY
+
+    __UMAT_USAGE_FLAGS_32BIT = 0x7fffffff // Binary compatibility hint
+};
+
+struct CV_EXPORTS UMatData;
+
+/** @brief  Custom array allocator
+*/
+class CV_EXPORTS MatAllocator
+{
+public:
+    MatAllocator() {}
+    virtual ~MatAllocator() {}
+
+    // let's comment it off for now to detect and fix all the uses of allocator
+    //virtual void allocate(int dims, const int* sizes, int type, int*& refcount,
+    //                      uchar*& datastart, uchar*& data, size_t* step) = 0;
+    //virtual void deallocate(int* refcount, uchar* datastart, uchar* data) = 0;
+    virtual UMatData* allocate(int dims, const int* sizes, int type,
+                               void* data, size_t* step, int flags, UMatUsageFlags usageFlags) const = 0;
+    virtual bool allocate(UMatData* data, int accessflags, UMatUsageFlags usageFlags) const = 0;
+    virtual void deallocate(UMatData* data) const = 0;
+    virtual void map(UMatData* data, int accessflags) const;
+    virtual void unmap(UMatData* data) const;
+    virtual void download(UMatData* data, void* dst, int dims, const size_t sz[],
+                          const size_t srcofs[], const size_t srcstep[],
+                          const size_t dststep[]) const;
+    virtual void upload(UMatData* data, const void* src, int dims, const size_t sz[],
+                        const size_t dstofs[], const size_t dststep[],
+                        const size_t srcstep[]) const;
+    virtual void copy(UMatData* srcdata, UMatData* dstdata, int dims, const size_t sz[],
+                      const size_t srcofs[], const size_t srcstep[],
+                      const size_t dstofs[], const size_t dststep[], bool sync) const;
+
+    // default implementation returns DummyBufferPoolController
+    virtual BufferPoolController* getBufferPoolController(
