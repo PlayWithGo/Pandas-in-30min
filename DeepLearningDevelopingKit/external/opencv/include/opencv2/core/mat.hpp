@@ -466,4 +466,72 @@ public:
                       const size_t dstofs[], const size_t dststep[], bool sync) const;
 
     // default implementation returns DummyBufferPoolController
-    virtual BufferPoolController* getBufferPoolController(
+    virtual BufferPoolController* getBufferPoolController(const char* id = NULL) const;
+};
+
+
+//////////////////////////////// MatCommaInitializer //////////////////////////////////
+
+/** @brief  Comma-separated Matrix Initializer
+
+ The class instances are usually not created explicitly.
+ Instead, they are created on "matrix << firstValue" operator.
+
+ The sample below initializes 2x2 rotation matrix:
+
+ \code
+ double angle = 30, a = cos(angle*CV_PI/180), b = sin(angle*CV_PI/180);
+ Mat R = (Mat_<double>(2,2) << a, -b, b, a);
+ \endcode
+*/
+template<typename _Tp> class MatCommaInitializer_
+{
+public:
+    //! the constructor, created by "matrix << firstValue" operator, where matrix is cv::Mat
+    MatCommaInitializer_(Mat_<_Tp>* _m);
+    //! the operator that takes the next value and put it to the matrix
+    template<typename T2> MatCommaInitializer_<_Tp>& operator , (T2 v);
+    //! another form of conversion operator
+    operator Mat_<_Tp>() const;
+protected:
+    MatIterator_<_Tp> it;
+};
+
+
+/////////////////////////////////////// Mat ///////////////////////////////////////////
+
+// note that umatdata might be allocated together
+// with the matrix data, not as a separate object.
+// therefore, it does not have constructor or destructor;
+// it should be explicitly initialized using init().
+struct CV_EXPORTS UMatData
+{
+    enum { COPY_ON_MAP=1, HOST_COPY_OBSOLETE=2,
+        DEVICE_COPY_OBSOLETE=4, TEMP_UMAT=8, TEMP_COPIED_UMAT=24,
+        USER_ALLOCATED=32, DEVICE_MEM_MAPPED=64,
+        ASYNC_CLEANUP=128
+    };
+    UMatData(const MatAllocator* allocator);
+    ~UMatData();
+
+    // provide atomic access to the structure
+    void lock();
+    void unlock();
+
+    bool hostCopyObsolete() const;
+    bool deviceCopyObsolete() const;
+    bool deviceMemMapped() const;
+    bool copyOnMap() const;
+    bool tempUMat() const;
+    bool tempCopiedUMat() const;
+    void markHostCopyObsolete(bool flag);
+    void markDeviceCopyObsolete(bool flag);
+    void markDeviceMemMapped(bool flag);
+
+    const MatAllocator* prevAllocator;
+    const MatAllocator* currAllocator;
+    int urefcount;
+    int refcount;
+    uchar* data;
+    uchar* origdata;
+  
