@@ -678,4 +678,44 @@ sub-matrices.
     @endcode
     -# Quickly initialize small matrices and/or get a super-fast element access.
     @code
-        double m[3][3] = {{a, b, c}, 
+        double m[3][3] = {{a, b, c}, {d, e, f}, {g, h, i}};
+        Mat M = Mat(3, 3, CV_64F, m).inv();
+    @endcode
+    .
+    Partial yet very common cases of this *user-allocated data* case are conversions from CvMat and
+    IplImage to Mat. For this purpose, there is function cv::cvarrToMat taking pointers to CvMat or
+    IplImage and the optional flag indicating whether to copy the data or not.
+    @snippet samples/cpp/image.cpp iplimage
+
+- Use MATLAB-style array initializers, zeros(), ones(), eye(), for example:
+@code
+    // create a double-precision identity matrix and add it to M.
+    M += Mat::eye(M.rows, M.cols, CV_64F);
+@endcode
+
+- Use a comma-separated initializer:
+@code
+    // create a 3x3 double-precision identity matrix
+    Mat M = (Mat_<double>(3,3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
+@endcode
+With this approach, you first call a constructor of the Mat class with the proper parameters, and
+then you just put `<< operator` followed by comma-separated values that can be constants,
+variables, expressions, and so on. Also, note the extra parentheses required to avoid compilation
+errors.
+
+Once the array is created, it is automatically managed via a reference-counting mechanism. If the
+array header is built on top of user-allocated data, you should handle the data by yourself. The
+array data is deallocated when no one points to it. If you want to release the data pointed by a
+array header before the array destructor is called, use Mat::release().
+
+The next important thing to learn about the array class is element access. This manual already
+described how to compute an address of each array element. Normally, you are not required to use the
+formula directly in the code. If you know the array element type (which can be retrieved using the
+method Mat::type() ), you can access the element \f$M_{ij}\f$ of a 2-dimensional array as:
+@code
+    M.at<double>(i,j) += 1.f;
+@endcode
+assuming that `M` is a double-precision floating-point array. There are several variants of the method
+at for a different number of dimensions.
+
+If you need to process a whole row of a 2D array, the most efficient way is to get t
