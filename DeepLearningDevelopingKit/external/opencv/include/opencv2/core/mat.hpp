@@ -630,4 +630,52 @@ right side (see below). As noted in the introduction, the array assignment is an
 because it only copies the header and increases the reference counter. The Mat::clone() method can
 be used to get a full (deep) copy of the array when you need it.
 
-- Construct a header for a part of another array. It can be a single row, single column, 
+- Construct a header for a part of another array. It can be a single row, single column, several
+rows, several columns, rectangular region in the array (called a *minor* in algebra) or a
+diagonal. Such operations are also O(1) because the new header references the same data. You can
+actually modify a part of the array using this feature, for example:
+@code
+    // add the 5-th row, multiplied by 3 to the 3rd row
+    M.row(3) = M.row(3) + M.row(5)*3;
+    // now copy the 7-th column to the 1-st column
+    // M.col(1) = M.col(7); // this will not work
+    Mat M1 = M.col(1);
+    M.col(7).copyTo(M1);
+    // create a new 320x240 image
+    Mat img(Size(320,240),CV_8UC3);
+    // select a ROI
+    Mat roi(img, Rect(10,10,100,100));
+    // fill the ROI with (0,255,0) (which is green in RGB space);
+    // the original 320x240 image will be modified
+    roi = Scalar(0,255,0);
+@endcode
+Due to the additional datastart and dataend members, it is possible to compute a relative
+sub-array position in the main *container* array using locateROI():
+@code
+    Mat A = Mat::eye(10, 10, CV_32S);
+    // extracts A columns, 1 (inclusive) to 3 (exclusive).
+    Mat B = A(Range::all(), Range(1, 3));
+    // extracts B rows, 5 (inclusive) to 9 (exclusive).
+    // that is, C \~ A(Range(5, 9), Range(1, 3))
+    Mat C = B(Range(5, 9), Range::all());
+    Size size; Point ofs;
+    C.locateROI(size, ofs);
+    // size will be (width=10,height=10) and the ofs will be (x=1, y=5)
+@endcode
+As in case of whole matrices, if you need a deep copy, use the `clone()` method of the extracted
+sub-matrices.
+
+- Make a header for user-allocated data. It can be useful to do the following:
+    -# Process "foreign" data using OpenCV (for example, when you implement a DirectShow\* filter or
+    a processing module for gstreamer, and so on). For example:
+    @code
+        void process_video_frame(const unsigned char* pixels,
+                                 int width, int height, int step)
+        {
+            Mat img(height, width, CV_8UC3, pixels, step);
+            GaussianBlur(img, img, Size(7,7), 1.5, 1.5);
+        }
+    @endcode
+    -# Quickly initialize small matrices and/or get a super-fast element access.
+    @code
+        double m[3][3] = {{a, b, c}, 
