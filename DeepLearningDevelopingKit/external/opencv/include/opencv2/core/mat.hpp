@@ -534,4 +534,62 @@ struct CV_EXPORTS UMatData
     int refcount;
     uchar* data;
     uchar* origdata;
-  
+    size_t size;
+
+    int flags;
+    void* handle;
+    void* userdata;
+    int allocatorFlags_;
+    int mapcount;
+    UMatData* originalUMatData;
+};
+
+
+struct CV_EXPORTS MatSize
+{
+    explicit MatSize(int* _p);
+    Size operator()() const;
+    const int& operator[](int i) const;
+    int& operator[](int i);
+    operator const int*() const;
+    bool operator == (const MatSize& sz) const;
+    bool operator != (const MatSize& sz) const;
+
+    int* p;
+};
+
+struct CV_EXPORTS MatStep
+{
+    MatStep();
+    explicit MatStep(size_t s);
+    const size_t& operator[](int i) const;
+    size_t& operator[](int i);
+    operator size_t() const;
+    MatStep& operator = (size_t s);
+
+    size_t* p;
+    size_t buf[2];
+protected:
+    MatStep& operator = (const MatStep&);
+};
+
+/** @example cout_mat.cpp
+An example demonstrating the serial out capabilities of cv::Mat
+*/
+
+ /** @brief n-dimensional dense array class \anchor CVMat_Details
+
+The class Mat represents an n-dimensional dense numerical single-channel or multi-channel array. It
+can be used to store real or complex-valued vectors and matrices, grayscale or color images, voxel
+volumes, vector fields, point clouds, tensors, histograms (though, very high-dimensional histograms
+may be better stored in a SparseMat ). The data layout of the array `M` is defined by the array
+`M.step[]`, so that the address of element \f$(i_0,...,i_{M.dims-1})\f$, where \f$0\leq i_k<M.size[k]\f$, is
+computed as:
+\f[addr(M_{i_0,...,i_{M.dims-1}}) = M.data + M.step[0]*i_0 + M.step[1]*i_1 + ... + M.step[M.dims-1]*i_{M.dims-1}\f]
+In case of a 2-dimensional array, the above formula is reduced to:
+\f[addr(M_{i,j}) = M.data + M.step[0]*i + M.step[1]*j\f]
+Note that `M.step[i] >= M.step[i+1]` (in fact, `M.step[i] >= M.step[i+1]*M.size[i+1]` ). This means
+that 2-dimensional matrices are stored row-by-row, 3-dimensional matrices are stored plane-by-plane,
+and so on. M.step[M.dims-1] is minimal and always equal to the element size M.elemSize() .
+
+So, the data layout in Mat is fully compatible with CvMat, IplImage, and CvMatND types from Op
