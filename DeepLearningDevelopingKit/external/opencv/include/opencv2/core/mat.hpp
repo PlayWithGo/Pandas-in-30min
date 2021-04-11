@@ -592,4 +592,42 @@ Note that `M.step[i] >= M.step[i+1]` (in fact, `M.step[i] >= M.step[i+1]*M.size[
 that 2-dimensional matrices are stored row-by-row, 3-dimensional matrices are stored plane-by-plane,
 and so on. M.step[M.dims-1] is minimal and always equal to the element size M.elemSize() .
 
-So, the data layout in Mat is fully compatible with CvMat, IplImage, and CvMatND types from Op
+So, the data layout in Mat is fully compatible with CvMat, IplImage, and CvMatND types from OpenCV
+1.x. It is also compatible with the majority of dense array types from the standard toolkits and
+SDKs, such as Numpy (ndarray), Win32 (independent device bitmaps), and others, that is, with any
+array that uses *steps* (or *strides*) to compute the position of a pixel. Due to this
+compatibility, it is possible to make a Mat header for user-allocated data and process it in-place
+using OpenCV functions.
+
+There are many different ways to create a Mat object. The most popular options are listed below:
+
+- Use the create(nrows, ncols, type) method or the similar Mat(nrows, ncols, type[, fillValue])
+constructor. A new array of the specified size and type is allocated. type has the same meaning as
+in the cvCreateMat method. For example, CV_8UC1 means a 8-bit single-channel array, CV_32FC2
+means a 2-channel (complex) floating-point array, and so on.
+@code
+    // make a 7x7 complex matrix filled with 1+3j.
+    Mat M(7,7,CV_32FC2,Scalar(1,3));
+    // and now turn M to a 100x60 15-channel 8-bit matrix.
+    // The old content will be deallocated
+    M.create(100,60,CV_8UC(15));
+@endcode
+As noted in the introduction to this chapter, create() allocates only a new array when the shape
+or type of the current array are different from the specified ones.
+
+- Create a multi-dimensional array:
+@code
+    // create a 100x100x100 8-bit array
+    int sz[] = {100, 100, 100};
+    Mat bigCube(3, sz, CV_8U, Scalar::all(0));
+@endcode
+It passes the number of dimensions =1 to the Mat constructor but the created array will be
+2-dimensional with the number of columns set to 1. So, Mat::dims is always \>= 2 (can also be 0
+when the array is empty).
+
+- Use a copy constructor or assignment operator where there can be an array or expression on the
+right side (see below). As noted in the introduction, the array assignment is an O(1) operation
+because it only copies the header and increases the reference counter. The Mat::clone() method can
+be used to get a full (deep) copy of the array when you need it.
+
+- Construct a header for a part of another array. It can be a single row, single column, 
