@@ -718,4 +718,59 @@ method Mat::type() ), you can access the element \f$M_{ij}\f$ of a 2-dimensional
 assuming that `M` is a double-precision floating-point array. There are several variants of the method
 at for a different number of dimensions.
 
-If you need to process a whole row of a 2D array, the most efficient way is to get t
+If you need to process a whole row of a 2D array, the most efficient way is to get the pointer to
+the row first, and then just use the plain C operator [] :
+@code
+    // compute sum of positive matrix elements
+    // (assuming that M is a double-precision matrix)
+    double sum=0;
+    for(int i = 0; i < M.rows; i++)
+    {
+        const double* Mi = M.ptr<double>(i);
+        for(int j = 0; j < M.cols; j++)
+            sum += std::max(Mi[j], 0.);
+    }
+@endcode
+Some operations, like the one above, do not actually depend on the array shape. They just process
+elements of an array one by one (or elements from multiple arrays that have the same coordinates,
+for example, array addition). Such operations are called *element-wise*. It makes sense to check
+whether all the input/output arrays are continuous, namely, have no gaps at the end of each row. If
+yes, process them as a long single row:
+@code
+    // compute the sum of positive matrix elements, optimized variant
+    double sum=0;
+    int cols = M.cols, rows = M.rows;
+    if(M.isContinuous())
+    {
+        cols *= rows;
+        rows = 1;
+    }
+    for(int i = 0; i < rows; i++)
+    {
+        const double* Mi = M.ptr<double>(i);
+        for(int j = 0; j < cols; j++)
+            sum += std::max(Mi[j], 0.);
+    }
+@endcode
+In case of the continuous matrix, the outer loop body is executed just once. So, the overhead is
+smaller, which is especially noticeable in case of small matrices.
+
+Finally, there are STL-style iterators that are smart enough to skip gaps between successive rows:
+@code
+    // compute sum of positive matrix elements, iterator-based variant
+    double sum=0;
+    MatConstIterator_<double> it = M.begin<double>(), it_end = M.end<double>();
+    for(; it != it_end; ++it)
+        sum += std::max(*it, 0.);
+@endcode
+The matrix iterators are random-access iterators, so they can be passed to any STL algorithm,
+including std::sort().
+
+@note Matrix Expressions and arithmetic see MatExpr
+*/
+class CV_EXPORTS Mat
+{
+public:
+    /**
+    These are various constructors that form a matrix. As noted in the AutomaticAllocation, often
+    the default constructor is enough, and the proper matrix will be allocated by an OpenCV f
