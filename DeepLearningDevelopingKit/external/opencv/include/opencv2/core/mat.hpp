@@ -773,4 +773,45 @@ class CV_EXPORTS Mat
 public:
     /**
     These are various constructors that form a matrix. As noted in the AutomaticAllocation, often
-    the default constructor is enough, and the proper matrix will be allocated by an OpenCV f
+    the default constructor is enough, and the proper matrix will be allocated by an OpenCV function.
+    The constructed matrix can further be assigned to another matrix or matrix expression or can be
+    allocated with Mat::create . In the former case, the old content is de-referenced.
+     */
+    Mat();
+
+    /** @overload
+    @param rows Number of rows in a 2D array.
+    @param cols Number of columns in a 2D array.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    */
+    Mat(int rows, int cols, int type);
+
+    /** @overload
+    @param size 2D array size: Size(cols, rows) . In the Size() constructor, the number of rows and the
+    number of columns go in the reverse order.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+      */
+    Mat(Size size, int type);
+
+    /** @overload
+    @param rows Number of rows in a 2D array.
+    @param cols Number of columns in a 2D array.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param s An optional value to initialize each matrix element with. To set all the matrix elements to
+    the particular value after the construction, use the assignment operator
+    Mat::operator=(const Scalar& value) .
+    */
+    Mat(int rows, int cols, int type, const Scalar& s);
+
+    /** @overload
+    @param size 2D array size: Size(cols, rows) . In the Size() constructor, the number of rows and the
+    number of columns go in the reverse order.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param s An optional value to initialize each matrix element with. To set all the matrix elements to
+    the particular value after the construction, use the assignment operator
+    Mat::operator=(const Scalar& value) .
+     
