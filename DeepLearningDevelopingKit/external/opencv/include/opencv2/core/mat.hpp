@@ -856,4 +856,35 @@ public:
 
     /** @overload
     @param m Array that (as a whole or partly) is assigned to the constructed matrix. No data is copied
-    by these constructors. Instead, the header pointing
+    by these constructors. Instead, the header pointing to m data or its sub-array is constructed and
+    associated with it. The reference counter, if any, is incremented. So, when you modify the matrix
+    formed using such a constructor, you also modify the corresponding elements of m . If you want to
+    have an independent copy of the sub-array, use Mat::clone() .
+    */
+    Mat(const Mat& m);
+
+    /** @overload
+    @param rows Number of rows in a 2D array.
+    @param cols Number of columns in a 2D array.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param data Pointer to the user data. Matrix constructors that take data and step parameters do not
+    allocate matrix data. Instead, they just initialize the matrix header that points to the specified
+    data, which means that no data is copied. This operation is very efficient and can be used to
+    process external data using OpenCV functions. The external data is not automatically deallocated, so
+    you should take care of it.
+    @param step Number of bytes each matrix row occupies. The value should include the padding bytes at
+    the end of each row, if any. If the parameter is missing (set to AUTO_STEP ), no padding is assumed
+    and the actual step is calculated as cols*elemSize(). See Mat::elemSize.
+    */
+    Mat(int rows, int cols, int type, void* data, size_t step=AUTO_STEP);
+
+    /** @overload
+    @param size 2D array size: Size(cols, rows) . In the Size() constructor, the number of rows and the
+    number of columns go in the reverse order.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param data Pointer to the user data. Matrix constructors that take data and step parameters do not
+    allocate matrix data. Instead, they just initialize the matrix header that points to the specified
+    data, which means that no data is copied. This operation is very efficient and can be used to
+    process 
