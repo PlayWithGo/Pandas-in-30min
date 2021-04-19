@@ -887,4 +887,33 @@ public:
     @param data Pointer to the user data. Matrix constructors that take data and step parameters do not
     allocate matrix data. Instead, they just initialize the matrix header that points to the specified
     data, which means that no data is copied. This operation is very efficient and can be used to
-    process 
+    process external data using OpenCV functions. The external data is not automatically deallocated, so
+    you should take care of it.
+    @param step Number of bytes each matrix row occupies. The value should include the padding bytes at
+    the end of each row, if any. If the parameter is missing (set to AUTO_STEP ), no padding is assumed
+    and the actual step is calculated as cols*elemSize(). See Mat::elemSize.
+    */
+    Mat(Size size, int type, void* data, size_t step=AUTO_STEP);
+
+    /** @overload
+    @param ndims Array dimensionality.
+    @param sizes Array of integers specifying an n-dimensional array shape.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param data Pointer to the user data. Matrix constructors that take data and step parameters do not
+    allocate matrix data. Instead, they just initialize the matrix header that points to the specified
+    data, which means that no data is copied. This operation is very efficient and can be used to
+    process external data using OpenCV functions. The external data is not automatically deallocated, so
+    you should take care of it.
+    @param steps Array of ndims-1 steps in case of a multi-dimensional array (the last step is always
+    set to the element size). If not specified, the matrix is assumed to be continuous.
+    */
+    Mat(int ndims, const int* sizes, int type, void* data, const size_t* steps=0);
+
+    /** @overload
+    @param sizes Array of integers specifying an n-dimensional array shape.
+    @param type Array type. Use CV_8UC1, ..., CV_64FC4 to create 1-4 channel matrices, or
+    CV_8UC(n), ..., CV_64FC(n) to create multi-channel (up to CV_CN_MAX channels) matrices.
+    @param data Pointer to the user data. Matrix constructors that take data and step parameters do not
+    allocate matrix data. Instead, they just initialize the matrix header that points to the specified
+    data, which means that no data is copied. This operation is ve
