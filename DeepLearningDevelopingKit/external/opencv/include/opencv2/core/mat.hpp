@@ -948,4 +948,34 @@ public:
 
     /** @overload
     @param m Array that (as a whole or partly) is assigned to the constructed matrix. No data is copied
-    by these constructors. Instead, the header pointing to m data or its sub-array is constru
+    by these constructors. Instead, the header pointing to m data or its sub-array is constructed and
+    associated with it. The reference counter, if any, is incremented. So, when you modify the matrix
+    formed using such a constructor, you also modify the corresponding elements of m . If you want to
+    have an independent copy of the sub-array, use Mat::clone() .
+    @param ranges Array of selected ranges of m along each dimensionality.
+    */
+    Mat(const Mat& m, const Range* ranges);
+
+    /** @overload
+    @param m Array that (as a whole or partly) is assigned to the constructed matrix. No data is copied
+    by these constructors. Instead, the header pointing to m data or its sub-array is constructed and
+    associated with it. The reference counter, if any, is incremented. So, when you modify the matrix
+    formed using such a constructor, you also modify the corresponding elements of m . If you want to
+    have an independent copy of the sub-array, use Mat::clone() .
+    @param ranges Array of selected ranges of m along each dimensionality.
+    */
+    Mat(const Mat& m, const std::vector<Range>& ranges);
+
+    /** @overload
+    @param vec STL vector whose elements form the matrix. The matrix has a single column and the number
+    of rows equal to the number of vector elements. Type of the matrix matches the type of vector
+    elements. The constructor can handle arbitrary types, for which there is a properly declared
+    DataType . This means that the vector elements must be primitive numbers or uni-type numerical
+    tuples of numbers. Mixed-type structures are not supported. The corresponding constructor is
+    explicit. Since STL vectors are not automatically converted to Mat instances, you should write
+    Mat(vec) explicitly. Unless you copy the data into the matrix ( copyData=true ), no new elements
+    will be added to the vector because it can potentially yield vector data reallocation, and, thus,
+    the matrix data pointer will be invalid.
+    @param copyData Flag to specify whether the underlying data of the STL vector should be copied
+    to (true) or shared with (false) the newly constructed matrix. When the data is copied, the
+  
