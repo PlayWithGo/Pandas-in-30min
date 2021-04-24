@@ -1086,4 +1086,53 @@ public:
 
     /** @brief Creates a matrix header for the specified matrix column.
 
-    The m
+    The method makes a new header for the specified matrix column and returns it. This is an O(1)
+    operation, regardless of the matrix size. The underlying data of the new matrix is shared with the
+    original matrix. See also the Mat::row description.
+    @param x A 0-based column index.
+     */
+    Mat col(int x) const;
+
+    /** @brief Creates a matrix header for the specified row span.
+
+    The method makes a new header for the specified row span of the matrix. Similarly to Mat::row and
+    Mat::col , this is an O(1) operation.
+    @param startrow An inclusive 0-based start index of the row span.
+    @param endrow An exclusive 0-based ending index of the row span.
+     */
+    Mat rowRange(int startrow, int endrow) const;
+
+    /** @overload
+    @param r Range structure containing both the start and the end indices.
+    */
+    Mat rowRange(const Range& r) const;
+
+    /** @brief Creates a matrix header for the specified column span.
+
+    The method makes a new header for the specified column span of the matrix. Similarly to Mat::row and
+    Mat::col , this is an O(1) operation.
+    @param startcol An inclusive 0-based start index of the column span.
+    @param endcol An exclusive 0-based ending index of the column span.
+     */
+    Mat colRange(int startcol, int endcol) const;
+
+    /** @overload
+    @param r Range structure containing both the start and the end indices.
+    */
+    Mat colRange(const Range& r) const;
+
+    /** @brief Extracts a diagonal from a matrix
+
+    The method makes a new header for the specified matrix diagonal. The new matrix is represented as a
+    single-column matrix. Similarly to Mat::row and Mat::col, this is an O(1) operation.
+    @param d index of the diagonal, with the following values:
+    - `d=0` is the main diagonal.
+    - `d<0` is a diagonal from the lower half. For example, d=-1 means the diagonal is set
+      immediately below the main one.
+    - `d>0` is a diagonal from the upper half. For example, d=1 means the diagonal is set
+      immediately above the main one.
+    For example:
+    @code
+        Mat m = (Mat_<int>(3,3) <<
+                    1,2,3,
+                   
