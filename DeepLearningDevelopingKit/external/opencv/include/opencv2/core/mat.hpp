@@ -1135,4 +1135,65 @@ public:
     @code
         Mat m = (Mat_<int>(3,3) <<
                     1,2,3,
-                   
+                    4,5,6,
+                    7,8,9);
+        Mat d0 = m.diag(0);
+        Mat d1 = m.diag(1);
+        Mat d_1 = m.diag(-1);
+    @endcode
+    The resulting matrices are
+    @code
+     d0 =
+       [1;
+        5;
+        9]
+     d1 =
+       [2;
+        6]
+     d_1 =
+       [4;
+        8]
+    @endcode
+     */
+    Mat diag(int d=0) const;
+
+    /** @brief creates a diagonal matrix
+
+    The method creates a square diagonal matrix from specified main diagonal.
+    @param d One-dimensional matrix that represents the main diagonal.
+     */
+    static Mat diag(const Mat& d);
+
+    /** @brief Creates a full copy of the array and the underlying data.
+
+    The method creates a full copy of the array. The original step[] is not taken into account. So, the
+    array copy is a continuous array occupying total()*elemSize() bytes.
+     */
+    Mat clone() const;
+
+    /** @brief Copies the matrix to another one.
+
+    The method copies the matrix data to another matrix. Before copying the data, the method invokes :
+    @code
+        m.create(this->size(), this->type());
+    @endcode
+    so that the destination matrix is reallocated if needed. While m.copyTo(m); works flawlessly, the
+    function does not handle the case of a partial overlap between the source and the destination
+    matrices.
+
+    When the operation mask is specified, if the Mat::create call shown above reallocates the matrix,
+    the newly allocated matrix is initialized with all zeros before copying the data.
+    @param m Destination matrix. If it does not have a proper size or type before the operation, it is
+    reallocated.
+     */
+    void copyTo( OutputArray m ) const;
+
+    /** @overload
+    @param m Destination matrix. If it does not have a proper size or type before the operation, it is
+    reallocated.
+    @param mask Operation mask of the same size as \*this. Its non-zero elements indicate which matrix
+    elements need to be copied. The mask has to be of type CV_8U and can have 1 or multiple channels.
+    */
+    void copyTo( OutputArray m, InputArray mask ) const;
+
+    /** @brief Converts an array to another data type wit
