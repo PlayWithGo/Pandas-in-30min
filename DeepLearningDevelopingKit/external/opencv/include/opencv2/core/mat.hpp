@@ -1038,3 +1038,52 @@ public:
     Mat& operator = (const Mat& m);
 
     /** @overload
+    @param expr Assigned matrix expression object. As opposite to the first form of the assignment
+    operation, the second form can reuse already allocated matrix if it has the right size and type to
+    fit the matrix expression result. It is automatically handled by the real function that the matrix
+    expressions is expanded to. For example, C=A+B is expanded to add(A, B, C), and add takes care of
+    automatic C reallocation.
+    */
+    Mat& operator = (const MatExpr& expr);
+
+    //! retrieve UMat from Mat
+    UMat getUMat(int accessFlags, UMatUsageFlags usageFlags = USAGE_DEFAULT) const;
+
+    /** @brief Creates a matrix header for the specified matrix row.
+
+    The method makes a new header for the specified matrix row and returns it. This is an O(1)
+    operation, regardless of the matrix size. The underlying data of the new matrix is shared with the
+    original matrix. Here is the example of one of the classical basic matrix processing operations,
+    axpy, used by LU and many other algorithms:
+    @code
+        inline void matrix_axpy(Mat& A, int i, int j, double alpha)
+        {
+            A.row(i) += A.row(j)*alpha;
+        }
+    @endcode
+    @note In the current implementation, the following code does not work as expected:
+    @code
+        Mat A;
+        ...
+        A.row(i) = A.row(j); // will not work
+    @endcode
+    This happens because A.row(i) forms a temporary header that is further assigned to another header.
+    Remember that each of these operations is O(1), that is, no data is copied. Thus, the above
+    assignment is not true if you may have expected the j-th row to be copied to the i-th row. To
+    achieve that, you should either turn this simple assignment into an expression or use the
+    Mat::copyTo method:
+    @code
+        Mat A;
+        ...
+        // works, but looks a bit obscure.
+        A.row(i) = A.row(j) + 0;
+        // this is a bit longer, but the recommended method.
+        A.row(j).copyTo(A.row(i));
+    @endcode
+    @param y A 0-based row index.
+     */
+    Mat row(int y) const;
+
+    /** @brief Creates a matrix header for the specified matrix column.
+
+    The m
