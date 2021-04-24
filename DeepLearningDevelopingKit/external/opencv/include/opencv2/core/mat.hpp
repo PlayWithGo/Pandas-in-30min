@@ -978,4 +978,63 @@ public:
     the matrix data pointer will be invalid.
     @param copyData Flag to specify whether the underlying data of the STL vector should be copied
     to (true) or shared with (false) the newly constructed matrix. When the data is copied, the
-  
+    allocated buffer is managed using Mat reference counting mechanism. While the data is shared,
+    the reference counter is NULL, and you should not deallocate the data until the matrix is not
+    destructed.
+    */
+    template<typename _Tp> explicit Mat(const std::vector<_Tp>& vec, bool copyData=false);
+
+#ifdef CV_CXX11
+    /** @overload
+    */
+    template<typename _Tp, typename = typename std::enable_if<std::is_arithmetic<_Tp>::value>::type>
+    explicit Mat(const std::initializer_list<_Tp> list);
+
+    /** @overload
+    */
+    template<typename _Tp> explicit Mat(const std::initializer_list<int> sizes, const std::initializer_list<_Tp> list);
+#endif
+
+#ifdef CV_CXX_STD_ARRAY
+    /** @overload
+    */
+    template<typename _Tp, size_t _Nm> explicit Mat(const std::array<_Tp, _Nm>& arr, bool copyData=false);
+#endif
+
+    /** @overload
+    */
+    template<typename _Tp, int n> explicit Mat(const Vec<_Tp, n>& vec, bool copyData=true);
+
+    /** @overload
+    */
+    template<typename _Tp, int m, int n> explicit Mat(const Matx<_Tp, m, n>& mtx, bool copyData=true);
+
+    /** @overload
+    */
+    template<typename _Tp> explicit Mat(const Point_<_Tp>& pt, bool copyData=true);
+
+    /** @overload
+    */
+    template<typename _Tp> explicit Mat(const Point3_<_Tp>& pt, bool copyData=true);
+
+    /** @overload
+    */
+    template<typename _Tp> explicit Mat(const MatCommaInitializer_<_Tp>& commaInitializer);
+
+    //! download data from GpuMat
+    explicit Mat(const cuda::GpuMat& m);
+
+    //! destructor - calls release()
+    ~Mat();
+
+    /** @brief assignment operators
+
+    These are available assignment operators. Since they all are very different, make sure to read the
+    operator parameters description.
+    @param m Assigned, right-hand-side matrix. Matrix assignment is an O(1) operation. This means that
+    no data is copied but the data is shared and the reference counter, if any, is incremented. Before
+    assigning new data, the old data is de-referenced via Mat::release .
+     */
+    Mat& operator = (const Mat& m);
+
+    /** @overload
