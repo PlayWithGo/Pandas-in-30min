@@ -1237,4 +1237,46 @@ public:
 
     The method makes a new matrix header for \*this elements. The new matrix may have a different size
     and/or different number of channels. Any combination is possible if:
-    -   No extra elements are included in
+    -   No extra elements are included into the new matrix and no elements are excluded. Consequently,
+        the product rows\*cols\*channels() must stay the same after the transformation.
+    -   No data is copied. That is, this is an O(1) operation. Consequently, if you change the number of
+        rows, or the operation changes the indices of elements row in some other way, the matrix must be
+        continuous. See Mat::isContinuous .
+
+    For example, if there is a set of 3D points stored as an STL vector, and you want to represent the
+    points as a 3xN matrix, do the following:
+    @code
+        std::vector<Point3f> vec;
+        ...
+        Mat pointMat = Mat(vec). // convert vector to Mat, O(1) operation
+                          reshape(1). // make Nx3 1-channel matrix out of Nx1 3-channel.
+                                      // Also, an O(1) operation
+                             t(); // finally, transpose the Nx3 matrix.
+                                  // This involves copying all the elements
+    @endcode
+    @param cn New number of channels. If the parameter is 0, the number of channels remains the same.
+    @param rows New number of rows. If the parameter is 0, the number of rows remains the same.
+     */
+    Mat reshape(int cn, int rows=0) const;
+
+    /** @overload */
+    Mat reshape(int cn, int newndims, const int* newsz) const;
+
+    /** @overload */
+    Mat reshape(int cn, const std::vector<int>& newshape) const;
+
+    /** @brief Transposes a matrix.
+
+    The method performs matrix transposition by means of matrix expressions. It does not perform the
+    actual transposition but returns a temporary matrix transposition object that can be further used as
+    a part of more complex matrix expressions or can be assigned to a matrix:
+    @code
+        Mat A1 = A + Mat::eye(A.size(), A.type())*lambda;
+        Mat C = A1.t()*A1; // compute (A + lambda*I)^t * (A + lamda*I)
+    @endcode
+     */
+    MatExpr t() const;
+
+    /** @brief Inverses a matrix.
+
+    The method performs a matrix inversion by means of matrix expressions. This means that a temporary
