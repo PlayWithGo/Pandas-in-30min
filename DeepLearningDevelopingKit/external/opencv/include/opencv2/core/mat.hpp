@@ -1322,4 +1322,59 @@ public:
     /** @brief Returns a zero array of the specified size and type.
 
     The method returns a Matlab-style zero array initializer. It can be used to quickly form a constant
-    array as a function parameter, part of a matrix expression, or as a matrix initializ
+    array as a function parameter, part of a matrix expression, or as a matrix initializer. :
+    @code
+        Mat A;
+        A = Mat::zeros(3, 3, CV_32F);
+    @endcode
+    In the example above, a new matrix is allocated only if A is not a 3x3 floating-point matrix.
+    Otherwise, the existing matrix A is filled with zeros.
+    @param rows Number of rows.
+    @param cols Number of columns.
+    @param type Created matrix type.
+     */
+    static MatExpr zeros(int rows, int cols, int type);
+
+    /** @overload
+    @param size Alternative to the matrix size specification Size(cols, rows) .
+    @param type Created matrix type.
+    */
+    static MatExpr zeros(Size size, int type);
+
+    /** @overload
+    @param ndims Array dimensionality.
+    @param sz Array of integers specifying the array shape.
+    @param type Created matrix type.
+    */
+    static MatExpr zeros(int ndims, const int* sz, int type);
+
+    /** @brief Returns an array of all 1's of the specified size and type.
+
+    The method returns a Matlab-style 1's array initializer, similarly to Mat::zeros. Note that using
+    this method you can initialize an array with an arbitrary value, using the following Matlab idiom:
+    @code
+        Mat A = Mat::ones(100, 100, CV_8U)*3; // make 100x100 matrix filled with 3.
+    @endcode
+    The above operation does not form a 100x100 matrix of 1's and then multiply it by 3. Instead, it
+    just remembers the scale factor (3 in this case) and use it when actually invoking the matrix
+    initializer.
+    @param rows Number of rows.
+    @param cols Number of columns.
+    @param type Created matrix type.
+     */
+    static MatExpr ones(int rows, int cols, int type);
+
+    /** @overload
+    @param size Alternative to the matrix size specification Size(cols, rows) .
+    @param type Created matrix type.
+    */
+    static MatExpr ones(Size size, int type);
+
+    /** @overload
+    @param ndims Array dimensionality.
+    @param sz Array of integers specifying the array shape.
+    @param type Created matrix type.
+    */
+    static MatExpr ones(int ndims, const int* sz, int type);
+
+    /** @brief Returns an identity matrix of the specified size and ty
