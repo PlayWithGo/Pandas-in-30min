@@ -1196,4 +1196,45 @@ public:
     */
     void copyTo( OutputArray m, InputArray mask ) const;
 
-    /** @brief Converts an array to another data type wit
+    /** @brief Converts an array to another data type with optional scaling.
+
+    The method converts source pixel values to the target data type. saturate_cast\<\> is applied at
+    the end to avoid possible overflows:
+
+    \f[m(x,y) = saturate \_ cast<rType>( \alpha (*this)(x,y) +  \beta )\f]
+    @param m output matrix; if it does not have a proper size or type before the operation, it is
+    reallocated.
+    @param rtype desired output matrix type or, rather, the depth since the number of channels are the
+    same as the input has; if rtype is negative, the output matrix will have the same type as the input.
+    @param alpha optional scale factor.
+    @param beta optional delta added to the scaled values.
+     */
+    void convertTo( OutputArray m, int rtype, double alpha=1, double beta=0 ) const;
+
+    /** @brief Provides a functional form of convertTo.
+
+    This is an internally used method called by the @ref MatrixExpressions engine.
+    @param m Destination array.
+    @param type Desired destination array depth (or -1 if it should be the same as the source type).
+     */
+    void assignTo( Mat& m, int type=-1 ) const;
+
+    /** @brief Sets all or some of the array elements to the specified value.
+    @param s Assigned scalar converted to the actual array type.
+    */
+    Mat& operator = (const Scalar& s);
+
+    /** @brief Sets all or some of the array elements to the specified value.
+
+    This is an advanced variant of the Mat::operator=(const Scalar& s) operator.
+    @param value Assigned scalar converted to the actual array type.
+    @param mask Operation mask of the same size as \*this. Its non-zero elements indicate which matrix
+    elements need to be copied. The mask has to be of type CV_8U and can have 1 or multiple channels
+     */
+    Mat& setTo(InputArray value, InputArray mask=noArray());
+
+    /** @brief Changes the shape and/or the number of channels of a 2D matrix without copying the data.
+
+    The method makes a new matrix header for \*this elements. The new matrix may have a different size
+    and/or different number of channels. Any combination is possible if:
+    -   No extra elements are included in
