@@ -1280,3 +1280,46 @@ public:
     /** @brief Inverses a matrix.
 
     The method performs a matrix inversion by means of matrix expressions. This means that a temporary
+    matrix inversion object is returned by the method and can be used further as a part of more complex
+    matrix expressions or can be assigned to a matrix.
+    @param method Matrix inversion method. One of cv::DecompTypes
+     */
+    MatExpr inv(int method=DECOMP_LU) const;
+
+    /** @brief Performs an element-wise multiplication or division of the two matrices.
+
+    The method returns a temporary object encoding per-element array multiplication, with optional
+    scale. Note that this is not a matrix multiplication that corresponds to a simpler "\*" operator.
+
+    Example:
+    @code
+        Mat C = A.mul(5/B); // equivalent to divide(A, B, C, 5)
+    @endcode
+    @param m Another array of the same type and the same size as \*this, or a matrix expression.
+    @param scale Optional scale factor.
+     */
+    MatExpr mul(InputArray m, double scale=1) const;
+
+    /** @brief Computes a cross-product of two 3-element vectors.
+
+    The method computes a cross-product of two 3-element vectors. The vectors must be 3-element
+    floating-point vectors of the same shape and size. The result is another 3-element vector of the
+    same shape and type as operands.
+    @param m Another cross-product operand.
+     */
+    Mat cross(InputArray m) const;
+
+    /** @brief Computes a dot-product of two vectors.
+
+    The method computes a dot-product of two matrices. If the matrices are not single-column or
+    single-row vectors, the top-to-bottom left-to-right scan ordering is used to treat them as 1D
+    vectors. The vectors must have the same size and type. If the matrices have more than one channel,
+    the dot products from all the channels are summed together.
+    @param m another dot-product operand.
+     */
+    double dot(InputArray m) const;
+
+    /** @brief Returns a zero array of the specified size and type.
+
+    The method returns a Matlab-style zero array initializer. It can be used to quickly form a constant
+    array as a function parameter, part of a matrix expression, or as a matrix initializ
