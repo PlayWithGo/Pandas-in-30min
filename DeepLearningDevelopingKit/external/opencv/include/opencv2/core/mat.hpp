@@ -1377,4 +1377,60 @@ public:
     */
     static MatExpr ones(int ndims, const int* sz, int type);
 
-    /** @brief Returns an identity matrix of the specified size and ty
+    /** @brief Returns an identity matrix of the specified size and type.
+
+    The method returns a Matlab-style identity matrix initializer, similarly to Mat::zeros. Similarly to
+    Mat::ones, you can use a scale operation to create a scaled identity matrix efficiently:
+    @code
+        // make a 4x4 diagonal matrix with 0.1's on the diagonal.
+        Mat A = Mat::eye(4, 4, CV_32F)*0.1;
+    @endcode
+    @param rows Number of rows.
+    @param cols Number of columns.
+    @param type Created matrix type.
+     */
+    static MatExpr eye(int rows, int cols, int type);
+
+    /** @overload
+    @param size Alternative matrix size specification as Size(cols, rows) .
+    @param type Created matrix type.
+    */
+    static MatExpr eye(Size size, int type);
+
+    /** @brief Allocates new array data if needed.
+
+    This is one of the key Mat methods. Most new-style OpenCV functions and methods that produce arrays
+    call this method for each output array. The method uses the following algorithm:
+
+    -# If the current array shape and the type match the new ones, return immediately. Otherwise,
+       de-reference the previous data by calling Mat::release.
+    -# Initialize the new header.
+    -# Allocate the new data of total()\*elemSize() bytes.
+    -# Allocate the new, associated with the data, reference counter and set it to 1.
+
+    Such a scheme makes the memory management robust and efficient at the same time and helps avoid
+    extra typing for you. This means that usually there is no need to explicitly allocate output arrays.
+    That is, instead of writing:
+    @code
+        Mat color;
+        ...
+        Mat gray(color.rows, color.cols, color.depth());
+        cvtColor(color, gray, COLOR_BGR2GRAY);
+    @endcode
+    you can simply write:
+    @code
+        Mat color;
+        ...
+        Mat gray;
+        cvtColor(color, gray, COLOR_BGR2GRAY);
+    @endcode
+    because cvtColor, as well as the most of OpenCV functions, calls Mat::create() for the output array
+    internally.
+    @param rows New number of rows.
+    @param cols New number of columns.
+    @param type New matrix type.
+     */
+    void create(int rows, int cols, int type);
+
+    /** @overload
+    @para
