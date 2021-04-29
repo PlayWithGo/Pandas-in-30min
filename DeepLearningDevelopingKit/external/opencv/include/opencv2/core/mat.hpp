@@ -1433,4 +1433,46 @@ public:
     void create(int rows, int cols, int type);
 
     /** @overload
-    @para
+    @param size Alternative new matrix size specification: Size(cols, rows)
+    @param type New matrix type.
+    */
+    void create(Size size, int type);
+
+    /** @overload
+    @param ndims New array dimensionality.
+    @param sizes Array of integers specifying a new array shape.
+    @param type New matrix type.
+    */
+    void create(int ndims, const int* sizes, int type);
+
+    /** @overload
+    @param sizes Array of integers specifying a new array shape.
+    @param type New matrix type.
+    */
+    void create(const std::vector<int>& sizes, int type);
+
+    /** @brief Increments the reference counter.
+
+    The method increments the reference counter associated with the matrix data. If the matrix header
+    points to an external data set (see Mat::Mat ), the reference counter is NULL, and the method has no
+    effect in this case. Normally, to avoid memory leaks, the method should not be called explicitly. It
+    is called implicitly by the matrix assignment operator. The reference counter increment is an atomic
+    operation on the platforms that support it. Thus, it is safe to operate on the same matrices
+    asynchronously in different threads.
+     */
+    void addref();
+
+    /** @brief Decrements the reference counter and deallocates the matrix if needed.
+
+    The method decrements the reference counter associated with the matrix data. When the reference
+    counter reaches 0, the matrix data is deallocated and the data and the reference counter pointers
+    are set to NULL's. If the matrix header points to an external data set (see Mat::Mat ), the
+    reference counter is NULL, and the method has no effect in this case.
+
+    This method can be called manually to force the matrix data deallocation. But since this method is
+    automatically called in the destructor, or by any other method that changes the data pointer, it is
+    usually not needed. The reference counter decrement and check for 0 is an atomic operation on the
+    platforms that support it. Thus, it is safe to operate on the same matrices asynchronously in
+    different threads.
+     */
+    void
