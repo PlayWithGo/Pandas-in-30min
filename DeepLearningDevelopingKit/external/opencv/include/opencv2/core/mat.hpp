@@ -1475,4 +1475,58 @@ public:
     platforms that support it. Thus, it is safe to operate on the same matrices asynchronously in
     different threads.
      */
-    void
+    void release();
+
+    //! internal use function, consider to use 'release' method instead; deallocates the matrix data
+    void deallocate();
+    //! internal use function; properly re-allocates _size, _step arrays
+    void copySize(const Mat& m);
+
+    /** @brief Reserves space for the certain number of rows.
+
+    The method reserves space for sz rows. If the matrix already has enough space to store sz rows,
+    nothing happens. If the matrix is reallocated, the first Mat::rows rows are preserved. The method
+    emulates the corresponding method of the STL vector class.
+    @param sz Number of rows.
+     */
+    void reserve(size_t sz);
+
+    /** @brief Reserves space for the certain number of bytes.
+
+    The method reserves space for sz bytes. If the matrix already has enough space to store sz bytes,
+    nothing happens. If matrix has to be reallocated its previous content could be lost.
+    @param sz Number of bytes.
+    */
+    void reserveBuffer(size_t sz);
+
+    /** @brief Changes the number of matrix rows.
+
+    The methods change the number of matrix rows. If the matrix is reallocated, the first
+    min(Mat::rows, sz) rows are preserved. The methods emulate the corresponding methods of the STL
+    vector class.
+    @param sz New number of rows.
+     */
+    void resize(size_t sz);
+
+    /** @overload
+    @param sz New number of rows.
+    @param s Value assigned to the newly added elements.
+     */
+    void resize(size_t sz, const Scalar& s);
+
+    //! internal function
+    void push_back_(const void* elem);
+
+    /** @brief Adds elements to the bottom of the matrix.
+
+    The methods add one or more elements to the bottom of the matrix. They emulate the corresponding
+    method of the STL vector class. When elem is Mat , its type and the number of columns must be the
+    same as in the container matrix.
+    @param elem Added element(s).
+     */
+    template<typename _Tp> void push_back(const _Tp& elem);
+
+    /** @overload
+    @param elem Added element(s).
+    */
+    tem
