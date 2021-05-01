@@ -1617,4 +1617,44 @@ public:
     /** @overload
     @param ranges Array of selected ranges along each array dimension.
     */
-    Mat operator()(cons
+    Mat operator()(const std::vector<Range>& ranges) const;
+
+    // //! converts header to CvMat; no data is copied
+    // operator CvMat() const;
+    // //! converts header to CvMatND; no data is copied
+    // operator CvMatND() const;
+    // //! converts header to IplImage; no data is copied
+    // operator IplImage() const;
+
+    template<typename _Tp> operator std::vector<_Tp>() const;
+    template<typename _Tp, int n> operator Vec<_Tp, n>() const;
+    template<typename _Tp, int m, int n> operator Matx<_Tp, m, n>() const;
+
+#ifdef CV_CXX_STD_ARRAY
+    template<typename _Tp, std::size_t _Nm> operator std::array<_Tp, _Nm>() const;
+#endif
+
+    /** @brief Reports whether the matrix is continuous or not.
+
+    The method returns true if the matrix elements are stored continuously without gaps at the end of
+    each row. Otherwise, it returns false. Obviously, 1x1 or 1xN matrices are always continuous.
+    Matrices created with Mat::create are always continuous. But if you extract a part of the matrix
+    using Mat::col, Mat::diag, and so on, or constructed a matrix header for externally allocated data,
+    such matrices may no longer have this property.
+
+    The continuity flag is stored as a bit in the Mat::flags field and is computed automatically when
+    you construct a matrix header. Thus, the continuity check is a very fast operation, though
+    theoretically it could be done as follows:
+    @code
+        // alternative implementation of Mat::isContinuous()
+        bool myCheckMatContinuity(const Mat& m)
+        {
+            //return (m.flags & Mat::CONTINUOUS_FLAG) != 0;
+            return m.rows == 1 || m.step == m.cols*m.elemSize();
+        }
+    @endcode
+    The method is used in quite a few of OpenCV functions. The point is that element-wise operations
+    (such as arithmetic and logical operations, math functions, alpha blending, color space
+    transformations, and others) do not depend on the image geometry. Thus, if all the input and output
+    arrays are continuous, the functions can process them as very long single-row vectors. The example
+    below illustrate
