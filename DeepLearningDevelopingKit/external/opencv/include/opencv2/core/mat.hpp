@@ -1572,4 +1572,49 @@ public:
     @code
         A.adjustROI(2, 2, 2, 2);
     @endcode
-    In this example, the matrix size is increased by 4 elements 
+    In this example, the matrix size is increased by 4 elements in each direction. The matrix is shifted
+    by 2 elements to the left and 2 elements up, which brings in all the necessary pixels for the
+    filtering with the 5x5 kernel.
+
+    adjustROI forces the adjusted ROI to be inside of the parent matrix that is boundaries of the
+    adjusted ROI are constrained by boundaries of the parent matrix. For example, if the submatrix A is
+    located in the first row of a parent matrix and you called A.adjustROI(2, 2, 2, 2) then A will not
+    be increased in the upward direction.
+
+    The function is used internally by the OpenCV filtering functions, like filter2D , morphological
+    operations, and so on.
+    @param dtop Shift of the top submatrix boundary upwards.
+    @param dbottom Shift of the bottom submatrix boundary downwards.
+    @param dleft Shift of the left submatrix boundary to the left.
+    @param dright Shift of the right submatrix boundary to the right.
+    @sa copyMakeBorder
+     */
+    Mat& adjustROI( int dtop, int dbottom, int dleft, int dright );
+
+    /** @brief Extracts a rectangular submatrix.
+
+    The operators make a new header for the specified sub-array of \*this . They are the most
+    generalized forms of Mat::row, Mat::col, Mat::rowRange, and Mat::colRange . For example,
+    `A(Range(0, 10), Range::all())` is equivalent to `A.rowRange(0, 10)`. Similarly to all of the above,
+    the operators are O(1) operations, that is, no matrix data is copied.
+    @param rowRange Start and end row of the extracted submatrix. The upper boundary is not included. To
+    select all the rows, use Range::all().
+    @param colRange Start and end column of the extracted submatrix. The upper boundary is not included.
+    To select all the columns, use Range::all().
+     */
+    Mat operator()( Range rowRange, Range colRange ) const;
+
+    /** @overload
+    @param roi Extracted submatrix specified as a rectangle.
+    */
+    Mat operator()( const Rect& roi ) const;
+
+    /** @overload
+    @param ranges Array of selected ranges along each array dimension.
+    */
+    Mat operator()( const Range* ranges ) const;
+
+    /** @overload
+    @param ranges Array of selected ranges along each array dimension.
+    */
+    Mat operator()(cons
