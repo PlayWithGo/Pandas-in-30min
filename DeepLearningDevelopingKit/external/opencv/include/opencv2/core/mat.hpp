@@ -1529,4 +1529,47 @@ public:
     /** @overload
     @param elem Added element(s).
     */
-    tem
+    template<typename _Tp> void push_back(const Mat_<_Tp>& elem);
+
+    /** @overload
+    @param elem Added element(s).
+    */
+    template<typename _Tp> void push_back(const std::vector<_Tp>& elem);
+
+    /** @overload
+    @param m Added line(s).
+    */
+    void push_back(const Mat& m);
+
+    /** @brief Removes elements from the bottom of the matrix.
+
+    The method removes one or more rows from the bottom of the matrix.
+    @param nelems Number of removed rows. If it is greater than the total number of rows, an exception
+    is thrown.
+     */
+    void pop_back(size_t nelems=1);
+
+    /** @brief Locates the matrix header within a parent matrix.
+
+    After you extracted a submatrix from a matrix using Mat::row, Mat::col, Mat::rowRange,
+    Mat::colRange, and others, the resultant submatrix points just to the part of the original big
+    matrix. However, each submatrix contains information (represented by datastart and dataend
+    fields) that helps reconstruct the original matrix size and the position of the extracted
+    submatrix within the original matrix. The method locateROI does exactly that.
+    @param wholeSize Output parameter that contains the size of the whole matrix containing *this*
+    as a part.
+    @param ofs Output parameter that contains an offset of *this* inside the whole matrix.
+     */
+    void locateROI( Size& wholeSize, Point& ofs ) const;
+
+    /** @brief Adjusts a submatrix size and position within the parent matrix.
+
+    The method is complimentary to Mat::locateROI . The typical use of these functions is to determine
+    the submatrix position within the parent matrix and then shift the position somehow. Typically, it
+    can be required for filtering operations when pixels outside of the ROI should be taken into
+    account. When all the method parameters are positive, the ROI needs to grow in all directions by the
+    specified amount, for example:
+    @code
+        A.adjustROI(2, 2, 2, 2);
+    @endcode
+    In this example, the matrix size is increased by 4 elements 
