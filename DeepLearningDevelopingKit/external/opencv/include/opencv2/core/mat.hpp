@@ -1801,4 +1801,66 @@ public:
      * @snippet snippets/core_mat_checkVector.cpp example-2d
      *
      * The following code demonstrates its usage for a 3-d matrix:
-     * @snippet snippe
+     * @snippet snippets/core_mat_checkVector.cpp example-3d
+     */
+    int checkVector(int elemChannels, int depth=-1, bool requireContinuous=true) const;
+
+    /** @brief Returns a pointer to the specified matrix row.
+
+    The methods return `uchar*` or typed pointer to the specified matrix row. See the sample in
+    Mat::isContinuous to know how to use these methods.
+    @param i0 A 0-based row index.
+     */
+    uchar* ptr(int i0=0);
+    /** @overload */
+    const uchar* ptr(int i0=0) const;
+
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    uchar* ptr(int row, int col);
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    const uchar* ptr(int row, int col) const;
+
+    /** @overload */
+    uchar* ptr(int i0, int i1, int i2);
+    /** @overload */
+    const uchar* ptr(int i0, int i1, int i2) const;
+
+    /** @overload */
+    uchar* ptr(const int* idx);
+    /** @overload */
+    const uchar* ptr(const int* idx) const;
+    /** @overload */
+    template<int n> uchar* ptr(const Vec<int, n>& idx);
+    /** @overload */
+    template<int n> const uchar* ptr(const Vec<int, n>& idx) const;
+
+    /** @overload */
+    template<typename _Tp> _Tp* ptr(int i0=0);
+    /** @overload */
+    template<typename _Tp> const _Tp* ptr(int i0=0) const;
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    template<typename _Tp> _Tp* ptr(int row, int col);
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    template<typename _Tp> const _Tp* ptr(int row, int col) const;
+    /** @overload */
+    template<typename _Tp> _Tp* ptr(int i0, int i1, int i2);
+    /** @overload */
+    template<typename _Tp> const _Tp* ptr(int i0, int i1, int i2) const;
+    /** @overload */
+    template<typename _Tp> _Tp* ptr(const int* idx);
+    /** @overload */
+    template<typename _Tp> const _Tp* ptr(const int* idx) const;
+    /** @overload */
+    template<typename _Tp, int n> _Tp* p
