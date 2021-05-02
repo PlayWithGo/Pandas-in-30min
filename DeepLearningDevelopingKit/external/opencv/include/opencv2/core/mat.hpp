@@ -1863,4 +1863,47 @@ public:
     /** @overload */
     template<typename _Tp> const _Tp* ptr(const int* idx) const;
     /** @overload */
-    template<typename _Tp, int n> _Tp* p
+    template<typename _Tp, int n> _Tp* ptr(const Vec<int, n>& idx);
+    /** @overload */
+    template<typename _Tp, int n> const _Tp* ptr(const Vec<int, n>& idx) const;
+
+    /** @brief Returns a reference to the specified array element.
+
+    The template methods return a reference to the specified array element. For the sake of higher
+    performance, the index range checks are only performed in the Debug configuration.
+
+    Note that the variants with a single index (i) can be used to access elements of single-row or
+    single-column 2-dimensional arrays. That is, if, for example, A is a 1 x N floating-point matrix and
+    B is an M x 1 integer matrix, you can simply write `A.at<float>(k+4)` and `B.at<int>(2*i+1)`
+    instead of `A.at<float>(0,k+4)` and `B.at<int>(2*i+1,0)`, respectively.
+
+    The example below initializes a Hilbert matrix:
+    @code
+        Mat H(100, 100, CV_64F);
+        for(int i = 0; i < H.rows; i++)
+            for(int j = 0; j < H.cols; j++)
+                H.at<double>(i,j)=1./(i+j+1);
+    @endcode
+
+    Keep in mind that the size identifier used in the at operator cannot be chosen at random. It depends
+    on the image from which you are trying to retrieve the data. The table below gives a better insight in this:
+     - If matrix is of type `CV_8U` then use `Mat.at<uchar>(y,x)`.
+     - If matrix is of type `CV_8S` then use `Mat.at<schar>(y,x)`.
+     - If matrix is of type `CV_16U` then use `Mat.at<ushort>(y,x)`.
+     - If matrix is of type `CV_16S` then use `Mat.at<short>(y,x)`.
+     - If matrix is of type `CV_32S`  then use `Mat.at<int>(y,x)`.
+     - If matrix is of type `CV_32F`  then use `Mat.at<float>(y,x)`.
+     - If matrix is of type `CV_64F` then use `Mat.at<double>(y,x)`.
+
+    @param i0 Index along the dimension 0
+     */
+    template<typename _Tp> _Tp& at(int i0=0);
+    /** @overload
+    @param i0 Index along the dimension 0
+    */
+    template<typename _Tp> const _Tp& at(int i0=0) const;
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    template<typen
