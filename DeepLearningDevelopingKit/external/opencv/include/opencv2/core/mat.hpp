@@ -1704,4 +1704,57 @@ public:
     10-20 percents, especially if the image is rather small and the operation is quite simple.
 
     Another OpenCV idiom in this function, a call of Mat::create for the destination array, that
-    allocates the destination array 
+    allocates the destination array unless it already has the proper size and type. And while the newly
+    allocated arrays are always continuous, you still need to check the destination array because
+    Mat::create does not always allocate a new matrix.
+     */
+    bool isContinuous() const;
+
+    //! returns true if the matrix is a submatrix of another matrix
+    bool isSubmatrix() const;
+
+    /** @brief Returns the matrix element size in bytes.
+
+    The method returns the matrix element size in bytes. For example, if the matrix type is CV_16SC3 ,
+    the method returns 3\*sizeof(short) or 6.
+     */
+    size_t elemSize() const;
+
+    /** @brief Returns the size of each matrix element channel in bytes.
+
+    The method returns the matrix element channel size in bytes, that is, it ignores the number of
+    channels. For example, if the matrix type is CV_16SC3 , the method returns sizeof(short) or 2.
+     */
+    size_t elemSize1() const;
+
+    /** @brief Returns the type of a matrix element.
+
+    The method returns a matrix element type. This is an identifier compatible with the CvMat type
+    system, like CV_16SC3 or 16-bit signed 3-channel array, and so on.
+     */
+    int type() const;
+
+    /** @brief Returns the depth of a matrix element.
+
+    The method returns the identifier of the matrix element depth (the type of each individual channel).
+    For example, for a 16-bit signed element array, the method returns CV_16S . A complete list of
+    matrix types contains the following values:
+    -   CV_8U - 8-bit unsigned integers ( 0..255 )
+    -   CV_8S - 8-bit signed integers ( -128..127 )
+    -   CV_16U - 16-bit unsigned integers ( 0..65535 )
+    -   CV_16S - 16-bit signed integers ( -32768..32767 )
+    -   CV_32S - 32-bit signed integers ( -2147483648..2147483647 )
+    -   CV_32F - 32-bit floating-point numbers ( -FLT_MAX..FLT_MAX, INF, NAN )
+    -   CV_64F - 64-bit floating-point numbers ( -DBL_MAX..DBL_MAX, INF, NAN )
+     */
+    int depth() const;
+
+    /** @brief Returns the number of matrix channels.
+
+    The method returns the number of matrix channels.
+     */
+    int channels() const;
+
+    /** @brief Returns a normalized step.
+
+    The method returns a matrix step divided by Mat::elemSize1() . It can be 
