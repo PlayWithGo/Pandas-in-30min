@@ -1757,4 +1757,48 @@ public:
 
     /** @brief Returns a normalized step.
 
-    The method returns a matrix step divided by Mat::elemSize1() . It can be 
+    The method returns a matrix step divided by Mat::elemSize1() . It can be useful to quickly access an
+    arbitrary matrix element.
+     */
+    size_t step1(int i=0) const;
+
+    /** @brief Returns true if the array has no elements.
+
+    The method returns true if Mat::total() is 0 or if Mat::data is NULL. Because of pop_back() and
+    resize() methods `M.total() == 0` does not imply that `M.data == NULL`.
+     */
+    bool empty() const;
+
+    /** @brief Returns the total number of array elements.
+
+    The method returns the number of array elements (a number of pixels if the array represents an
+    image).
+     */
+    size_t total() const;
+
+    /** @brief Returns the total number of array elements.
+
+     The method returns the number of elements within a certain sub-array slice with startDim <= dim < endDim
+     */
+    size_t total(int startDim, int endDim=INT_MAX) const;
+
+    /**
+     * @param elemChannels Number of channels or number of columns the matrix should have.
+     *                     For a 2-D matrix, when the matrix has only 1 column, then it should have
+     *                     elemChannels channels; When the matrix has only 1 channel,
+     *                     then it should have elemChannels columns.
+     *                     For a 3-D matrix, it should have only one channel. Furthermore,
+     *                     if the number of planes is not one, then the number of rows
+     *                     within every plane has to be 1; if the number of rows within
+     *                     every plane is not 1, then the number of planes has to be 1.
+     * @param depth The depth the matrix should have. Set it to -1 when any depth is fine.
+     * @param requireContinuous Set it to true to require the matrix to be continuous
+     * @return -1 if the requirement is not satisfied.
+     *         Otherwise, it returns the number of elements in the matrix. Note
+     *         that an element may have multiple channels.
+     *
+     * The following code demonstrates its usage for a 2-d matrix:
+     * @snippet snippets/core_mat_checkVector.cpp example-2d
+     *
+     * The following code demonstrates its usage for a 3-d matrix:
+     * @snippet snippe
