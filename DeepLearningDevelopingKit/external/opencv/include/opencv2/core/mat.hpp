@@ -1962,4 +1962,53 @@ public:
         {
             typedef Vec<T, 4> VT;
 
-            const float alpha_scale = (float)std::numeric_limits<T>::max
+            const float alpha_scale = (float)std::numeric_limits<T>::max(),
+                        inv_scale = 1.f/alpha_scale;
+
+            CV_Assert( src1.type() == src2.type() &&
+                       src1.type() == traits::Type<VT>::value &&
+                       src1.size() == src2.size());
+            Size size = src1.size();
+            dst.create(size, src1.type());
+
+            MatConstIterator_<VT> it1 = src1.begin<VT>(), it1_end = src1.end<VT>();
+            MatConstIterator_<VT> it2 = src2.begin<VT>();
+            MatIterator_<VT> dst_it = dst.begin<VT>();
+
+            for( ; it1 != it1_end; ++it1, ++it2, ++dst_it )
+            {
+                VT pix1 = *it1, pix2 = *it2;
+                float alpha = pix1[3]*inv_scale, beta = pix2[3]*inv_scale;
+                *dst_it = VT(saturate_cast<T>(pix1[0]*alpha + pix2[0]*beta),
+                             saturate_cast<T>(pix1[1]*alpha + pix2[1]*beta),
+                             saturate_cast<T>(pix1[2]*alpha + pix2[2]*beta),
+                             saturate_cast<T>((1 - (1-alpha)*(1-beta))*alpha_scale));
+            }
+        }
+    @endcode
+     */
+    template<typename _Tp> MatIterator_<_Tp> begin();
+    template<typename _Tp> MatConstIterator_<_Tp> begin() const;
+
+    /** @brief Returns the matrix iterator and sets it to the after-last matrix element.
+
+    The methods return the matrix read-only or read-write iterators, set to the point following the last
+    matrix element.
+     */
+    template<typename _Tp> MatIterator_<_Tp> end();
+    template<typename _Tp> MatConstIterator_<_Tp> end() const;
+
+    /** @brief Runs the given functor over all matrix elements in parallel.
+
+    The operation passed as argument has to be a function pointer, a function object or a lambda(C++11).
+
+    Example 1. All of the operations below put 0xFF the first channel of all matrix elements:
+    @code
+        Mat image(1920, 1080, CV_8UC3);
+        typedef cv::Point3_<uint8_t> Pixel;
+
+        // first. raw pointer access.
+        for (int r = 0; r < image.rows; ++r) {
+            Pixel* ptr = image.ptr<Pixel>(r, 0);
+            const Pixel* ptr_end = ptr + image.cols;
+            for (; 
