@@ -1906,4 +1906,60 @@ public:
     @param row Index along the dimension 0
     @param col Index along the dimension 1
     */
-    template<typen
+    template<typename _Tp> _Tp& at(int row, int col);
+    /** @overload
+    @param row Index along the dimension 0
+    @param col Index along the dimension 1
+    */
+    template<typename _Tp> const _Tp& at(int row, int col) const;
+
+    /** @overload
+    @param i0 Index along the dimension 0
+    @param i1 Index along the dimension 1
+    @param i2 Index along the dimension 2
+    */
+    template<typename _Tp> _Tp& at(int i0, int i1, int i2);
+    /** @overload
+    @param i0 Index along the dimension 0
+    @param i1 Index along the dimension 1
+    @param i2 Index along the dimension 2
+    */
+    template<typename _Tp> const _Tp& at(int i0, int i1, int i2) const;
+
+    /** @overload
+    @param idx Array of Mat::dims indices.
+    */
+    template<typename _Tp> _Tp& at(const int* idx);
+    /** @overload
+    @param idx Array of Mat::dims indices.
+    */
+    template<typename _Tp> const _Tp& at(const int* idx) const;
+
+    /** @overload */
+    template<typename _Tp, int n> _Tp& at(const Vec<int, n>& idx);
+    /** @overload */
+    template<typename _Tp, int n> const _Tp& at(const Vec<int, n>& idx) const;
+
+    /** @overload
+    special versions for 2D arrays (especially convenient for referencing image pixels)
+    @param pt Element position specified as Point(j,i) .
+    */
+    template<typename _Tp> _Tp& at(Point pt);
+    /** @overload
+    special versions for 2D arrays (especially convenient for referencing image pixels)
+    @param pt Element position specified as Point(j,i) .
+    */
+    template<typename _Tp> const _Tp& at(Point pt) const;
+
+    /** @brief Returns the matrix iterator and sets it to the first matrix element.
+
+    The methods return the matrix read-only or read-write iterators. The use of matrix iterators is very
+    similar to the use of bi-directional STL iterators. In the example below, the alpha blending
+    function is rewritten using the matrix iterators:
+    @code
+        template<typename T>
+        void alphaBlendRGBA(const Mat& src1, const Mat& src2, Mat& dst)
+        {
+            typedef Vec<T, 4> VT;
+
+            const float alpha_scale = (float)std::numeric_limits<T>::max
