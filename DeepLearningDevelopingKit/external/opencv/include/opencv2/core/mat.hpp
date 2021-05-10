@@ -2011,4 +2011,67 @@ public:
         for (int r = 0; r < image.rows; ++r) {
             Pixel* ptr = image.ptr<Pixel>(r, 0);
             const Pixel* ptr_end = ptr + image.cols;
-            for (; 
+            for (; ptr != ptr_end; ++ptr) {
+                ptr->x = 255;
+            }
+        }
+
+        // Using MatIterator. (Simple but there are a Iterator's overhead)
+        for (Pixel &p : cv::Mat_<Pixel>(image)) {
+            p.x = 255;
+        }
+
+        // Parallel execution with function object.
+        struct Operator {
+            void operator ()(Pixel &pixel, const int * position) {
+                pixel.x = 255;
+            }
+        };
+        image.forEach<Pixel>(Operator());
+
+        // Parallel execution using C++11 lambda.
+        image.forEach<Pixel>([](Pixel &p, const int * position) -> void {
+            p.x = 255;
+        });
+    @endcode
+    Example 2. Using the pixel's position:
+    @code
+        // Creating 3D matrix (255 x 255 x 255) typed uint8_t
+        // and initialize all elements by the value which equals elements position.
+        // i.e. pixels (x,y,z) = (1,2,3) is (b,g,r) = (1,2,3).
+
+        int sizes[] = { 255, 255, 255 };
+        typedef cv::Point3_<uint8_t> Pixel;
+
+        Mat_<Pixel> image = Mat::zeros(3, sizes, CV_8UC3);
+
+        image.forEach<Pixel>([&](Pixel& pixel, const int position[]) -> void {
+            pixel.x = position[0];
+            pixel.y = position[1];
+            pixel.z = position[2];
+        });
+    @endcode
+     */
+    template<typename _Tp, typename Functor> void forEach(const Functor& operation);
+    /** @overload */
+    template<typename _Tp, typename Functor> void forEach(const Functor& operation) const;
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+    Mat(Mat&& m);
+    Mat& operator = (Mat&& m);
+#endif
+
+    enum { MAGIC_VAL  = 0x42FF0000, AUTO_STEP = 0, CONTINUOUS_FLAG = CV_MAT_CONT_FLAG, SUBMATRIX_FLAG = CV_SUBMAT_FLAG };
+    enum { MAGIC_MASK = 0xFFFF0000, TYPE_MASK = 0x00000FFF, DEPTH_MASK = 7 };
+
+    /*! includes several bit-fields:
+         - the magic signature
+         - continuity flag
+         - depth
+         - number of channels
+     */
+    int flags;
+    //! the matrix dimensionality, >= 2
+    int dims;
+    //! the number of rows and columns or (-1, -1) when the matrix has more than 2 dimensions
+    int rows,
