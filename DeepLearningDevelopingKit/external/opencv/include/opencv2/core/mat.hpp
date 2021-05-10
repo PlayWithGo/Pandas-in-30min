@@ -2074,4 +2074,66 @@ public:
     //! the matrix dimensionality, >= 2
     int dims;
     //! the number of rows and columns or (-1, -1) when the matrix has more than 2 dimensions
-    int rows,
+    int rows, cols;
+    //! pointer to the data
+    uchar* data;
+
+    //! helper fields used in locateROI and adjustROI
+    const uchar* datastart;
+    const uchar* dataend;
+    const uchar* datalimit;
+
+    //! custom allocator
+    MatAllocator* allocator;
+    //! and the standard allocator
+    static MatAllocator* getStdAllocator();
+    static MatAllocator* getDefaultAllocator();
+    static void setDefaultAllocator(MatAllocator* allocator);
+
+    //! interaction with UMat
+    UMatData* u;
+
+    MatSize size;
+    MatStep step;
+
+protected:
+    template<typename _Tp, typename Functor> void forEach_impl(const Functor& operation);
+};
+
+
+///////////////////////////////// Mat_<_Tp> ////////////////////////////////////
+
+/** @brief Template matrix class derived from Mat
+
+@code{.cpp}
+    template<typename _Tp> class Mat_ : public Mat
+    {
+    public:
+        // ... some specific methods
+        //         and
+        // no new extra fields
+    };
+@endcode
+The class `Mat_<_Tp>` is a *thin* template wrapper on top of the Mat class. It does not have any
+extra data fields. Nor this class nor Mat has any virtual methods. Thus, references or pointers to
+these two classes can be freely but carefully converted one to another. For example:
+@code{.cpp}
+    // create a 100x100 8-bit matrix
+    Mat M(100,100,CV_8U);
+    // this will be compiled fine. no any data conversion will be done.
+    Mat_<float>& M1 = (Mat_<float>&)M;
+    // the program is likely to crash at the statement below
+    M1(99,99) = 1.f;
+@endcode
+While Mat is sufficient in most cases, Mat_ can be more convenient if you use a lot of element
+access operations and if you know matrix type at the compilation time. Note that
+`Mat::at(int y,int x)` and `Mat_::operator()(int y,int x)` do absolutely the same
+and run at the same speed, but the latter is certainly shorter:
+@code{.cpp}
+    Mat_<double> M(20,20);
+    for(int i = 0; i < M.rows; i++)
+        for(int j = 0; j < M.cols; j++)
+            M(i,j) = 1./(i+j+1);
+    Mat E, V;
+    eigen(M,E,V);
+    cout << E.at<double>(0,0)/E
