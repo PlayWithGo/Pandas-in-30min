@@ -2190,4 +2190,48 @@ public:
     Mat_(const Mat_& m);
     //! constructs a matrix on top of user-allocated data. step is in bytes(!!!), regardless of the type
     Mat_(int _rows, int _cols, _Tp* _data, size_t _step=AUTO_STEP);
-    //! constructs n-dim matrix on top of user-allocated data. steps 
+    //! constructs n-dim matrix on top of user-allocated data. steps are in bytes(!!!), regardless of the type
+    Mat_(int _ndims, const int* _sizes, _Tp* _data, const size_t* _steps=0);
+    //! selects a submatrix
+    Mat_(const Mat_& m, const Range& rowRange, const Range& colRange=Range::all());
+    //! selects a submatrix
+    Mat_(const Mat_& m, const Rect& roi);
+    //! selects a submatrix, n-dim version
+    Mat_(const Mat_& m, const Range* ranges);
+    //! selects a submatrix, n-dim version
+    Mat_(const Mat_& m, const std::vector<Range>& ranges);
+    //! from a matrix expression
+    explicit Mat_(const MatExpr& e);
+    //! makes a matrix out of Vec, std::vector, Point_ or Point3_. The matrix will have a single column
+    explicit Mat_(const std::vector<_Tp>& vec, bool copyData=false);
+    template<int n> explicit Mat_(const Vec<typename DataType<_Tp>::channel_type, n>& vec, bool copyData=true);
+    template<int m, int n> explicit Mat_(const Matx<typename DataType<_Tp>::channel_type, m, n>& mtx, bool copyData=true);
+    explicit Mat_(const Point_<typename DataType<_Tp>::channel_type>& pt, bool copyData=true);
+    explicit Mat_(const Point3_<typename DataType<_Tp>::channel_type>& pt, bool copyData=true);
+    explicit Mat_(const MatCommaInitializer_<_Tp>& commaInitializer);
+
+#ifdef CV_CXX11
+    Mat_(std::initializer_list<_Tp> values);
+    explicit Mat_(const std::initializer_list<int> sizes, const std::initializer_list<_Tp> values);
+#endif
+
+#ifdef CV_CXX_STD_ARRAY
+    template <std::size_t _Nm> explicit Mat_(const std::array<_Tp, _Nm>& arr, bool copyData=false);
+#endif
+
+    Mat_& operator = (const Mat& m);
+    Mat_& operator = (const Mat_& m);
+    //! set all the elements to s.
+    Mat_& operator = (const _Tp& s);
+    //! assign a matrix expression
+    Mat_& operator = (const MatExpr& e);
+
+    //! iterators; they are smart enough to skip gaps in the end of rows
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
+
+    //! template methods for for operation over all matrix elements.
+    // the operations take care of skipping gaps in the end of rows (if any)
+    template<typename Functor> v
