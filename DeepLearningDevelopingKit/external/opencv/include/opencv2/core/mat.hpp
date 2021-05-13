@@ -2136,4 +2136,58 @@ and run at the same speed, but the latter is certainly shorter:
             M(i,j) = 1./(i+j+1);
     Mat E, V;
     eigen(M,E,V);
-    cout << E.at<double>(0,0)/E
+    cout << E.at<double>(0,0)/E.at<double>(M.rows-1,0);
+@endcode
+To use Mat_ for multi-channel images/matrices, pass Vec as a Mat_ parameter:
+@code{.cpp}
+    // allocate a 320x240 color image and fill it with green (in RGB space)
+    Mat_<Vec3b> img(240, 320, Vec3b(0,255,0));
+    // now draw a diagonal white line
+    for(int i = 0; i < 100; i++)
+        img(i,i)=Vec3b(255,255,255);
+    // and now scramble the 2nd (red) channel of each pixel
+    for(int i = 0; i < img.rows; i++)
+        for(int j = 0; j < img.cols; j++)
+            img(i,j)[2] ^= (uchar)(i ^ j);
+@endcode
+Mat_ is fully compatible with C++11 range-based for loop. For example such loop
+can be used to safely apply look-up table:
+@code{.cpp}
+void applyTable(Mat_<uchar>& I, const uchar* const table)
+{
+    for(auto& pixel : I)
+    {
+        pixel = table[pixel];
+    }
+}
+@endcode
+ */
+template<typename _Tp> class Mat_ : public Mat
+{
+public:
+    typedef _Tp value_type;
+    typedef typename DataType<_Tp>::channel_type channel_type;
+    typedef MatIterator_<_Tp> iterator;
+    typedef MatConstIterator_<_Tp> const_iterator;
+
+    //! default constructor
+    Mat_();
+    //! equivalent to Mat(_rows, _cols, DataType<_Tp>::type)
+    Mat_(int _rows, int _cols);
+    //! constructor that sets each matrix element to specified value
+    Mat_(int _rows, int _cols, const _Tp& value);
+    //! equivalent to Mat(_size, DataType<_Tp>::type)
+    explicit Mat_(Size _size);
+    //! constructor that sets each matrix element to specified value
+    Mat_(Size _size, const _Tp& value);
+    //! n-dim array constructor
+    Mat_(int _ndims, const int* _sizes);
+    //! n-dim array constructor that sets each matrix element to specified value
+    Mat_(int _ndims, const int* _sizes, const _Tp& value);
+    //! copy/conversion constructor. If m is of different type, it's converted
+    Mat_(const Mat& m);
+    //! copy constructor
+    Mat_(const Mat_& m);
+    //! constructs a matrix on top of user-allocated data. step is in bytes(!!!), regardless of the type
+    Mat_(int _rows, int _cols, _Tp* _data, size_t _step=AUTO_STEP);
+    //! constructs n-dim matrix on top of user-allocated data. steps 
