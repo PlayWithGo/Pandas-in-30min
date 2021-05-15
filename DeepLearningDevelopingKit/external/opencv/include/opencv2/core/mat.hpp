@@ -2447,4 +2447,49 @@ public:
     UMat& operator = (const Scalar& s);
     //! sets some of the matrix elements to s, according to the mask
     UMat& setTo(InputArray value, InputArray mask=noArray());
-    //! creates alternative matrix header for the same data, with dif
+    //! creates alternative matrix header for the same data, with different
+    // number of channels and/or different number of rows. see cvReshape.
+    UMat reshape(int cn, int rows=0) const;
+    UMat reshape(int cn, int newndims, const int* newsz) const;
+
+    //! matrix transposition by means of matrix expressions
+    UMat t() const;
+    //! matrix inversion by means of matrix expressions
+    UMat inv(int method=DECOMP_LU) const;
+    //! per-element matrix multiplication by means of matrix expressions
+    UMat mul(InputArray m, double scale=1) const;
+
+    //! computes dot-product
+    double dot(InputArray m) const;
+
+    //! Matlab-style matrix initialization
+    static UMat zeros(int rows, int cols, int type);
+    static UMat zeros(Size size, int type);
+    static UMat zeros(int ndims, const int* sz, int type);
+    static UMat ones(int rows, int cols, int type);
+    static UMat ones(Size size, int type);
+    static UMat ones(int ndims, const int* sz, int type);
+    static UMat eye(int rows, int cols, int type);
+    static UMat eye(Size size, int type);
+
+    //! allocates new matrix data unless the matrix already has specified size and type.
+    // previous data is unreferenced if needed.
+    void create(int rows, int cols, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    void create(Size size, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    void create(int ndims, const int* sizes, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    void create(const std::vector<int>& sizes, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+
+    //! increases the reference counter; use with care to avoid memleaks
+    void addref();
+    //! decreases reference counter;
+    // deallocates the data when reference counter reaches 0.
+    void release();
+
+    //! deallocates the matrix data
+    void deallocate();
+    //! internal use function; properly re-allocates _size, _step arrays
+    void copySize(const UMat& m);
+
+    //! locates matrix header within a parent matrix. See below
+    void locateROI( Size& wholeSize, Point& ofs ) const;
+    //! moves/resizes the current matrix ROI inside the parent
