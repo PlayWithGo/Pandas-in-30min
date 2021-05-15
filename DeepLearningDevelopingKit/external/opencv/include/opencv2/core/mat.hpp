@@ -2234,4 +2234,58 @@ public:
 
     //! template methods for for operation over all matrix elements.
     // the operations take care of skipping gaps in the end of rows (if any)
-    template<typename Functor> v
+    template<typename Functor> void forEach(const Functor& operation);
+    template<typename Functor> void forEach(const Functor& operation) const;
+
+    //! equivalent to Mat::create(_rows, _cols, DataType<_Tp>::type)
+    void create(int _rows, int _cols);
+    //! equivalent to Mat::create(_size, DataType<_Tp>::type)
+    void create(Size _size);
+    //! equivalent to Mat::create(_ndims, _sizes, DatType<_Tp>::type)
+    void create(int _ndims, const int* _sizes);
+    //! equivalent to Mat::release()
+    void release();
+    //! cross-product
+    Mat_ cross(const Mat_& m) const;
+    //! data type conversion
+    template<typename T2> operator Mat_<T2>() const;
+    //! overridden forms of Mat::row() etc.
+    Mat_ row(int y) const;
+    Mat_ col(int x) const;
+    Mat_ diag(int d=0) const;
+    Mat_ clone() const;
+
+    //! overridden forms of Mat::elemSize() etc.
+    size_t elemSize() const;
+    size_t elemSize1() const;
+    int type() const;
+    int depth() const;
+    int channels() const;
+    size_t step1(int i=0) const;
+    //! returns step()/sizeof(_Tp)
+    size_t stepT(int i=0) const;
+
+    //! overridden forms of Mat::zeros() etc. Data type is omitted, of course
+    static MatExpr zeros(int rows, int cols);
+    static MatExpr zeros(Size size);
+    static MatExpr zeros(int _ndims, const int* _sizes);
+    static MatExpr ones(int rows, int cols);
+    static MatExpr ones(Size size);
+    static MatExpr ones(int _ndims, const int* _sizes);
+    static MatExpr eye(int rows, int cols);
+    static MatExpr eye(Size size);
+
+    //! some more overridden methods
+    Mat_& adjustROI( int dtop, int dbottom, int dleft, int dright );
+    Mat_ operator()( const Range& rowRange, const Range& colRange ) const;
+    Mat_ operator()( const Rect& roi ) const;
+    Mat_ operator()( const Range* ranges ) const;
+    Mat_ operator()(const std::vector<Range>& ranges) const;
+
+    //! more convenient forms of row and element access operators
+    _Tp* operator [](int y);
+    const _Tp* operator [](int y) const;
+
+    //! returns reference to the specified element
+    _Tp& operator ()(const int* idx);
+    //! returns read-only reference to the spe
