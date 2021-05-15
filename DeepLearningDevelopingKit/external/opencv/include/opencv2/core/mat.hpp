@@ -2352,4 +2352,52 @@ typedef Mat_<Vec3w> Mat3w;
 typedef Mat_<Vec4w> Mat4w;
 
 typedef Mat_<int>   Mat1i;
-typedef Mat_<Vec2i> Mat2
+typedef Mat_<Vec2i> Mat2i;
+typedef Mat_<Vec3i> Mat3i;
+typedef Mat_<Vec4i> Mat4i;
+
+typedef Mat_<float> Mat1f;
+typedef Mat_<Vec2f> Mat2f;
+typedef Mat_<Vec3f> Mat3f;
+typedef Mat_<Vec4f> Mat4f;
+
+typedef Mat_<double> Mat1d;
+typedef Mat_<Vec2d> Mat2d;
+typedef Mat_<Vec3d> Mat3d;
+typedef Mat_<Vec4d> Mat4d;
+
+/** @todo document */
+class CV_EXPORTS UMat
+{
+public:
+    //! default constructor
+    UMat(UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    //! constructs 2D matrix of the specified size and type
+    // (_type is CV_8UC1, CV_64FC3, CV_32SC(12) etc.)
+    UMat(int rows, int cols, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    UMat(Size size, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    //! constucts 2D matrix and fills it with the specified value _s.
+    UMat(int rows, int cols, int type, const Scalar& s, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    UMat(Size size, int type, const Scalar& s, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+
+    //! constructs n-dimensional matrix
+    UMat(int ndims, const int* sizes, int type, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+    UMat(int ndims, const int* sizes, int type, const Scalar& s, UMatUsageFlags usageFlags = USAGE_DEFAULT);
+
+    //! copy constructor
+    UMat(const UMat& m);
+
+    //! creates a matrix header for a part of the bigger matrix
+    UMat(const UMat& m, const Range& rowRange, const Range& colRange=Range::all());
+    UMat(const UMat& m, const Rect& roi);
+    UMat(const UMat& m, const Range* ranges);
+    UMat(const UMat& m, const std::vector<Range>& ranges);
+    //! builds matrix from std::vector with or without copying the data
+    template<typename _Tp> explicit UMat(const std::vector<_Tp>& vec, bool copyData=false);
+
+    //! builds matrix from cv::Vec; the data is copied by default
+    template<typename _Tp, int n> explicit UMat(const Vec<_Tp, n>& vec, bool copyData=true);
+    //! builds matrix from cv::Matx; the data is copied by default
+    template<typename _Tp, int m, int n> explicit UMat(const Matx<_Tp, m, n>& mtx, bool copyData=true);
+    //! builds matrix from a 2D point
+    template<typename _Tp> explicit UMat(const Point_<_Tp
