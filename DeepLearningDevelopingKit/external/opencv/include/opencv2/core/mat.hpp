@@ -2400,4 +2400,51 @@ public:
     //! builds matrix from cv::Matx; the data is copied by default
     template<typename _Tp, int m, int n> explicit UMat(const Matx<_Tp, m, n>& mtx, bool copyData=true);
     //! builds matrix from a 2D point
-    template<typename _Tp> explicit UMat(const Point_<_Tp
+    template<typename _Tp> explicit UMat(const Point_<_Tp>& pt, bool copyData=true);
+    //! builds matrix from a 3D point
+    template<typename _Tp> explicit UMat(const Point3_<_Tp>& pt, bool copyData=true);
+    //! builds matrix from comma initializer
+    template<typename _Tp> explicit UMat(const MatCommaInitializer_<_Tp>& commaInitializer);
+
+    //! destructor - calls release()
+    ~UMat();
+    //! assignment operators
+    UMat& operator = (const UMat& m);
+
+    Mat getMat(int flags) const;
+
+    //! returns a new matrix header for the specified row
+    UMat row(int y) const;
+    //! returns a new matrix header for the specified column
+    UMat col(int x) const;
+    //! ... for the specified row span
+    UMat rowRange(int startrow, int endrow) const;
+    UMat rowRange(const Range& r) const;
+    //! ... for the specified column span
+    UMat colRange(int startcol, int endcol) const;
+    UMat colRange(const Range& r) const;
+    //! ... for the specified diagonal
+    //! (d=0 - the main diagonal,
+    //!  >0 - a diagonal from the upper half,
+    //!  <0 - a diagonal from the lower half)
+    UMat diag(int d=0) const;
+    //! constructs a square diagonal matrix which main diagonal is vector "d"
+    static UMat diag(const UMat& d);
+
+    //! returns deep copy of the matrix, i.e. the data is copied
+    UMat clone() const;
+    //! copies the matrix content to "m".
+    // It calls m.create(this->size(), this->type()).
+    void copyTo( OutputArray m ) const;
+    //! copies those matrix elements to "m" that are marked with non-zero mask elements.
+    void copyTo( OutputArray m, InputArray mask ) const;
+    //! converts matrix to another datatype with optional scaling. See cvConvertScale.
+    void convertTo( OutputArray m, int rtype, double alpha=1, double beta=0 ) const;
+
+    void assignTo( UMat& m, int type=-1 ) const;
+
+    //! sets every matrix element to s
+    UMat& operator = (const Scalar& s);
+    //! sets some of the matrix elements to s, according to the mask
+    UMat& setTo(InputArray value, InputArray mask=noArray());
+    //! creates alternative matrix header for the same data, with dif
