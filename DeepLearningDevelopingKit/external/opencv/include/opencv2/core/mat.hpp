@@ -2288,4 +2288,68 @@ public:
 
     //! returns reference to the specified element
     _Tp& operator ()(const int* idx);
-    //! returns read-only reference to the spe
+    //! returns read-only reference to the specified element
+    const _Tp& operator ()(const int* idx) const;
+
+    //! returns reference to the specified element
+    template<int n> _Tp& operator ()(const Vec<int, n>& idx);
+    //! returns read-only reference to the specified element
+    template<int n> const _Tp& operator ()(const Vec<int, n>& idx) const;
+
+    //! returns reference to the specified element (1D case)
+    _Tp& operator ()(int idx0);
+    //! returns read-only reference to the specified element (1D case)
+    const _Tp& operator ()(int idx0) const;
+    //! returns reference to the specified element (2D case)
+    _Tp& operator ()(int row, int col);
+    //! returns read-only reference to the specified element (2D case)
+    const _Tp& operator ()(int row, int col) const;
+    //! returns reference to the specified element (3D case)
+    _Tp& operator ()(int idx0, int idx1, int idx2);
+    //! returns read-only reference to the specified element (3D case)
+    const _Tp& operator ()(int idx0, int idx1, int idx2) const;
+
+    _Tp& operator ()(Point pt);
+    const _Tp& operator ()(Point pt) const;
+
+    //! conversion to vector.
+    operator std::vector<_Tp>() const;
+
+#ifdef CV_CXX_STD_ARRAY
+    //! conversion to array.
+    template<std::size_t _Nm> operator std::array<_Tp, _Nm>() const;
+#endif
+
+    //! conversion to Vec
+    template<int n> operator Vec<typename DataType<_Tp>::channel_type, n>() const;
+    //! conversion to Matx
+    template<int m, int n> operator Matx<typename DataType<_Tp>::channel_type, m, n>() const;
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+    Mat_(Mat_&& m);
+    Mat_& operator = (Mat_&& m);
+
+    Mat_(Mat&& m);
+    Mat_& operator = (Mat&& m);
+
+    Mat_(MatExpr&& e);
+#endif
+};
+
+typedef Mat_<uchar> Mat1b;
+typedef Mat_<Vec2b> Mat2b;
+typedef Mat_<Vec3b> Mat3b;
+typedef Mat_<Vec4b> Mat4b;
+
+typedef Mat_<short> Mat1s;
+typedef Mat_<Vec2s> Mat2s;
+typedef Mat_<Vec3s> Mat3s;
+typedef Mat_<Vec4s> Mat4s;
+
+typedef Mat_<ushort> Mat1w;
+typedef Mat_<Vec2w> Mat2w;
+typedef Mat_<Vec3w> Mat3w;
+typedef Mat_<Vec4w> Mat4w;
+
+typedef Mat_<int>   Mat1i;
+typedef Mat_<Vec2i> Mat2
