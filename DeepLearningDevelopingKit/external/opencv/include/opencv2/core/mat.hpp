@@ -2492,4 +2492,55 @@ public:
 
     //! locates matrix header within a parent matrix. See below
     void locateROI( Size& wholeSize, Point& ofs ) const;
-    //! moves/resizes the current matrix ROI inside the parent
+    //! moves/resizes the current matrix ROI inside the parent matrix.
+    UMat& adjustROI( int dtop, int dbottom, int dleft, int dright );
+    //! extracts a rectangular sub-matrix
+    // (this is a generalized form of row, rowRange etc.)
+    UMat operator()( Range rowRange, Range colRange ) const;
+    UMat operator()( const Rect& roi ) const;
+    UMat operator()( const Range* ranges ) const;
+    UMat operator()(const std::vector<Range>& ranges) const;
+
+    //! returns true iff the matrix data is continuous
+    // (i.e. when there are no gaps between successive rows).
+    // similar to CV_IS_MAT_CONT(cvmat->type)
+    bool isContinuous() const;
+
+    //! returns true if the matrix is a submatrix of another matrix
+    bool isSubmatrix() const;
+
+    //! returns element size in bytes,
+    // similar to CV_ELEM_SIZE(cvmat->type)
+    size_t elemSize() const;
+    //! returns the size of element channel in bytes.
+    size_t elemSize1() const;
+    //! returns element type, similar to CV_MAT_TYPE(cvmat->type)
+    int type() const;
+    //! returns element type, similar to CV_MAT_DEPTH(cvmat->type)
+    int depth() const;
+    //! returns element type, similar to CV_MAT_CN(cvmat->type)
+    int channels() const;
+    //! returns step/elemSize1()
+    size_t step1(int i=0) const;
+    //! returns true if matrix data is NULL
+    bool empty() const;
+    //! returns the total number of matrix elements
+    size_t total() const;
+
+    //! returns N if the matrix is 1-channel (N x ptdim) or ptdim-channel (1 x N) or (N x 1); negative number otherwise
+    int checkVector(int elemChannels, int depth=-1, bool requireContinuous=true) const;
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+    UMat(UMat&& m);
+    UMat& operator = (UMat&& m);
+#endif
+
+    /*! Returns the OpenCL buffer handle on which UMat operates on.
+        The UMat instance should be kept alive during the use of the handle to prevent the buffer to be
+        returned to the OpenCV buffer pool.
+     */
+    void* handle(int accessFlags) const;
+    void ndoffset(size_t* ofs) const;
+
+    enum { MAGIC_VAL  = 0x42FF0000, AUTO_STEP = 0, CONTINUOUS_FLAG = CV_MAT_CONT_FLAG, SUBMATRIX_FLAG = CV_SUBMAT_FLAG };
+    enum 
