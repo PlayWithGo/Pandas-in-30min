@@ -2601,4 +2601,48 @@ Elements can be accessed using the following methods:
         }
         cout << "nnz = " << sparse_mat.nzcount() << endl;
     @endcode
--   Sparse matrix iterators. They are similar to MatIterator but diffe
+-   Sparse matrix iterators. They are similar to MatIterator but different from NAryMatIterator.
+    That is, the iteration loop is familiar to STL users:
+    @code
+        // prints elements of a sparse floating-point matrix
+        // and the sum of elements.
+        SparseMatConstIterator_<float>
+            it = sparse_mat.begin<float>(),
+            it_end = sparse_mat.end<float>();
+        double s = 0;
+        int dims = sparse_mat.dims();
+        for(; it != it_end; ++it)
+        {
+            // print element indices and the element value
+            const SparseMat::Node* n = it.node();
+            printf("(");
+            for(int i = 0; i < dims; i++)
+                printf("%d%s", n->idx[i], i < dims-1 ? ", " : ")");
+            printf(": %g\n", it.value<float>());
+            s += *it;
+        }
+        printf("Element sum is %g\n", s);
+    @endcode
+    If you run this loop, you will notice that elements are not enumerated in a logical order
+    (lexicographical, and so on). They come in the same order as they are stored in the hash table
+    (semi-randomly). You may collect pointers to the nodes and sort them to get the proper ordering.
+    Note, however, that pointers to the nodes may become invalid when you add more elements to the
+    matrix. This may happen due to possible buffer reallocation.
+-   Combination of the above 2 methods when you need to process 2 or more sparse matrices
+    simultaneously. For example, this is how you can compute unnormalized cross-correlation of the 2
+    floating-point sparse matrices:
+    @code
+        double cross_corr(const SparseMat& a, const SparseMat& b)
+        {
+            const SparseMat *_a = &a, *_b = &b;
+            // if b contains less elements than a,
+            // it is faster to iterate through b
+            if(_a->nzcount() > _b->nzcount())
+                std::swap(_a, _b);
+            SparseMatConstIterator_<float> it = _a->begin<float>(),
+                                           it_end = _a->end<float>();
+            double ccorr = 0;
+            for(; it != it_end; ++it)
+            {
+                // take the next element from the first matrix
+                float av
