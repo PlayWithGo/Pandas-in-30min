@@ -2543,4 +2543,62 @@ public:
     void ndoffset(size_t* ofs) const;
 
     enum { MAGIC_VAL  = 0x42FF0000, AUTO_STEP = 0, CONTINUOUS_FLAG = CV_MAT_CONT_FLAG, SUBMATRIX_FLAG = CV_SUBMAT_FLAG };
-    enum 
+    enum { MAGIC_MASK = 0xFFFF0000, TYPE_MASK = 0x00000FFF, DEPTH_MASK = 7 };
+
+    /*! includes several bit-fields:
+         - the magic signature
+         - continuity flag
+         - depth
+         - number of channels
+     */
+    int flags;
+    //! the matrix dimensionality, >= 2
+    int dims;
+    //! the number of rows and columns or (-1, -1) when the matrix has more than 2 dimensions
+    int rows, cols;
+
+    //! custom allocator
+    MatAllocator* allocator;
+    UMatUsageFlags usageFlags; // usage flags for allocator
+    //! and the standard allocator
+    static MatAllocator* getStdAllocator();
+
+    // black-box container of UMat data
+    UMatData* u;
+
+    // offset of the submatrix (or 0)
+    size_t offset;
+
+    MatSize size;
+    MatStep step;
+
+protected:
+};
+
+
+/////////////////////////// multi-dimensional sparse matrix //////////////////////////
+
+/** @brief The class SparseMat represents multi-dimensional sparse numerical arrays.
+
+Such a sparse array can store elements of any type that Mat can store. *Sparse* means that only
+non-zero elements are stored (though, as a result of operations on a sparse matrix, some of its
+stored elements can actually become 0. It is up to you to detect such elements and delete them
+using SparseMat::erase ). The non-zero elements are stored in a hash table that grows when it is
+filled so that the search time is O(1) in average (regardless of whether element is there or not).
+Elements can be accessed using the following methods:
+-   Query operations (SparseMat::ptr and the higher-level SparseMat::ref, SparseMat::value and
+    SparseMat::find), for example:
+    @code
+        const int dims = 5;
+        int size[5] = {10, 10, 10, 10, 10};
+        SparseMat sparse_mat(dims, size, CV_32F);
+        for(int i = 0; i < 1000; i++)
+        {
+            int idx[dims];
+            for(int k = 0; k < dims; k++)
+                idx[k] = rand() % size[k];
+            sparse_mat.ref<float>(idx) += 1.f;
+        }
+        cout << "nnz = " << sparse_mat.nzcount() << endl;
+    @endcode
+-   Sparse matrix iterators. They are similar to MatIterator but diffe
