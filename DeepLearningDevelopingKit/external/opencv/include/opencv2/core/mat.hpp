@@ -2761,4 +2761,50 @@ public:
     // decrements the header reference counter. When the counter reaches 0, the header and all the underlying data are deallocated.
     void release();
 
-    //! converts sparse matrix to t
+    //! converts sparse matrix to the old-style representation; all the elements are copied.
+    //operator CvSparseMat*() const;
+    //! returns the size of each element in bytes (not including the overhead - the space occupied by SparseMat::Node elements)
+    size_t elemSize() const;
+    //! returns elemSize()/channels()
+    size_t elemSize1() const;
+
+    //! returns type of sparse matrix elements
+    int type() const;
+    //! returns the depth of sparse matrix elements
+    int depth() const;
+    //! returns the number of channels
+    int channels() const;
+
+    //! returns the array of sizes, or NULL if the matrix is not allocated
+    const int* size() const;
+    //! returns the size of i-th matrix dimension (or 0)
+    int size(int i) const;
+    //! returns the matrix dimensionality
+    int dims() const;
+    //! returns the number of non-zero elements (=the number of hash table nodes)
+    size_t nzcount() const;
+
+    //! computes the element hash value (1D case)
+    size_t hash(int i0) const;
+    //! computes the element hash value (2D case)
+    size_t hash(int i0, int i1) const;
+    //! computes the element hash value (3D case)
+    size_t hash(int i0, int i1, int i2) const;
+    //! computes the element hash value (nD case)
+    size_t hash(const int* idx) const;
+
+    //!@{
+    /*!
+     specialized variants for 1D, 2D, 3D cases and the generic_type one for n-D case.
+     return pointer to the matrix element.
+      - if the element is there (it's non-zero), the pointer to it is returned
+      - if it's not there and createMissing=false, NULL pointer is returned
+      - if it's not there and createMissing=true, then the new element
+        is created and initialized with 0. Pointer to it is returned
+      - if the optional hashval pointer is not NULL, the element hash value is
+        not computed, but *hashval is taken instead.
+    */
+    //! returns pointer to the specified element (1D case)
+    uchar* ptr(int i0, bool createMissing, size_t* hashval=0);
+    //! returns pointer to the specified element (2D case)
+    uchar* ptr(int i0, int i1, bool createMissing, size_t* hashv
