@@ -2645,4 +2645,77 @@ Elements can be accessed using the following methods:
             for(; it != it_end; ++it)
             {
                 // take the next element from the first matrix
-                float av
+                float avalue = *it;
+                const Node* anode = it.node();
+                // and try to find an element with the same index in the second matrix.
+                // since the hash value depends only on the element index,
+                // reuse the hash value stored in the node
+                float bvalue = _b->value<float>(anode->idx,&anode->hashval);
+                ccorr += avalue*bvalue;
+            }
+            return ccorr;
+        }
+    @endcode
+ */
+class CV_EXPORTS SparseMat
+{
+public:
+    typedef SparseMatIterator iterator;
+    typedef SparseMatConstIterator const_iterator;
+
+    enum { MAGIC_VAL=0x42FD0000, MAX_DIM=32, HASH_SCALE=0x5bd1e995, HASH_BIT=0x80000000 };
+
+    //! the sparse matrix header
+    struct CV_EXPORTS Hdr
+    {
+        Hdr(int _dims, const int* _sizes, int _type);
+        void clear();
+        int refcount;
+        int dims;
+        int valueOffset;
+        size_t nodeSize;
+        size_t nodeCount;
+        size_t freeList;
+        std::vector<uchar> pool;
+        std::vector<size_t> hashtab;
+        int size[MAX_DIM];
+    };
+
+    //! sparse matrix node - element of a hash table
+    struct CV_EXPORTS Node
+    {
+        //! hash value
+        size_t hashval;
+        //! index of the next node in the same hash table entry
+        size_t next;
+        //! index of the matrix element
+        int idx[MAX_DIM];
+    };
+
+    /** @brief Various SparseMat constructors.
+     */
+    SparseMat();
+
+    /** @overload
+    @param dims Array dimensionality.
+    @param _sizes Sparce matrix size on all dementions.
+    @param _type Sparse matrix data type.
+    */
+    SparseMat(int dims, const int* _sizes, int _type);
+
+    /** @overload
+    @param m Source matrix for copy constructor. If m is dense matrix (ocvMat) then it will be converted
+    to sparse representation.
+    */
+    SparseMat(const SparseMat& m);
+
+    /** @overload
+    @param m Source matrix for copy constructor. If m is dense matrix (ocvMat) then it will be converted
+    to sparse representation.
+    */
+    explicit SparseMat(const Mat& m);
+
+    //! the destructor
+    ~SparseMat();
+
+    //! assignment operator. T
