@@ -2807,4 +2807,54 @@ public:
     //! returns pointer to the specified element (1D case)
     uchar* ptr(int i0, bool createMissing, size_t* hashval=0);
     //! returns pointer to the specified element (2D case)
-    uchar* ptr(int i0, int i1, bool createMissing, size_t* hashv
+    uchar* ptr(int i0, int i1, bool createMissing, size_t* hashval=0);
+    //! returns pointer to the specified element (3D case)
+    uchar* ptr(int i0, int i1, int i2, bool createMissing, size_t* hashval=0);
+    //! returns pointer to the specified element (nD case)
+    uchar* ptr(const int* idx, bool createMissing, size_t* hashval=0);
+    //!@}
+
+    //!@{
+    /*!
+     return read-write reference to the specified sparse matrix element.
+
+     `ref<_Tp>(i0,...[,hashval])` is equivalent to `*(_Tp*)ptr(i0,...,true[,hashval])`.
+     The methods always return a valid reference.
+     If the element did not exist, it is created and initialiazed with 0.
+    */
+    //! returns reference to the specified element (1D case)
+    template<typename _Tp> _Tp& ref(int i0, size_t* hashval=0);
+    //! returns reference to the specified element (2D case)
+    template<typename _Tp> _Tp& ref(int i0, int i1, size_t* hashval=0);
+    //! returns reference to the specified element (3D case)
+    template<typename _Tp> _Tp& ref(int i0, int i1, int i2, size_t* hashval=0);
+    //! returns reference to the specified element (nD case)
+    template<typename _Tp> _Tp& ref(const int* idx, size_t* hashval=0);
+    //!@}
+
+    //!@{
+    /*!
+     return value of the specified sparse matrix element.
+
+     `value<_Tp>(i0,...[,hashval])` is equivalent to
+     @code
+     { const _Tp* p = find<_Tp>(i0,...[,hashval]); return p ? *p : _Tp(); }
+     @endcode
+
+     That is, if the element did not exist, the methods return 0.
+     */
+    //! returns value of the specified element (1D case)
+    template<typename _Tp> _Tp value(int i0, size_t* hashval=0) const;
+    //! returns value of the specified element (2D case)
+    template<typename _Tp> _Tp value(int i0, int i1, size_t* hashval=0) const;
+    //! returns value of the specified element (3D case)
+    template<typename _Tp> _Tp value(int i0, int i1, int i2, size_t* hashval=0) const;
+    //! returns value of the specified element (nD case)
+    template<typename _Tp> _Tp value(const int* idx, size_t* hashval=0) const;
+    //!@}
+
+    //!@{
+    /*!
+     Return pointer to the specified sparse matrix element if it exists
+
+     `fin
