@@ -2718,4 +2718,47 @@ public:
     //! the destructor
     ~SparseMat();
 
-    //! assignment operator. T
+    //! assignment operator. This is O(1) operation, i.e. no data is copied
+    SparseMat& operator = (const SparseMat& m);
+    //! equivalent to the corresponding constructor
+    SparseMat& operator = (const Mat& m);
+
+    //! creates full copy of the matrix
+    SparseMat clone() const;
+
+    //! copies all the data to the destination matrix. All the previous content of m is erased
+    void copyTo( SparseMat& m ) const;
+    //! converts sparse matrix to dense matrix.
+    void copyTo( Mat& m ) const;
+    //! multiplies all the matrix elements by the specified scale factor alpha and converts the results to the specified data type
+    void convertTo( SparseMat& m, int rtype, double alpha=1 ) const;
+    //! converts sparse matrix to dense n-dim matrix with optional type conversion and scaling.
+    /*!
+        @param [out] m - output matrix; if it does not have a proper size or type before the operation,
+            it is reallocated
+        @param [in] rtype - desired output matrix type or, rather, the depth since the number of channels
+            are the same as the input has; if rtype is negative, the output matrix will have the
+            same type as the input.
+        @param [in] alpha - optional scale factor
+        @param [in] beta - optional delta added to the scaled values
+    */
+    void convertTo( Mat& m, int rtype, double alpha=1, double beta=0 ) const;
+
+    // not used now
+    void assignTo( SparseMat& m, int type=-1 ) const;
+
+    //! reallocates sparse matrix.
+    /*!
+        If the matrix already had the proper size and type,
+        it is simply cleared with clear(), otherwise,
+        the old matrix is released (using release()) and the new one is allocated.
+    */
+    void create(int dims, const int* _sizes, int _type);
+    //! sets all the sparse matrix elements to 0, which means clearing the hash table.
+    void clear();
+    //! manually increments the reference counter to the header.
+    void addref();
+    // decrements the header reference counter. When the counter reaches 0, the header and all the underlying data are deallocated.
+    void release();
+
+    //! converts sparse matrix to t
