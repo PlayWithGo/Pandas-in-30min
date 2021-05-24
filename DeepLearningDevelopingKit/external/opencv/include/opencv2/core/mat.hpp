@@ -2857,4 +2857,45 @@ public:
     /*!
      Return pointer to the specified sparse matrix element if it exists
 
-     `fin
+     `find<_Tp>(i0,...[,hashval])` is equivalent to `(_const Tp*)ptr(i0,...false[,hashval])`.
+
+     If the specified element does not exist, the methods return NULL.
+    */
+    //! returns pointer to the specified element (1D case)
+    template<typename _Tp> const _Tp* find(int i0, size_t* hashval=0) const;
+    //! returns pointer to the specified element (2D case)
+    template<typename _Tp> const _Tp* find(int i0, int i1, size_t* hashval=0) const;
+    //! returns pointer to the specified element (3D case)
+    template<typename _Tp> const _Tp* find(int i0, int i1, int i2, size_t* hashval=0) const;
+    //! returns pointer to the specified element (nD case)
+    template<typename _Tp> const _Tp* find(const int* idx, size_t* hashval=0) const;
+    //!@}
+
+    //! erases the specified element (2D case)
+    void erase(int i0, int i1, size_t* hashval=0);
+    //! erases the specified element (3D case)
+    void erase(int i0, int i1, int i2, size_t* hashval=0);
+    //! erases the specified element (nD case)
+    void erase(const int* idx, size_t* hashval=0);
+
+    //!@{
+    /*!
+       return the sparse matrix iterator pointing to the first sparse matrix element
+    */
+    //! returns the sparse matrix iterator at the matrix beginning
+    SparseMatIterator begin();
+    //! returns the sparse matrix iterator at the matrix beginning
+    template<typename _Tp> SparseMatIterator_<_Tp> begin();
+    //! returns the read-only sparse matrix iterator at the matrix beginning
+    SparseMatConstIterator begin() const;
+    //! returns the read-only sparse matrix iterator at the matrix beginning
+    template<typename _Tp> SparseMatConstIterator_<_Tp> begin() const;
+    //!@}
+    /*!
+       return the sparse matrix iterator pointing to the element following the last sparse matrix element
+    */
+    //! returns the sparse matrix iterator at the matrix end
+    SparseMatIterator end();
+    //! returns the read-only sparse matrix iterator at the matrix end
+    SparseMatConstIterator end() const;
+    //! r
