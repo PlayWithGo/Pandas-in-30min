@@ -2953,4 +2953,47 @@ public:
     SparseMat_(const Mat& m);
     //! converts the old-style sparse matrix to the C++ class. All the elements are copied
     //SparseMat_(const CvSparseMat* m);
-    //! the assignment operator. If DataType<_Tp>.type != m.type(), the m elements
+    //! the assignment operator. If DataType<_Tp>.type != m.type(), the m elements are converted
+    SparseMat_& operator = (const SparseMat& m);
+    //! the assignment operator. This is O(1) operation - no data is copied
+    SparseMat_& operator = (const SparseMat_& m);
+    //! converts dense matrix to the sparse form
+    SparseMat_& operator = (const Mat& m);
+
+    //! makes full copy of the matrix. All the elements are duplicated
+    SparseMat_ clone() const;
+    //! equivalent to cv::SparseMat::create(dims, _sizes, DataType<_Tp>::type)
+    void create(int dims, const int* _sizes);
+    //! converts sparse matrix to the old-style CvSparseMat. All the elements are copied
+    //operator CvSparseMat*() const;
+
+    //! returns type of the matrix elements
+    int type() const;
+    //! returns depth of the matrix elements
+    int depth() const;
+    //! returns the number of channels in each matrix element
+    int channels() const;
+
+    //! equivalent to SparseMat::ref<_Tp>(i0, hashval)
+    _Tp& ref(int i0, size_t* hashval=0);
+    //! equivalent to SparseMat::ref<_Tp>(i0, i1, hashval)
+    _Tp& ref(int i0, int i1, size_t* hashval=0);
+    //! equivalent to SparseMat::ref<_Tp>(i0, i1, i2, hashval)
+    _Tp& ref(int i0, int i1, int i2, size_t* hashval=0);
+    //! equivalent to SparseMat::ref<_Tp>(idx, hashval)
+    _Tp& ref(const int* idx, size_t* hashval=0);
+
+    //! equivalent to SparseMat::value<_Tp>(i0, hashval)
+    _Tp operator()(int i0, size_t* hashval=0) const;
+    //! equivalent to SparseMat::value<_Tp>(i0, i1, hashval)
+    _Tp operator()(int i0, int i1, size_t* hashval=0) const;
+    //! equivalent to SparseMat::value<_Tp>(i0, i1, i2, hashval)
+    _Tp operator()(int i0, int i1, int i2, size_t* hashval=0) const;
+    //! equivalent to SparseMat::value<_Tp>(idx, hashval)
+    _Tp operator()(const int* idx, size_t* hashval=0) const;
+
+    //! returns sparse matrix iterator pointing to the first sparse matrix element
+    SparseMatIterator_<_Tp> begin();
+    //! returns read-only sparse matrix iterator pointing to the first sparse matrix element
+    SparseMatConstIterator_<_Tp> begin() const;
+    //! returns sparse matrix iterator pointing to the element following the las
