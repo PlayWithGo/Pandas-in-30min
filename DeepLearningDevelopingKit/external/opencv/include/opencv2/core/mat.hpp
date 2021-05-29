@@ -2898,4 +2898,59 @@ public:
     SparseMatIterator end();
     //! returns the read-only sparse matrix iterator at the matrix end
     SparseMatConstIterator end() const;
-    //! r
+    //! returns the typed sparse matrix iterator at the matrix end
+    template<typename _Tp> SparseMatIterator_<_Tp> end();
+    //! returns the typed read-only sparse matrix iterator at the matrix end
+    template<typename _Tp> SparseMatConstIterator_<_Tp> end() const;
+
+    //! returns the value stored in the sparse martix node
+    template<typename _Tp> _Tp& value(Node* n);
+    //! returns the value stored in the sparse martix node
+    template<typename _Tp> const _Tp& value(const Node* n) const;
+
+    ////////////// some internal-use methods ///////////////
+    Node* node(size_t nidx);
+    const Node* node(size_t nidx) const;
+
+    uchar* newNode(const int* idx, size_t hashval);
+    void removeNode(size_t hidx, size_t nidx, size_t previdx);
+    void resizeHashTab(size_t newsize);
+
+    int flags;
+    Hdr* hdr;
+};
+
+
+
+///////////////////////////////// SparseMat_<_Tp> ////////////////////////////////////
+
+/** @brief Template sparse n-dimensional array class derived from SparseMat
+
+SparseMat_ is a thin wrapper on top of SparseMat created in the same way as Mat_ . It simplifies
+notation of some operations:
+@code
+    int sz[] = {10, 20, 30};
+    SparseMat_<double> M(3, sz);
+    ...
+    M.ref(1, 2, 3) = M(4, 5, 6) + M(7, 8, 9);
+@endcode
+ */
+template<typename _Tp> class SparseMat_ : public SparseMat
+{
+public:
+    typedef SparseMatIterator_<_Tp> iterator;
+    typedef SparseMatConstIterator_<_Tp> const_iterator;
+
+    //! the default constructor
+    SparseMat_();
+    //! the full constructor equivalent to SparseMat(dims, _sizes, DataType<_Tp>::type)
+    SparseMat_(int dims, const int* _sizes);
+    //! the copy constructor. If DataType<_Tp>.type != m.type(), the m elements are converted
+    SparseMat_(const SparseMat& m);
+    //! the copy constructor. This is O(1) operation - no data is copied
+    SparseMat_(const SparseMat_& m);
+    //! converts dense matrix to the sparse form
+    SparseMat_(const Mat& m);
+    //! converts the old-style sparse matrix to the C++ class. All the elements are copied
+    //SparseMat_(const CvSparseMat* m);
+    //! the assignment operator. If DataType<_Tp>.type != m.type(), the m elements
