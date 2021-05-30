@@ -3050,4 +3050,64 @@ public:
     MatConstIterator operator ++(int);
     //! returns the current iterator position
     Point pos() const;
-    /
+    //! returns the current iterator position
+    void pos(int* _idx) const;
+
+    ptrdiff_t lpos() const;
+    void seek(ptrdiff_t ofs, bool relative = false);
+    void seek(const int* _idx, bool relative = false);
+
+    const Mat* m;
+    size_t elemSize;
+    const uchar* ptr;
+    const uchar* sliceStart;
+    const uchar* sliceEnd;
+};
+
+
+
+////////////////////////////////// MatConstIterator_ /////////////////////////////////
+
+/** @brief Matrix read-only iterator
+ */
+template<typename _Tp>
+class MatConstIterator_ : public MatConstIterator
+{
+public:
+    typedef _Tp value_type;
+    typedef ptrdiff_t difference_type;
+    typedef const _Tp* pointer;
+    typedef const _Tp& reference;
+
+    typedef std::random_access_iterator_tag iterator_category;
+
+    //! default constructor
+    MatConstIterator_();
+    //! constructor that sets the iterator to the beginning of the matrix
+    MatConstIterator_(const Mat_<_Tp>* _m);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatConstIterator_(const Mat_<_Tp>* _m, int _row, int _col=0);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatConstIterator_(const Mat_<_Tp>* _m, Point _pt);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatConstIterator_(const Mat_<_Tp>* _m, const int* _idx);
+    //! copy constructor
+    MatConstIterator_(const MatConstIterator_& it);
+
+    //! copy operator
+    MatConstIterator_& operator = (const MatConstIterator_& it);
+    //! returns the current matrix element
+    const _Tp& operator *() const;
+    //! returns the i-th matrix element, relative to the current
+    const _Tp& operator [](ptrdiff_t i) const;
+
+    //! shifts the iterator forward by the specified number of elements
+    MatConstIterator_& operator += (ptrdiff_t ofs);
+    //! shifts the iterator backward by the specified number of elements
+    MatConstIterator_& operator -= (ptrdiff_t ofs);
+    //! decrements the iterator
+    MatConstIterator_& operator --();
+    //! decrements the iterator
+    MatConstIterator_ operator --(int);
+    //! increments the iterator
+    MatConstIte
