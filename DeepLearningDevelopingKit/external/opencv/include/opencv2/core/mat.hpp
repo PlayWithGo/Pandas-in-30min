@@ -3110,4 +3110,66 @@ public:
     //! decrements the iterator
     MatConstIterator_ operator --(int);
     //! increments the iterator
-    MatConstIte
+    MatConstIterator_& operator ++();
+    //! increments the iterator
+    MatConstIterator_ operator ++(int);
+    //! returns the current iterator position
+    Point pos() const;
+};
+
+
+
+//////////////////////////////////// MatIterator_ ////////////////////////////////////
+
+/** @brief Matrix read-write iterator
+*/
+template<typename _Tp>
+class MatIterator_ : public MatConstIterator_<_Tp>
+{
+public:
+    typedef _Tp* pointer;
+    typedef _Tp& reference;
+
+    typedef std::random_access_iterator_tag iterator_category;
+
+    //! the default constructor
+    MatIterator_();
+    //! constructor that sets the iterator to the beginning of the matrix
+    MatIterator_(Mat_<_Tp>* _m);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatIterator_(Mat_<_Tp>* _m, int _row, int _col=0);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatIterator_(Mat_<_Tp>* _m, Point _pt);
+    //! constructor that sets the iterator to the specified element of the matrix
+    MatIterator_(Mat_<_Tp>* _m, const int* _idx);
+    //! copy constructor
+    MatIterator_(const MatIterator_& it);
+    //! copy operator
+    MatIterator_& operator = (const MatIterator_<_Tp>& it );
+
+    //! returns the current matrix element
+    _Tp& operator *() const;
+    //! returns the i-th matrix element, relative to the current
+    _Tp& operator [](ptrdiff_t i) const;
+
+    //! shifts the iterator forward by the specified number of elements
+    MatIterator_& operator += (ptrdiff_t ofs);
+    //! shifts the iterator backward by the specified number of elements
+    MatIterator_& operator -= (ptrdiff_t ofs);
+    //! decrements the iterator
+    MatIterator_& operator --();
+    //! decrements the iterator
+    MatIterator_ operator --(int);
+    //! increments the iterator
+    MatIterator_& operator ++();
+    //! increments the iterator
+    MatIterator_ operator ++(int);
+};
+
+
+
+/////////////////////////////// SparseMatConstIterator ///////////////////////////////
+
+/**  @brief Read-Only Sparse Matrix Iterator.
+
+ Here is how to use the iterator to compute the sum of floating-point sparse matrix elements:
