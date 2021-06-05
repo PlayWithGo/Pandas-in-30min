@@ -3173,3 +3173,67 @@ public:
 /**  @brief Read-Only Sparse Matrix Iterator.
 
  Here is how to use the iterator to compute the sum of floating-point sparse matrix elements:
+
+ \code
+ SparseMatConstIterator it = m.begin(), it_end = m.end();
+ double s = 0;
+ CV_Assert( m.type() == CV_32F );
+ for( ; it != it_end; ++it )
+    s += it.value<float>();
+ \endcode
+*/
+class CV_EXPORTS SparseMatConstIterator
+{
+public:
+    //! the default constructor
+    SparseMatConstIterator();
+    //! the full constructor setting the iterator to the first sparse matrix element
+    SparseMatConstIterator(const SparseMat* _m);
+    //! the copy constructor
+    SparseMatConstIterator(const SparseMatConstIterator& it);
+
+    //! the assignment operator
+    SparseMatConstIterator& operator = (const SparseMatConstIterator& it);
+
+    //! template method returning the current matrix element
+    template<typename _Tp> const _Tp& value() const;
+    //! returns the current node of the sparse matrix. it.node->idx is the current element index
+    const SparseMat::Node* node() const;
+
+    //! moves iterator to the previous element
+    SparseMatConstIterator& operator --();
+    //! moves iterator to the previous element
+    SparseMatConstIterator operator --(int);
+    //! moves iterator to the next element
+    SparseMatConstIterator& operator ++();
+    //! moves iterator to the next element
+    SparseMatConstIterator operator ++(int);
+
+    //! moves iterator to the element after the last element
+    void seekEnd();
+
+    const SparseMat* m;
+    size_t hashidx;
+    uchar* ptr;
+};
+
+
+
+////////////////////////////////// SparseMatIterator /////////////////////////////////
+
+/** @brief  Read-write Sparse Matrix Iterator
+
+ The class is similar to cv::SparseMatConstIterator,
+ but can be used for in-place modification of the matrix elements.
+*/
+class CV_EXPORTS SparseMatIterator : public SparseMatConstIterator
+{
+public:
+    //! the default constructor
+    SparseMatIterator();
+    //! the full constructor setting the iterator to the first sparse matrix element
+    SparseMatIterator(SparseMat* _m);
+    //! the full constructor setting the iterator to the specified sparse matrix element
+    SparseMatIterator(SparseMat* _m, const int* idx);
+    //! the copy constructor
+    Spars
