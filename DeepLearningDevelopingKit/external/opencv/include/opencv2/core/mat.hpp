@@ -3450,4 +3450,40 @@ public:
     virtual void multiply(const MatExpr& expr1, double s, MatExpr& res) const;
 
     virtual void divide(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res, double scale=1) const;
-    virtual void divide(double s, const Ma
+    virtual void divide(double s, const MatExpr& expr, MatExpr& res) const;
+
+    virtual void abs(const MatExpr& expr, MatExpr& res) const;
+
+    virtual void transpose(const MatExpr& expr, MatExpr& res) const;
+    virtual void matmul(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res) const;
+    virtual void invert(const MatExpr& expr, int method, MatExpr& res) const;
+
+    virtual Size size(const MatExpr& expr) const;
+    virtual int type(const MatExpr& expr) const;
+};
+
+/** @brief Matrix expression representation
+@anchor MatrixExpressions
+This is a list of implemented matrix operations that can be combined in arbitrary complex
+expressions (here A, B stand for matrices ( Mat ), s for a scalar ( Scalar ), alpha for a
+real-valued scalar ( double )):
+-   Addition, subtraction, negation: `A+B`, `A-B`, `A+s`, `A-s`, `s+A`, `s-A`, `-A`
+-   Scaling: `A*alpha`
+-   Per-element multiplication and division: `A.mul(B)`, `A/B`, `alpha/A`
+-   Matrix multiplication: `A*B`
+-   Transposition: `A.t()` (means A<sup>T</sup>)
+-   Matrix inversion and pseudo-inversion, solving linear systems and least-squares problems:
+    `A.inv([method]) (~ A<sup>-1</sup>)`,   `A.inv([method])*B (~ X: AX=B)`
+-   Comparison: `A cmpop B`, `A cmpop alpha`, `alpha cmpop A`, where *cmpop* is one of
+  `>`, `>=`, `==`, `!=`, `<=`, `<`. The result of comparison is an 8-bit single channel mask whose
+    elements are set to 255 (if the particular element or pair of elements satisfy the condition) or
+    0.
+-   Bitwise logical operations: `A logicop B`, `A logicop s`, `s logicop A`, `~A`, where *logicop* is one of
+  `&`, `|`, `^`.
+-   Element-wise minimum and maximum: `min(A, B)`, `min(A, alpha)`, `max(A, B)`, `max(A, alpha)`
+-   Element-wise absolute value: `abs(A)`
+-   Cross-product, dot-product: `A.cross(B)`, `A.dot(B)`
+-   Any function of matrix or matrices and scalars that returns a matrix or a scalar, such as norm,
+    mean, sum, countNonZero, trace, determinant, repeat, and others.
+-   Matrix initializers ( Mat::eye(), Mat::zeros(), Mat::ones() ), matrix comma-separated
+    initializers, matr
