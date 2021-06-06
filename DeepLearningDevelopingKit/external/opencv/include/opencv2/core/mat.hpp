@@ -3294,4 +3294,58 @@ public:
  This is the derived from cv::SparseMatConstIterator_ class that
  introduces more convenient operator *() for accessing the current element.
 */
-template<typen
+template<typename _Tp> class SparseMatIterator_ : public SparseMatConstIterator_<_Tp>
+{
+public:
+
+    typedef std::forward_iterator_tag iterator_category;
+
+    //! the default constructor
+    SparseMatIterator_();
+    //! the full constructor setting the iterator to the first sparse matrix element
+    SparseMatIterator_(SparseMat_<_Tp>* _m);
+    SparseMatIterator_(SparseMat* _m);
+    //! the copy constructor
+    SparseMatIterator_(const SparseMatIterator_& it);
+
+    //! the assignment operator
+    SparseMatIterator_& operator = (const SparseMatIterator_& it);
+    //! returns the reference to the current element
+    _Tp& operator *() const;
+
+    //! moves the iterator to the next element
+    SparseMatIterator_& operator ++();
+    //! moves the iterator to the next element
+    SparseMatIterator_ operator ++(int);
+};
+
+
+
+/////////////////////////////////// NAryMatIterator //////////////////////////////////
+
+/** @brief n-ary multi-dimensional array iterator.
+
+Use the class to implement unary, binary, and, generally, n-ary element-wise operations on
+multi-dimensional arrays. Some of the arguments of an n-ary function may be continuous arrays, some
+may be not. It is possible to use conventional MatIterator 's for each array but incrementing all of
+the iterators after each small operations may be a big overhead. In this case consider using
+NAryMatIterator to iterate through several matrices simultaneously as long as they have the same
+geometry (dimensionality and all the dimension sizes are the same). On each iteration `it.planes[0]`,
+`it.planes[1]`,... will be the slices of the corresponding matrices.
+
+The example below illustrates how you can compute a normalized and threshold 3D color histogram:
+@code
+    void computeNormalizedColorHist(const Mat& image, Mat& hist, int N, double minProb)
+    {
+        const int histSize[] = {N, N, N};
+
+        // make sure that the histogram has a proper size and type
+        hist.create(3, histSize, CV_32F);
+
+        // and clear it
+        hist = Scalar(0);
+
+        // the loop below assumes that the image
+        // is a 8-bit 3-channel. check it.
+        CV_Assert(image.type() == CV_8UC3);
+        MatConstIterator_<Vec3b> it = image.beg
