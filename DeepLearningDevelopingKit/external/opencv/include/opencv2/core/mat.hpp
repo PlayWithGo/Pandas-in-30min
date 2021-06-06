@@ -3236,4 +3236,62 @@ public:
     //! the full constructor setting the iterator to the specified sparse matrix element
     SparseMatIterator(SparseMat* _m, const int* idx);
     //! the copy constructor
-    Spars
+    SparseMatIterator(const SparseMatIterator& it);
+
+    //! the assignment operator
+    SparseMatIterator& operator = (const SparseMatIterator& it);
+    //! returns read-write reference to the current sparse matrix element
+    template<typename _Tp> _Tp& value() const;
+    //! returns pointer to the current sparse matrix node. it.node->idx is the index of the current element (do not modify it!)
+    SparseMat::Node* node() const;
+
+    //! moves iterator to the next element
+    SparseMatIterator& operator ++();
+    //! moves iterator to the next element
+    SparseMatIterator operator ++(int);
+};
+
+
+
+/////////////////////////////// SparseMatConstIterator_ //////////////////////////////
+
+/** @brief  Template Read-Only Sparse Matrix Iterator Class.
+
+ This is the derived from SparseMatConstIterator class that
+ introduces more convenient operator *() for accessing the current element.
+*/
+template<typename _Tp> class SparseMatConstIterator_ : public SparseMatConstIterator
+{
+public:
+
+    typedef std::forward_iterator_tag iterator_category;
+
+    //! the default constructor
+    SparseMatConstIterator_();
+    //! the full constructor setting the iterator to the first sparse matrix element
+    SparseMatConstIterator_(const SparseMat_<_Tp>* _m);
+    SparseMatConstIterator_(const SparseMat* _m);
+    //! the copy constructor
+    SparseMatConstIterator_(const SparseMatConstIterator_& it);
+
+    //! the assignment operator
+    SparseMatConstIterator_& operator = (const SparseMatConstIterator_& it);
+    //! the element access operator
+    const _Tp& operator *() const;
+
+    //! moves iterator to the next element
+    SparseMatConstIterator_& operator ++();
+    //! moves iterator to the next element
+    SparseMatConstIterator_ operator ++(int);
+};
+
+
+
+///////////////////////////////// SparseMatIterator_ /////////////////////////////////
+
+/** @brief  Template Read-Write Sparse Matrix Iterator Class.
+
+ This is the derived from cv::SparseMatConstIterator_ class that
+ introduces more convenient operator *() for accessing the current element.
+*/
+template<typen
