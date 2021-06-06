@@ -3348,4 +3348,54 @@ The example below illustrates how you can compute a normalized and threshold 3D 
         // the loop below assumes that the image
         // is a 8-bit 3-channel. check it.
         CV_Assert(image.type() == CV_8UC3);
-        MatConstIterator_<Vec3b> it = image.beg
+        MatConstIterator_<Vec3b> it = image.begin<Vec3b>(),
+                                 it_end = image.end<Vec3b>();
+        for( ; it != it_end; ++it )
+        {
+            const Vec3b& pix = *it;
+            hist.at<float>(pix[0]*N/256, pix[1]*N/256, pix[2]*N/256) += 1.f;
+        }
+
+        minProb *= image.rows*image.cols;
+
+        // initialize iterator (the style is different from STL).
+        // after initialization the iterator will contain
+        // the number of slices or planes the iterator will go through.
+        // it simultaneously increments iterators for several matrices
+        // supplied as a null terminated list of pointers
+        const Mat* arrays[] = {&hist, 0};
+        Mat planes[1];
+        NAryMatIterator itNAry(arrays, planes, 1);
+        double s = 0;
+        // iterate through the matrix. on each iteration
+        // itNAry.planes[i] (of type Mat) will be set to the current plane
+        // of the i-th n-dim matrix passed to the iterator constructor.
+        for(int p = 0; p < itNAry.nplanes; p++, ++itNAry)
+        {
+            threshold(itNAry.planes[0], itNAry.planes[0], minProb, 0, THRESH_TOZERO);
+            s += sum(itNAry.planes[0])[0];
+        }
+
+        s = 1./s;
+        itNAry = NAryMatIterator(arrays, planes, 1);
+        for(int p = 0; p < itNAry.nplanes; p++, ++itNAry)
+            itNAry.planes[0] *= s;
+    }
+@endcode
+ */
+class CV_EXPORTS NAryMatIterator
+{
+public:
+    //! the default constructor
+    NAryMatIterator();
+    //! the full constructor taking arbitrary number of n-dim matrices
+    NAryMatIterator(const Mat** arrays, uchar** ptrs, int narrays=-1);
+    //! the full constructor taking arbitrary number of n-dim matrices
+    NAryMatIterator(const Mat** arrays, Mat* planes, int narrays=-1);
+    //! the separate iterator initialization method
+    void init(const Mat** arrays, Mat* planes, uchar** ptrs, int narrays=-1);
+
+    //! proceeds to the next plane of every iterated matrix
+    NAryMatIterator& operator ++();
+    //! proceeds to the next plane of every iterated matrix (postfix increment operator)
+    NAryMatIterator operator ++
