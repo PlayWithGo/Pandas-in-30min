@@ -3398,4 +3398,56 @@ public:
     //! proceeds to the next plane of every iterated matrix
     NAryMatIterator& operator ++();
     //! proceeds to the next plane of every iterated matrix (postfix increment operator)
-    NAryMatIterator operator ++
+    NAryMatIterator operator ++(int);
+
+    //! the iterated arrays
+    const Mat** arrays;
+    //! the current planes
+    Mat* planes;
+    //! data pointers
+    uchar** ptrs;
+    //! the number of arrays
+    int narrays;
+    //! the number of hyper-planes that the iterator steps through
+    size_t nplanes;
+    //! the size of each segment (in elements)
+    size_t size;
+protected:
+    int iterdepth;
+    size_t idx;
+};
+
+
+
+///////////////////////////////// Matrix Expressions /////////////////////////////////
+
+class CV_EXPORTS MatOp
+{
+public:
+    MatOp();
+    virtual ~MatOp();
+
+    virtual bool elementWise(const MatExpr& expr) const;
+    virtual void assign(const MatExpr& expr, Mat& m, int type=-1) const = 0;
+    virtual void roi(const MatExpr& expr, const Range& rowRange,
+                     const Range& colRange, MatExpr& res) const;
+    virtual void diag(const MatExpr& expr, int d, MatExpr& res) const;
+    virtual void augAssignAdd(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignSubtract(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignMultiply(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignDivide(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignAnd(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignOr(const MatExpr& expr, Mat& m) const;
+    virtual void augAssignXor(const MatExpr& expr, Mat& m) const;
+
+    virtual void add(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res) const;
+    virtual void add(const MatExpr& expr1, const Scalar& s, MatExpr& res) const;
+
+    virtual void subtract(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res) const;
+    virtual void subtract(const Scalar& s, const MatExpr& expr, MatExpr& res) const;
+
+    virtual void multiply(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res, double scale=1) const;
+    virtual void multiply(const MatExpr& expr1, double s, MatExpr& res) const;
+
+    virtual void divide(const MatExpr& expr1, const MatExpr& expr2, MatExpr& res, double scale=1) const;
+    virtual void divide(double s, const Ma
