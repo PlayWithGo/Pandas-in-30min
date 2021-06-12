@@ -3486,4 +3486,67 @@ real-valued scalar ( double )):
 -   Any function of matrix or matrices and scalars that returns a matrix or a scalar, such as norm,
     mean, sum, countNonZero, trace, determinant, repeat, and others.
 -   Matrix initializers ( Mat::eye(), Mat::zeros(), Mat::ones() ), matrix comma-separated
-    initializers, matr
+    initializers, matrix constructors and operators that extract sub-matrices (see Mat description).
+-   Mat_<destination_type>() constructors to cast the result to the proper type.
+@note Comma-separated initializers and probably some other operations may require additional
+explicit Mat() or Mat_<T>() constructor calls to resolve a possible ambiguity.
+
+Here are examples of matrix expressions:
+@code
+    // compute pseudo-inverse of A, equivalent to A.inv(DECOMP_SVD)
+    SVD svd(A);
+    Mat pinvA = svd.vt.t()*Mat::diag(1./svd.w)*svd.u.t();
+
+    // compute the new vector of parameters in the Levenberg-Marquardt algorithm
+    x -= (A.t()*A + lambda*Mat::eye(A.cols,A.cols,A.type())).inv(DECOMP_CHOLESKY)*(A.t()*err);
+
+    // sharpen image using "unsharp mask" algorithm
+    Mat blurred; double sigma = 1, threshold = 5, amount = 1;
+    GaussianBlur(img, blurred, Size(), sigma, sigma);
+    Mat lowContrastMask = abs(img - blurred) < threshold;
+    Mat sharpened = img*(1+amount) + blurred*(-amount);
+    img.copyTo(sharpened, lowContrastMask);
+@endcode
+*/
+class CV_EXPORTS MatExpr
+{
+public:
+    MatExpr();
+    explicit MatExpr(const Mat& m);
+
+    MatExpr(const MatOp* _op, int _flags, const Mat& _a = Mat(), const Mat& _b = Mat(),
+            const Mat& _c = Mat(), double _alpha = 1, double _beta = 1, const Scalar& _s = Scalar());
+
+    operator Mat() const;
+    template<typename _Tp> operator Mat_<_Tp>() const;
+
+    Size size() const;
+    int type() const;
+
+    MatExpr row(int y) const;
+    MatExpr col(int x) const;
+    MatExpr diag(int d = 0) const;
+    MatExpr operator()( const Range& rowRange, const Range& colRange ) const;
+    MatExpr operator()( const Rect& roi ) const;
+
+    MatExpr t() const;
+    MatExpr inv(int method = DECOMP_LU) const;
+    MatExpr mul(const MatExpr& e, double scale=1) const;
+    MatExpr mul(const Mat& m, double scale=1) const;
+
+    Mat cross(const Mat& m) const;
+    double dot(const Mat& m) const;
+
+    const MatOp* op;
+    int flags;
+
+    Mat a, b, c;
+    double alpha, beta;
+    Scalar s;
+};
+
+//! @} core_basic
+
+//! @relates cv::MatExpr
+//! @{
+CV_EXPORTS MatExpr operator + (c
