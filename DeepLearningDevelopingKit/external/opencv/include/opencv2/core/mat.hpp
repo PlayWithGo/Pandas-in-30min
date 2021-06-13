@@ -3636,4 +3636,26 @@ CV_EXPORTS MatExpr max(double s, const Mat& a);
 
 /** @brief Calculates an absolute value of each matrix element.
 
-abs is a meta-function that is expanded to one of ab
+abs is a meta-function that is expanded to one of absdiff or convertScaleAbs forms:
+- C = abs(A-B) is equivalent to `absdiff(A, B, C)`
+- C = abs(A) is equivalent to `absdiff(A, Scalar::all(0), C)`
+- C = `Mat_<Vec<uchar,n> >(abs(A*alpha + beta))` is equivalent to `convertScaleAbs(A, C, alpha,
+beta)`
+
+The output matrix has the same size and the same type as the input one except for the last case,
+where C is depth=CV_8U .
+@param m matrix.
+@sa @ref MatrixExpressions, absdiff, convertScaleAbs
+ */
+CV_EXPORTS MatExpr abs(const Mat& m);
+/** @overload
+@param e matrix expression.
+*/
+CV_EXPORTS MatExpr abs(const MatExpr& e);
+//! @} relates cv::MatExpr
+
+} // cv
+
+#include "opencv2/core/mat.inl.hpp"
+
+#endif // OPENCV_CORE_MAT_HPP
