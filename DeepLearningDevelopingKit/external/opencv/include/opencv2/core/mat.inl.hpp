@@ -1332,3 +1332,2103 @@ void Mat::push_back(const Mat_<_Tp>& m)
 template<> inline
 void Mat::push_back(const MatExpr& expr)
 {
+    push_back(static_cast<Mat>(expr));
+}
+
+
+template<typename _Tp> inline
+void Mat::push_back(const std::vector<_Tp>& v)
+{
+    push_back(Mat(v));
+}
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+
+inline
+Mat::Mat(Mat&& m)
+    : flags(m.flags), dims(m.dims), rows(m.rows), cols(m.cols), data(m.data),
+      datastart(m.datastart), dataend(m.dataend), datalimit(m.datalimit), allocator(m.allocator),
+      u(m.u), size(&rows)
+{
+    if (m.dims <= 2)  // move new step/size info
+    {
+        step[0] = m.step[0];
+        step[1] = m.step[1];
+    }
+    else
+    {
+        CV_DbgAssert(m.step.p != m.step.buf);
+        step.p = m.step.p;
+        size.p = m.size.p;
+        m.step.p = m.step.buf;
+        m.size.p = &m.rows;
+    }
+    m.flags = MAGIC_VAL; m.dims = m.rows = m.cols = 0;
+    m.data = NULL; m.datastart = NULL; m.dataend = NULL; m.datalimit = NULL;
+    m.allocator = NULL;
+    m.u = NULL;
+}
+
+inline
+Mat& Mat::operator = (Mat&& m)
+{
+    if (this == &m)
+      return *this;
+
+    release();
+    flags = m.flags; dims = m.dims; rows = m.rows; cols = m.cols; data = m.data;
+    datastart = m.datastart; dataend = m.dataend; datalimit = m.datalimit; allocator = m.allocator;
+    u = m.u;
+    if (step.p != step.buf) // release self step/size
+    {
+        fastFree(step.p);
+        step.p = step.buf;
+        size.p = &rows;
+    }
+    if (m.dims <= 2) // move new step/size info
+    {
+        step[0] = m.step[0];
+        step[1] = m.step[1];
+    }
+    else
+    {
+        CV_DbgAssert(m.step.p != m.step.buf);
+        step.p = m.step.p;
+        size.p = m.size.p;
+        m.step.p = m.step.buf;
+        m.size.p = &m.rows;
+    }
+    m.flags = MAGIC_VAL; m.dims = m.rows = m.cols = 0;
+    m.data = NULL; m.datastart = NULL; m.dataend = NULL; m.datalimit = NULL;
+    m.allocator = NULL;
+    m.u = NULL;
+    return *this;
+}
+
+#endif
+
+
+///////////////////////////// MatSize ////////////////////////////
+
+inline
+MatSize::MatSize(int* _p)
+    : p(_p) {}
+
+inline
+Size MatSize::operator()() const
+{
+    CV_DbgAssert(p[-1] <= 2);
+    return Size(p[1], p[0]);
+}
+
+inline
+const int& MatSize::operator[](int i) const
+{
+    return p[i];
+}
+
+inline
+int& MatSize::operator[](int i)
+{
+    return p[i];
+}
+
+inline
+MatSize::operator const int*() const
+{
+    return p;
+}
+
+inline
+bool MatSize::operator == (const MatSize& sz) const
+{
+    int d = p[-1];
+    int dsz = sz.p[-1];
+    if( d != dsz )
+        return false;
+    if( d == 2 )
+        return p[0] == sz.p[0] && p[1] == sz.p[1];
+
+    for( int i = 0; i < d; i++ )
+        if( p[i] != sz.p[i] )
+            return false;
+    return true;
+}
+
+inline
+bool MatSize::operator != (const MatSize& sz) const
+{
+    return !(*this == sz);
+}
+
+
+
+///////////////////////////// MatStep ////////////////////////////
+
+inline
+MatStep::MatStep()
+{
+    p = buf; p[0] = p[1] = 0;
+}
+
+inline
+MatStep::MatStep(size_t s)
+{
+    p = buf; p[0] = s; p[1] = 0;
+}
+
+inline
+const size_t& MatStep::operator[](int i) const
+{
+    return p[i];
+}
+
+inline
+size_t& MatStep::operator[](int i)
+{
+    return p[i];
+}
+
+inline MatStep::operator size_t() const
+{
+    CV_DbgAssert( p == buf );
+    return buf[0];
+}
+
+inline MatStep& MatStep::operator = (size_t s)
+{
+    CV_DbgAssert( p == buf );
+    buf[0] = s;
+    return *this;
+}
+
+
+
+////////////////////////////// Mat_<_Tp> ////////////////////////////
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_()
+    : Mat()
+{
+    flags = (flags & ~CV_MAT_TYPE_MASK) | traits::Type<_Tp>::value;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _rows, int _cols)
+    : Mat(_rows, _cols, traits::Type<_Tp>::value)
+{
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _rows, int _cols, const _Tp& value)
+    : Mat(_rows, _cols, traits::Type<_Tp>::value)
+{
+    *this = value;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(Size _sz)
+    : Mat(_sz.height, _sz.width, traits::Type<_Tp>::value)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(Size _sz, const _Tp& value)
+    : Mat(_sz.height, _sz.width, traits::Type<_Tp>::value)
+{
+    *this = value;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _dims, const int* _sz)
+    : Mat(_dims, _sz, traits::Type<_Tp>::value)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _dims, const int* _sz, const _Tp& _s)
+    : Mat(_dims, _sz, traits::Type<_Tp>::value, Scalar(_s))
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _dims, const int* _sz, _Tp* _data, const size_t* _steps)
+    : Mat(_dims, _sz, traits::Type<_Tp>::value, _data, _steps)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat_<_Tp>& m, const Range* ranges)
+    : Mat(m, ranges)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat_<_Tp>& m, const std::vector<Range>& ranges)
+    : Mat(m, ranges)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat& m)
+    : Mat()
+{
+    flags = (flags & ~CV_MAT_TYPE_MASK) | traits::Type<_Tp>::value;
+    *this = m;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat_& m)
+    : Mat(m)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(int _rows, int _cols, _Tp* _data, size_t steps)
+    : Mat(_rows, _cols, traits::Type<_Tp>::value, _data, steps)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat_& m, const Range& _rowRange, const Range& _colRange)
+    : Mat(m, _rowRange, _colRange)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Mat_& m, const Rect& roi)
+    : Mat(m, roi)
+{}
+
+template<typename _Tp> template<int n> inline
+Mat_<_Tp>::Mat_(const Vec<typename DataType<_Tp>::channel_type, n>& vec, bool copyData)
+    : Mat(n / DataType<_Tp>::channels, 1, traits::Type<_Tp>::value, (void*)&vec)
+{
+    CV_Assert(n%DataType<_Tp>::channels == 0);
+    if( copyData )
+        *this = clone();
+}
+
+template<typename _Tp> template<int m, int n> inline
+Mat_<_Tp>::Mat_(const Matx<typename DataType<_Tp>::channel_type, m, n>& M, bool copyData)
+    : Mat(m, n / DataType<_Tp>::channels, traits::Type<_Tp>::value, (void*)&M)
+{
+    CV_Assert(n % DataType<_Tp>::channels == 0);
+    if( copyData )
+        *this = clone();
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Point_<typename DataType<_Tp>::channel_type>& pt, bool copyData)
+    : Mat(2 / DataType<_Tp>::channels, 1, traits::Type<_Tp>::value, (void*)&pt)
+{
+    CV_Assert(2 % DataType<_Tp>::channels == 0);
+    if( copyData )
+        *this = clone();
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const Point3_<typename DataType<_Tp>::channel_type>& pt, bool copyData)
+    : Mat(3 / DataType<_Tp>::channels, 1, traits::Type<_Tp>::value, (void*)&pt)
+{
+    CV_Assert(3 % DataType<_Tp>::channels == 0);
+    if( copyData )
+        *this = clone();
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const MatCommaInitializer_<_Tp>& commaInitializer)
+    : Mat(commaInitializer)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const std::vector<_Tp>& vec, bool copyData)
+    : Mat(vec, copyData)
+{}
+
+#ifdef CV_CXX11
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(std::initializer_list<_Tp> list)
+    : Mat(list)
+{}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const std::initializer_list<int> sizes, std::initializer_list<_Tp> list)
+    : Mat(sizes, list)
+{}
+#endif
+
+#ifdef CV_CXX_STD_ARRAY
+template<typename _Tp> template<std::size_t _Nm> inline
+Mat_<_Tp>::Mat_(const std::array<_Tp, _Nm>& arr, bool copyData)
+    : Mat(arr, copyData)
+{}
+#endif
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (const Mat& m)
+{
+    if( traits::Type<_Tp>::value == m.type() )
+    {
+        Mat::operator = (m);
+        return *this;
+    }
+    if( traits::Depth<_Tp>::value == m.depth() )
+    {
+        return (*this = m.reshape(DataType<_Tp>::channels, m.dims, 0));
+    }
+    CV_DbgAssert(DataType<_Tp>::channels == m.channels());
+    m.convertTo(*this, type());
+    return *this;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (const Mat_& m)
+{
+    Mat::operator=(m);
+    return *this;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (const _Tp& s)
+{
+    typedef typename DataType<_Tp>::vec_type VT;
+    Mat::operator=(Scalar((const VT&)s));
+    return *this;
+}
+
+template<typename _Tp> inline
+void Mat_<_Tp>::create(int _rows, int _cols)
+{
+    Mat::create(_rows, _cols, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+void Mat_<_Tp>::create(Size _sz)
+{
+    Mat::create(_sz, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+void Mat_<_Tp>::create(int _dims, const int* _sz)
+{
+    Mat::create(_dims, _sz, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+void Mat_<_Tp>::release()
+{
+    Mat::release();
+#ifdef _DEBUG
+    flags = (flags & ~CV_MAT_TYPE_MASK) | traits::Type<_Tp>::value;
+#endif
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::cross(const Mat_& m) const
+{
+    return Mat_<_Tp>(Mat::cross(m));
+}
+
+template<typename _Tp> template<typename T2> inline
+Mat_<_Tp>::operator Mat_<T2>() const
+{
+    return Mat_<T2>(*this);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::row(int y) const
+{
+    return Mat_(*this, Range(y, y+1), Range::all());
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::col(int x) const
+{
+    return Mat_(*this, Range::all(), Range(x, x+1));
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::diag(int d) const
+{
+    return Mat_(Mat::diag(d));
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::clone() const
+{
+    return Mat_(Mat::clone());
+}
+
+template<typename _Tp> inline
+size_t Mat_<_Tp>::elemSize() const
+{
+    CV_DbgAssert( Mat::elemSize() == sizeof(_Tp) );
+    return sizeof(_Tp);
+}
+
+template<typename _Tp> inline
+size_t Mat_<_Tp>::elemSize1() const
+{
+    CV_DbgAssert( Mat::elemSize1() == sizeof(_Tp) / DataType<_Tp>::channels );
+    return sizeof(_Tp) / DataType<_Tp>::channels;
+}
+
+template<typename _Tp> inline
+int Mat_<_Tp>::type() const
+{
+    CV_DbgAssert( Mat::type() == traits::Type<_Tp>::value );
+    return traits::Type<_Tp>::value;
+}
+
+template<typename _Tp> inline
+int Mat_<_Tp>::depth() const
+{
+    CV_DbgAssert( Mat::depth() == traits::Depth<_Tp>::value );
+    return traits::Depth<_Tp>::value;
+}
+
+template<typename _Tp> inline
+int Mat_<_Tp>::channels() const
+{
+    CV_DbgAssert( Mat::channels() == DataType<_Tp>::channels );
+    return DataType<_Tp>::channels;
+}
+
+template<typename _Tp> inline
+size_t Mat_<_Tp>::stepT(int i) const
+{
+    return step.p[i] / elemSize();
+}
+
+template<typename _Tp> inline
+size_t Mat_<_Tp>::step1(int i) const
+{
+    return step.p[i] / elemSize1();
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::adjustROI( int dtop, int dbottom, int dleft, int dright )
+{
+    return (Mat_<_Tp>&)(Mat::adjustROI(dtop, dbottom, dleft, dright));
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::operator()( const Range& _rowRange, const Range& _colRange ) const
+{
+    return Mat_<_Tp>(*this, _rowRange, _colRange);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::operator()( const Rect& roi ) const
+{
+    return Mat_<_Tp>(*this, roi);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::operator()( const Range* ranges ) const
+{
+    return Mat_<_Tp>(*this, ranges);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp> Mat_<_Tp>::operator()(const std::vector<Range>& ranges) const
+{
+    return Mat_<_Tp>(*this, ranges);
+}
+
+template<typename _Tp> inline
+_Tp* Mat_<_Tp>::operator [](int y)
+{
+    CV_DbgAssert( 0 <= y && y < size.p[0] );
+    return (_Tp*)(data + y*step.p[0]);
+}
+
+template<typename _Tp> inline
+const _Tp* Mat_<_Tp>::operator [](int y) const
+{
+    CV_DbgAssert( 0 <= y && y < size.p[0] );
+    return (const _Tp*)(data + y*step.p[0]);
+}
+
+template<typename _Tp> inline
+_Tp& Mat_<_Tp>::operator ()(int i0, int i1)
+{
+    CV_DbgAssert(dims <= 2);
+    CV_DbgAssert(data);
+    CV_DbgAssert((unsigned)i0 < (unsigned)size.p[0]);
+    CV_DbgAssert((unsigned)i1 < (unsigned)size.p[1]);
+    CV_DbgAssert(type() == traits::Type<_Tp>::value);
+    return ((_Tp*)(data + step.p[0] * i0))[i1];
+}
+
+template<typename _Tp> inline
+const _Tp& Mat_<_Tp>::operator ()(int i0, int i1) const
+{
+    CV_DbgAssert(dims <= 2);
+    CV_DbgAssert(data);
+    CV_DbgAssert((unsigned)i0 < (unsigned)size.p[0]);
+    CV_DbgAssert((unsigned)i1 < (unsigned)size.p[1]);
+    CV_DbgAssert(type() == traits::Type<_Tp>::value);
+    return ((const _Tp*)(data + step.p[0] * i0))[i1];
+}
+
+template<typename _Tp> inline
+_Tp& Mat_<_Tp>::operator ()(Point pt)
+{
+    CV_DbgAssert(dims <= 2);
+    CV_DbgAssert(data);
+    CV_DbgAssert((unsigned)pt.y < (unsigned)size.p[0]);
+    CV_DbgAssert((unsigned)pt.x < (unsigned)size.p[1]);
+    CV_DbgAssert(type() == traits::Type<_Tp>::value);
+    return ((_Tp*)(data + step.p[0] * pt.y))[pt.x];
+}
+
+template<typename _Tp> inline
+const _Tp& Mat_<_Tp>::operator ()(Point pt) const
+{
+    CV_DbgAssert(dims <= 2);
+    CV_DbgAssert(data);
+    CV_DbgAssert((unsigned)pt.y < (unsigned)size.p[0]);
+    CV_DbgAssert((unsigned)pt.x < (unsigned)size.p[1]);
+    CV_DbgAssert(type() == traits::Type<_Tp>::value);
+    return ((const _Tp*)(data + step.p[0] * pt.y))[pt.x];
+}
+
+template<typename _Tp> inline
+_Tp& Mat_<_Tp>::operator ()(const int* idx)
+{
+    return Mat::at<_Tp>(idx);
+}
+
+template<typename _Tp> inline
+const _Tp& Mat_<_Tp>::operator ()(const int* idx) const
+{
+    return Mat::at<_Tp>(idx);
+}
+
+template<typename _Tp> template<int n> inline
+_Tp& Mat_<_Tp>::operator ()(const Vec<int, n>& idx)
+{
+    return Mat::at<_Tp>(idx);
+}
+
+template<typename _Tp> template<int n> inline
+const _Tp& Mat_<_Tp>::operator ()(const Vec<int, n>& idx) const
+{
+    return Mat::at<_Tp>(idx);
+}
+
+template<typename _Tp> inline
+_Tp& Mat_<_Tp>::operator ()(int i0)
+{
+    return this->at<_Tp>(i0);
+}
+
+template<typename _Tp> inline
+const _Tp& Mat_<_Tp>::operator ()(int i0) const
+{
+    return this->at<_Tp>(i0);
+}
+
+template<typename _Tp> inline
+_Tp& Mat_<_Tp>::operator ()(int i0, int i1, int i2)
+{
+    return this->at<_Tp>(i0, i1, i2);
+}
+
+template<typename _Tp> inline
+const _Tp& Mat_<_Tp>::operator ()(int i0, int i1, int i2) const
+{
+    return this->at<_Tp>(i0, i1, i2);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::operator std::vector<_Tp>() const
+{
+    std::vector<_Tp> v;
+    copyTo(v);
+    return v;
+}
+
+#ifdef CV_CXX_STD_ARRAY
+template<typename _Tp> template<std::size_t _Nm> inline
+Mat_<_Tp>::operator std::array<_Tp, _Nm>() const
+{
+    std::array<_Tp, _Nm> a;
+    copyTo(a);
+    return a;
+}
+#endif
+
+template<typename _Tp> template<int n> inline
+Mat_<_Tp>::operator Vec<typename DataType<_Tp>::channel_type, n>() const
+{
+    CV_Assert(n % DataType<_Tp>::channels == 0);
+
+#if defined _MSC_VER
+    const Mat* pMat = (const Mat*)this; // workaround for MSVS <= 2012 compiler bugs (but GCC 4.6 dislikes this workaround)
+    return pMat->operator Vec<typename DataType<_Tp>::channel_type, n>();
+#else
+    return this->Mat::operator Vec<typename DataType<_Tp>::channel_type, n>();
+#endif
+}
+
+template<typename _Tp> template<int m, int n> inline
+Mat_<_Tp>::operator Matx<typename DataType<_Tp>::channel_type, m, n>() const
+{
+    CV_Assert(n % DataType<_Tp>::channels == 0);
+
+#if defined _MSC_VER
+    const Mat* pMat = (const Mat*)this; // workaround for MSVS <= 2012 compiler bugs (but GCC 4.6 dislikes this workaround)
+    Matx<typename DataType<_Tp>::channel_type, m, n> res = pMat->operator Matx<typename DataType<_Tp>::channel_type, m, n>();
+    return res;
+#else
+    Matx<typename DataType<_Tp>::channel_type, m, n> res = this->Mat::operator Matx<typename DataType<_Tp>::channel_type, m, n>();
+    return res;
+#endif
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp> Mat_<_Tp>::begin() const
+{
+    return Mat::begin<_Tp>();
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp> Mat_<_Tp>::end() const
+{
+    return Mat::end<_Tp>();
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp> Mat_<_Tp>::begin()
+{
+    return Mat::begin<_Tp>();
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp> Mat_<_Tp>::end()
+{
+    return Mat::end<_Tp>();
+}
+
+template<typename _Tp> template<typename Functor> inline
+void Mat_<_Tp>::forEach(const Functor& operation) {
+    Mat::forEach<_Tp, Functor>(operation);
+}
+
+template<typename _Tp> template<typename Functor> inline
+void Mat_<_Tp>::forEach(const Functor& operation) const {
+    Mat::forEach<_Tp, Functor>(operation);
+}
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(Mat_&& m)
+    : Mat(m)
+{
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (Mat_&& m)
+{
+    Mat::operator = (std::move(m));
+    return *this;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(Mat&& m)
+    : Mat()
+{
+    flags = (flags & ~CV_MAT_TYPE_MASK) | traits::Type<_Tp>::value;
+    *this = m;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (Mat&& m)
+{
+    if( traits::Type<_Tp>::value == m.type() )
+    {
+        Mat::operator = ((Mat&&)m);
+        return *this;
+    }
+    if( traits::Depth<_Tp>::value == m.depth() )
+    {
+        Mat::operator = ((Mat&&)m.reshape(DataType<_Tp>::channels, m.dims, 0));
+        return *this;
+    }
+    CV_DbgAssert(DataType<_Tp>::channels == m.channels());
+    m.convertTo(*this, type());
+    return *this;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(MatExpr&& e)
+    : Mat()
+{
+    flags = (flags & ~CV_MAT_TYPE_MASK) | traits::Type<_Tp>::value;
+    *this = Mat(e);
+}
+
+#endif
+
+///////////////////////////// SparseMat /////////////////////////////
+
+inline
+SparseMat::SparseMat()
+    : flags(MAGIC_VAL), hdr(0)
+{}
+
+inline
+SparseMat::SparseMat(int _dims, const int* _sizes, int _type)
+    : flags(MAGIC_VAL), hdr(0)
+{
+    create(_dims, _sizes, _type);
+}
+
+inline
+SparseMat::SparseMat(const SparseMat& m)
+    : flags(m.flags), hdr(m.hdr)
+{
+    addref();
+}
+
+inline
+SparseMat::~SparseMat()
+{
+    release();
+}
+
+inline
+SparseMat& SparseMat::operator = (const SparseMat& m)
+{
+    if( this != &m )
+    {
+        if( m.hdr )
+            CV_XADD(&m.hdr->refcount, 1);
+        release();
+        flags = m.flags;
+        hdr = m.hdr;
+    }
+    return *this;
+}
+
+inline
+SparseMat& SparseMat::operator = (const Mat& m)
+{
+    return (*this = SparseMat(m));
+}
+
+inline
+SparseMat SparseMat::clone() const
+{
+    SparseMat temp;
+    this->copyTo(temp);
+    return temp;
+}
+
+inline
+void SparseMat::assignTo( SparseMat& m, int _type ) const
+{
+    if( _type < 0 )
+        m = *this;
+    else
+        convertTo(m, _type);
+}
+
+inline
+void SparseMat::addref()
+{
+    if( hdr )
+        CV_XADD(&hdr->refcount, 1);
+}
+
+inline
+void SparseMat::release()
+{
+    if( hdr && CV_XADD(&hdr->refcount, -1) == 1 )
+        delete hdr;
+    hdr = 0;
+}
+
+inline
+size_t SparseMat::elemSize() const
+{
+    return CV_ELEM_SIZE(flags);
+}
+
+inline
+size_t SparseMat::elemSize1() const
+{
+    return CV_ELEM_SIZE1(flags);
+}
+
+inline
+int SparseMat::type() const
+{
+    return CV_MAT_TYPE(flags);
+}
+
+inline
+int SparseMat::depth() const
+{
+    return CV_MAT_DEPTH(flags);
+}
+
+inline
+int SparseMat::channels() const
+{
+    return CV_MAT_CN(flags);
+}
+
+inline
+const int* SparseMat::size() const
+{
+    return hdr ? hdr->size : 0;
+}
+
+inline
+int SparseMat::size(int i) const
+{
+    if( hdr )
+    {
+        CV_DbgAssert((unsigned)i < (unsigned)hdr->dims);
+        return hdr->size[i];
+    }
+    return 0;
+}
+
+inline
+int SparseMat::dims() const
+{
+    return hdr ? hdr->dims : 0;
+}
+
+inline
+size_t SparseMat::nzcount() const
+{
+    return hdr ? hdr->nodeCount : 0;
+}
+
+inline
+size_t SparseMat::hash(int i0) const
+{
+    return (size_t)i0;
+}
+
+inline
+size_t SparseMat::hash(int i0, int i1) const
+{
+    return (size_t)(unsigned)i0 * HASH_SCALE + (unsigned)i1;
+}
+
+inline
+size_t SparseMat::hash(int i0, int i1, int i2) const
+{
+    return ((size_t)(unsigned)i0 * HASH_SCALE + (unsigned)i1) * HASH_SCALE + (unsigned)i2;
+}
+
+inline
+size_t SparseMat::hash(const int* idx) const
+{
+    size_t h = (unsigned)idx[0];
+    if( !hdr )
+        return 0;
+    int d = hdr->dims;
+    for(int i = 1; i < d; i++ )
+        h = h * HASH_SCALE + (unsigned)idx[i];
+    return h;
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat::ref(int i0, size_t* hashval)
+{
+    return *(_Tp*)((SparseMat*)this)->ptr(i0, true, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat::ref(int i0, int i1, size_t* hashval)
+{
+    return *(_Tp*)((SparseMat*)this)->ptr(i0, i1, true, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat::ref(int i0, int i1, int i2, size_t* hashval)
+{
+    return *(_Tp*)((SparseMat*)this)->ptr(i0, i1, i2, true, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat::ref(const int* idx, size_t* hashval)
+{
+    return *(_Tp*)((SparseMat*)this)->ptr(idx, true, hashval);
+}
+
+template<typename _Tp> inline
+_Tp SparseMat::value(int i0, size_t* hashval) const
+{
+    const _Tp* p = (const _Tp*)((SparseMat*)this)->ptr(i0, false, hashval);
+    return p ? *p : _Tp();
+}
+
+template<typename _Tp> inline
+_Tp SparseMat::value(int i0, int i1, size_t* hashval) const
+{
+    const _Tp* p = (const _Tp*)((SparseMat*)this)->ptr(i0, i1, false, hashval);
+    return p ? *p : _Tp();
+}
+
+template<typename _Tp> inline
+_Tp SparseMat::value(int i0, int i1, int i2, size_t* hashval) const
+{
+    const _Tp* p = (const _Tp*)((SparseMat*)this)->ptr(i0, i1, i2, false, hashval);
+    return p ? *p : _Tp();
+}
+
+template<typename _Tp> inline
+_Tp SparseMat::value(const int* idx, size_t* hashval) const
+{
+    const _Tp* p = (const _Tp*)((SparseMat*)this)->ptr(idx, false, hashval);
+    return p ? *p : _Tp();
+}
+
+template<typename _Tp> inline
+const _Tp* SparseMat::find(int i0, size_t* hashval) const
+{
+    return (const _Tp*)((SparseMat*)this)->ptr(i0, false, hashval);
+}
+
+template<typename _Tp> inline
+const _Tp* SparseMat::find(int i0, int i1, size_t* hashval) const
+{
+    return (const _Tp*)((SparseMat*)this)->ptr(i0, i1, false, hashval);
+}
+
+template<typename _Tp> inline
+const _Tp* SparseMat::find(int i0, int i1, int i2, size_t* hashval) const
+{
+    return (const _Tp*)((SparseMat*)this)->ptr(i0, i1, i2, false, hashval);
+}
+
+template<typename _Tp> inline
+const _Tp* SparseMat::find(const int* idx, size_t* hashval) const
+{
+    return (const _Tp*)((SparseMat*)this)->ptr(idx, false, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat::value(Node* n)
+{
+    return *(_Tp*)((uchar*)n + hdr->valueOffset);
+}
+
+template<typename _Tp> inline
+const _Tp& SparseMat::value(const Node* n) const
+{
+    return *(const _Tp*)((const uchar*)n + hdr->valueOffset);
+}
+
+inline
+SparseMat::Node* SparseMat::node(size_t nidx)
+{
+    return (Node*)(void*)&hdr->pool[nidx];
+}
+
+inline
+const SparseMat::Node* SparseMat::node(size_t nidx) const
+{
+    return (const Node*)(const void*)&hdr->pool[nidx];
+}
+
+inline
+SparseMatIterator SparseMat::begin()
+{
+    return SparseMatIterator(this);
+}
+
+inline
+SparseMatConstIterator SparseMat::begin() const
+{
+    return SparseMatConstIterator(this);
+}
+
+inline
+SparseMatIterator SparseMat::end()
+{
+    SparseMatIterator it(this);
+    it.seekEnd();
+    return it;
+}
+
+inline
+SparseMatConstIterator SparseMat::end() const
+{
+    SparseMatConstIterator it(this);
+    it.seekEnd();
+    return it;
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp> SparseMat::begin()
+{
+    return SparseMatIterator_<_Tp>(this);
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp> SparseMat::begin() const
+{
+    return SparseMatConstIterator_<_Tp>(this);
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp> SparseMat::end()
+{
+    SparseMatIterator_<_Tp> it(this);
+    it.seekEnd();
+    return it;
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp> SparseMat::end() const
+{
+    SparseMatConstIterator_<_Tp> it(this);
+    it.seekEnd();
+    return it;
+}
+
+
+
+///////////////////////////// SparseMat_ ////////////////////////////
+
+template<typename _Tp> inline
+SparseMat_<_Tp>::SparseMat_()
+{
+    flags = MAGIC_VAL | traits::Type<_Tp>::value;
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>::SparseMat_(int _dims, const int* _sizes)
+    : SparseMat(_dims, _sizes, traits::Type<_Tp>::value)
+{}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>::SparseMat_(const SparseMat& m)
+{
+    if( m.type() == traits::Type<_Tp>::value )
+        *this = (const SparseMat_<_Tp>&)m;
+    else
+        m.convertTo(*this, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>::SparseMat_(const SparseMat_<_Tp>& m)
+{
+    this->flags = m.flags;
+    this->hdr = m.hdr;
+    if( this->hdr )
+        CV_XADD(&this->hdr->refcount, 1);
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>::SparseMat_(const Mat& m)
+{
+    SparseMat sm(m);
+    *this = sm;
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>& SparseMat_<_Tp>::operator = (const SparseMat_<_Tp>& m)
+{
+    if( this != &m )
+    {
+        if( m.hdr ) CV_XADD(&m.hdr->refcount, 1);
+        release();
+        flags = m.flags;
+        hdr = m.hdr;
+    }
+    return *this;
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>& SparseMat_<_Tp>::operator = (const SparseMat& m)
+{
+    if( m.type() == traits::Type<_Tp>::value )
+        return (*this = (const SparseMat_<_Tp>&)m);
+    m.convertTo(*this, traits::Type<_Tp>::value);
+    return *this;
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp>& SparseMat_<_Tp>::operator = (const Mat& m)
+{
+    return (*this = SparseMat(m));
+}
+
+template<typename _Tp> inline
+SparseMat_<_Tp> SparseMat_<_Tp>::clone() const
+{
+    SparseMat_<_Tp> m;
+    this->copyTo(m);
+    return m;
+}
+
+template<typename _Tp> inline
+void SparseMat_<_Tp>::create(int _dims, const int* _sizes)
+{
+    SparseMat::create(_dims, _sizes, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+int SparseMat_<_Tp>::type() const
+{
+    return traits::Type<_Tp>::value;
+}
+
+template<typename _Tp> inline
+int SparseMat_<_Tp>::depth() const
+{
+    return traits::Depth<_Tp>::value;
+}
+
+template<typename _Tp> inline
+int SparseMat_<_Tp>::channels() const
+{
+    return DataType<_Tp>::channels;
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat_<_Tp>::ref(int i0, size_t* hashval)
+{
+    return SparseMat::ref<_Tp>(i0, hashval);
+}
+
+template<typename _Tp> inline
+_Tp SparseMat_<_Tp>::operator()(int i0, size_t* hashval) const
+{
+    return SparseMat::value<_Tp>(i0, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat_<_Tp>::ref(int i0, int i1, size_t* hashval)
+{
+    return SparseMat::ref<_Tp>(i0, i1, hashval);
+}
+
+template<typename _Tp> inline
+_Tp SparseMat_<_Tp>::operator()(int i0, int i1, size_t* hashval) const
+{
+    return SparseMat::value<_Tp>(i0, i1, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat_<_Tp>::ref(int i0, int i1, int i2, size_t* hashval)
+{
+    return SparseMat::ref<_Tp>(i0, i1, i2, hashval);
+}
+
+template<typename _Tp> inline
+_Tp SparseMat_<_Tp>::operator()(int i0, int i1, int i2, size_t* hashval) const
+{
+    return SparseMat::value<_Tp>(i0, i1, i2, hashval);
+}
+
+template<typename _Tp> inline
+_Tp& SparseMat_<_Tp>::ref(const int* idx, size_t* hashval)
+{
+    return SparseMat::ref<_Tp>(idx, hashval);
+}
+
+template<typename _Tp> inline
+_Tp SparseMat_<_Tp>::operator()(const int* idx, size_t* hashval) const
+{
+    return SparseMat::value<_Tp>(idx, hashval);
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp> SparseMat_<_Tp>::begin()
+{
+    return SparseMatIterator_<_Tp>(this);
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp> SparseMat_<_Tp>::begin() const
+{
+    return SparseMatConstIterator_<_Tp>(this);
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp> SparseMat_<_Tp>::end()
+{
+    SparseMatIterator_<_Tp> it(this);
+    it.seekEnd();
+    return it;
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp> SparseMat_<_Tp>::end() const
+{
+    SparseMatConstIterator_<_Tp> it(this);
+    it.seekEnd();
+    return it;
+}
+
+
+
+////////////////////////// MatConstIterator /////////////////////////
+
+inline
+MatConstIterator::MatConstIterator()
+    : m(0), elemSize(0), ptr(0), sliceStart(0), sliceEnd(0)
+{}
+
+inline
+MatConstIterator::MatConstIterator(const Mat* _m)
+    : m(_m), elemSize(_m->elemSize()), ptr(0), sliceStart(0), sliceEnd(0)
+{
+    if( m && m->isContinuous() )
+    {
+        sliceStart = m->ptr();
+        sliceEnd = sliceStart + m->total()*elemSize;
+    }
+    seek((const int*)0);
+}
+
+inline
+MatConstIterator::MatConstIterator(const Mat* _m, int _row, int _col)
+    : m(_m), elemSize(_m->elemSize()), ptr(0), sliceStart(0), sliceEnd(0)
+{
+    CV_Assert(m && m->dims <= 2);
+    if( m->isContinuous() )
+    {
+        sliceStart = m->ptr();
+        sliceEnd = sliceStart + m->total()*elemSize;
+    }
+    int idx[] = {_row, _col};
+    seek(idx);
+}
+
+inline
+MatConstIterator::MatConstIterator(const Mat* _m, Point _pt)
+    : m(_m), elemSize(_m->elemSize()), ptr(0), sliceStart(0), sliceEnd(0)
+{
+    CV_Assert(m && m->dims <= 2);
+    if( m->isContinuous() )
+    {
+        sliceStart = m->ptr();
+        sliceEnd = sliceStart + m->total()*elemSize;
+    }
+    int idx[] = {_pt.y, _pt.x};
+    seek(idx);
+}
+
+inline
+MatConstIterator::MatConstIterator(const MatConstIterator& it)
+    : m(it.m), elemSize(it.elemSize), ptr(it.ptr), sliceStart(it.sliceStart), sliceEnd(it.sliceEnd)
+{}
+
+inline
+MatConstIterator& MatConstIterator::operator = (const MatConstIterator& it )
+{
+    m = it.m; elemSize = it.elemSize; ptr = it.ptr;
+    sliceStart = it.sliceStart; sliceEnd = it.sliceEnd;
+    return *this;
+}
+
+inline
+const uchar* MatConstIterator::operator *() const
+{
+    return ptr;
+}
+
+inline MatConstIterator& MatConstIterator::operator += (ptrdiff_t ofs)
+{
+    if( !m || ofs == 0 )
+        return *this;
+    ptrdiff_t ofsb = ofs*elemSize;
+    ptr += ofsb;
+    if( ptr < sliceStart || sliceEnd <= ptr )
+    {
+        ptr -= ofsb;
+        seek(ofs, true);
+    }
+    return *this;
+}
+
+inline
+MatConstIterator& MatConstIterator::operator -= (ptrdiff_t ofs)
+{
+    return (*this += -ofs);
+}
+
+inline
+MatConstIterator& MatConstIterator::operator --()
+{
+    if( m && (ptr -= elemSize) < sliceStart )
+    {
+        ptr += elemSize;
+        seek(-1, true);
+    }
+    return *this;
+}
+
+inline
+MatConstIterator MatConstIterator::operator --(int)
+{
+    MatConstIterator b = *this;
+    *this += -1;
+    return b;
+}
+
+inline
+MatConstIterator& MatConstIterator::operator ++()
+{
+    if( m && (ptr += elemSize) >= sliceEnd )
+    {
+        ptr -= elemSize;
+        seek(1, true);
+    }
+    return *this;
+}
+
+inline MatConstIterator MatConstIterator::operator ++(int)
+{
+    MatConstIterator b = *this;
+    *this += 1;
+    return b;
+}
+
+
+static inline
+bool operator == (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return a.m == b.m && a.ptr == b.ptr;
+}
+
+static inline
+bool operator != (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return !(a == b);
+}
+
+static inline
+bool operator < (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return a.ptr < b.ptr;
+}
+
+static inline
+bool operator > (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return a.ptr > b.ptr;
+}
+
+static inline
+bool operator <= (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return a.ptr <= b.ptr;
+}
+
+static inline
+bool operator >= (const MatConstIterator& a, const MatConstIterator& b)
+{
+    return a.ptr >= b.ptr;
+}
+
+static inline
+ptrdiff_t operator - (const MatConstIterator& b, const MatConstIterator& a)
+{
+    if( a.m != b.m )
+        return ((size_t)(-1) >> 1);
+    if( a.sliceEnd == b.sliceEnd )
+        return (b.ptr - a.ptr)/static_cast<ptrdiff_t>(b.elemSize);
+
+    return b.lpos() - a.lpos();
+}
+
+static inline
+MatConstIterator operator + (const MatConstIterator& a, ptrdiff_t ofs)
+{
+    MatConstIterator b = a;
+    return b += ofs;
+}
+
+static inline
+MatConstIterator operator + (ptrdiff_t ofs, const MatConstIterator& a)
+{
+    MatConstIterator b = a;
+    return b += ofs;
+}
+
+static inline
+MatConstIterator operator - (const MatConstIterator& a, ptrdiff_t ofs)
+{
+    MatConstIterator b = a;
+    return b += -ofs;
+}
+
+
+inline
+const uchar* MatConstIterator::operator [](ptrdiff_t i) const
+{
+    return *(*this + i);
+}
+
+
+
+///////////////////////// MatConstIterator_ /////////////////////////
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>::MatConstIterator_()
+{}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>::MatConstIterator_(const Mat_<_Tp>* _m)
+    : MatConstIterator(_m)
+{}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>::MatConstIterator_(const Mat_<_Tp>* _m, int _row, int _col)
+    : MatConstIterator(_m, _row, _col)
+{}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>::MatConstIterator_(const Mat_<_Tp>* _m, Point _pt)
+    : MatConstIterator(_m, _pt)
+{}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>::MatConstIterator_(const MatConstIterator_& it)
+    : MatConstIterator(it)
+{}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>& MatConstIterator_<_Tp>::operator = (const MatConstIterator_& it )
+{
+    MatConstIterator::operator = (it);
+    return *this;
+}
+
+template<typename _Tp> inline
+const _Tp& MatConstIterator_<_Tp>::operator *() const
+{
+    return *(_Tp*)(this->ptr);
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>& MatConstIterator_<_Tp>::operator += (ptrdiff_t ofs)
+{
+    MatConstIterator::operator += (ofs);
+    return *this;
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>& MatConstIterator_<_Tp>::operator -= (ptrdiff_t ofs)
+{
+    return (*this += -ofs);
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>& MatConstIterator_<_Tp>::operator --()
+{
+    MatConstIterator::operator --();
+    return *this;
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp> MatConstIterator_<_Tp>::operator --(int)
+{
+    MatConstIterator_ b = *this;
+    MatConstIterator::operator --();
+    return b;
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp>& MatConstIterator_<_Tp>::operator ++()
+{
+    MatConstIterator::operator ++();
+    return *this;
+}
+
+template<typename _Tp> inline
+MatConstIterator_<_Tp> MatConstIterator_<_Tp>::operator ++(int)
+{
+    MatConstIterator_ b = *this;
+    MatConstIterator::operator ++();
+    return b;
+}
+
+
+template<typename _Tp> inline
+Point MatConstIterator_<_Tp>::pos() const
+{
+    if( !m )
+        return Point();
+    CV_DbgAssert( m->dims <= 2 );
+    if( m->isContinuous() )
+    {
+        ptrdiff_t ofs = (const _Tp*)ptr - (const _Tp*)m->data;
+        int y = (int)(ofs / m->cols);
+        int x = (int)(ofs - (ptrdiff_t)y * m->cols);
+        return Point(x, y);
+    }
+    else
+    {
+        ptrdiff_t ofs = (uchar*)ptr - m->data;
+        int y = (int)(ofs / m->step);
+        int x = (int)((ofs - y * m->step)/sizeof(_Tp));
+        return Point(x, y);
+    }
+}
+
+
+template<typename _Tp> static inline
+bool operator == (const MatConstIterator_<_Tp>& a, const MatConstIterator_<_Tp>& b)
+{
+    return a.m == b.m && a.ptr == b.ptr;
+}
+
+template<typename _Tp> static inline
+bool operator != (const MatConstIterator_<_Tp>& a, const MatConstIterator_<_Tp>& b)
+{
+    return a.m != b.m || a.ptr != b.ptr;
+}
+
+template<typename _Tp> static inline
+MatConstIterator_<_Tp> operator + (const MatConstIterator_<_Tp>& a, ptrdiff_t ofs)
+{
+    MatConstIterator t = (const MatConstIterator&)a + ofs;
+    return (MatConstIterator_<_Tp>&)t;
+}
+
+template<typename _Tp> static inline
+MatConstIterator_<_Tp> operator + (ptrdiff_t ofs, const MatConstIterator_<_Tp>& a)
+{
+    MatConstIterator t = (const MatConstIterator&)a + ofs;
+    return (MatConstIterator_<_Tp>&)t;
+}
+
+template<typename _Tp> static inline
+MatConstIterator_<_Tp> operator - (const MatConstIterator_<_Tp>& a, ptrdiff_t ofs)
+{
+    MatConstIterator t = (const MatConstIterator&)a - ofs;
+    return (MatConstIterator_<_Tp>&)t;
+}
+
+template<typename _Tp> inline
+const _Tp& MatConstIterator_<_Tp>::operator [](ptrdiff_t i) const
+{
+    return *(_Tp*)MatConstIterator::operator [](i);
+}
+
+
+
+//////////////////////////// MatIterator_ ///////////////////////////
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_()
+    : MatConstIterator_<_Tp>()
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_(Mat_<_Tp>* _m)
+    : MatConstIterator_<_Tp>(_m)
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_(Mat_<_Tp>* _m, int _row, int _col)
+    : MatConstIterator_<_Tp>(_m, _row, _col)
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_(Mat_<_Tp>* _m, Point _pt)
+    : MatConstIterator_<_Tp>(_m, _pt)
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_(Mat_<_Tp>* _m, const int* _idx)
+    : MatConstIterator_<_Tp>(_m, _idx)
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>::MatIterator_(const MatIterator_& it)
+    : MatConstIterator_<_Tp>(it)
+{}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>& MatIterator_<_Tp>::operator = (const MatIterator_<_Tp>& it )
+{
+    MatConstIterator::operator = (it);
+    return *this;
+}
+
+template<typename _Tp> inline
+_Tp& MatIterator_<_Tp>::operator *() const
+{
+    return *(_Tp*)(this->ptr);
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>& MatIterator_<_Tp>::operator += (ptrdiff_t ofs)
+{
+    MatConstIterator::operator += (ofs);
+    return *this;
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>& MatIterator_<_Tp>::operator -= (ptrdiff_t ofs)
+{
+    MatConstIterator::operator += (-ofs);
+    return *this;
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>& MatIterator_<_Tp>::operator --()
+{
+    MatConstIterator::operator --();
+    return *this;
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp> MatIterator_<_Tp>::operator --(int)
+{
+    MatIterator_ b = *this;
+    MatConstIterator::operator --();
+    return b;
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp>& MatIterator_<_Tp>::operator ++()
+{
+    MatConstIterator::operator ++();
+    return *this;
+}
+
+template<typename _Tp> inline
+MatIterator_<_Tp> MatIterator_<_Tp>::operator ++(int)
+{
+    MatIterator_ b = *this;
+    MatConstIterator::operator ++();
+    return b;
+}
+
+template<typename _Tp> inline
+_Tp& MatIterator_<_Tp>::operator [](ptrdiff_t i) const
+{
+    return *(*this + i);
+}
+
+
+template<typename _Tp> static inline
+bool operator == (const MatIterator_<_Tp>& a, const MatIterator_<_Tp>& b)
+{
+    return a.m == b.m && a.ptr == b.ptr;
+}
+
+template<typename _Tp> static inline
+bool operator != (const MatIterator_<_Tp>& a, const MatIterator_<_Tp>& b)
+{
+    return a.m != b.m || a.ptr != b.ptr;
+}
+
+template<typename _Tp> static inline
+MatIterator_<_Tp> operator + (const MatIterator_<_Tp>& a, ptrdiff_t ofs)
+{
+    MatConstIterator t = (const MatConstIterator&)a + ofs;
+    return (MatIterator_<_Tp>&)t;
+}
+
+template<typename _Tp> static inline
+MatIterator_<_Tp> operator + (ptrdiff_t ofs, const MatIterator_<_Tp>& a)
+{
+    MatConstIterator t = (const MatConstIterator&)a + ofs;
+    return (MatIterator_<_Tp>&)t;
+}
+
+template<typename _Tp> static inline
+MatIterator_<_Tp> operator - (const MatIterator_<_Tp>& a, ptrdiff_t ofs)
+{
+    MatConstIterator t = (const MatConstIterator&)a - ofs;
+    return (MatIterator_<_Tp>&)t;
+}
+
+
+
+/////////////////////// SparseMatConstIterator //////////////////////
+
+inline
+SparseMatConstIterator::SparseMatConstIterator()
+    : m(0), hashidx(0), ptr(0)
+{}
+
+inline
+SparseMatConstIterator::SparseMatConstIterator(const SparseMatConstIterator& it)
+    : m(it.m), hashidx(it.hashidx), ptr(it.ptr)
+{}
+
+inline SparseMatConstIterator& SparseMatConstIterator::operator = (const SparseMatConstIterator& it)
+{
+    if( this != &it )
+    {
+        m = it.m;
+        hashidx = it.hashidx;
+        ptr = it.ptr;
+    }
+    return *this;
+}
+
+template<typename _Tp> inline
+const _Tp& SparseMatConstIterator::value() const
+{
+    return *(const _Tp*)ptr;
+}
+
+inline
+const SparseMat::Node* SparseMatConstIterator::node() const
+{
+    return (ptr && m && m->hdr) ? (const SparseMat::Node*)(const void*)(ptr - m->hdr->valueOffset) : 0;
+}
+
+inline
+SparseMatConstIterator SparseMatConstIterator::operator ++(int)
+{
+    SparseMatConstIterator it = *this;
+    ++*this;
+    return it;
+}
+
+inline
+void SparseMatConstIterator::seekEnd()
+{
+    if( m && m->hdr )
+    {
+        hashidx = m->hdr->hashtab.size();
+        ptr = 0;
+    }
+}
+
+
+static inline
+bool operator == (const SparseMatConstIterator& it1, const SparseMatConstIterator& it2)
+{
+    return it1.m == it2.m && it1.ptr == it2.ptr;
+}
+
+static inline
+bool operator != (const SparseMatConstIterator& it1, const SparseMatConstIterator& it2)
+{
+    return !(it1 == it2);
+}
+
+
+
+///////////////////////// SparseMatIterator /////////////////////////
+
+inline
+SparseMatIterator::SparseMatIterator()
+{}
+
+inline
+SparseMatIterator::SparseMatIterator(SparseMat* _m)
+    : SparseMatConstIterator(_m)
+{}
+
+inline
+SparseMatIterator::SparseMatIterator(const SparseMatIterator& it)
+    : SparseMatConstIterator(it)
+{}
+
+inline
+SparseMatIterator& SparseMatIterator::operator = (const SparseMatIterator& it)
+{
+    (SparseMatConstIterator&)*this = it;
+    return *this;
+}
+
+template<typename _Tp> inline
+_Tp& SparseMatIterator::value() const
+{
+    return *(_Tp*)ptr;
+}
+
+inline
+SparseMat::Node* SparseMatIterator::node() const
+{
+    return (SparseMat::Node*)SparseMatConstIterator::node();
+}
+
+inline
+SparseMatIterator& SparseMatIterator::operator ++()
+{
+    SparseMatConstIterator::operator ++();
+    return *this;
+}
+
+inline
+SparseMatIterator SparseMatIterator::operator ++(int)
+{
+    SparseMatIterator it = *this;
+    ++*this;
+    return it;
+}
+
+
+
+////////////////////// SparseMatConstIterator_ //////////////////////
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>::SparseMatConstIterator_()
+{}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMat_<_Tp>* _m)
+    : SparseMatConstIterator(_m)
+{}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMat* _m)
+    : SparseMatConstIterator(_m)
+{
+    CV_Assert( _m->type() == traits::Type<_Tp>::value );
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>::SparseMatConstIterator_(const SparseMatConstIterator_<_Tp>& it)
+    : SparseMatConstIterator(it)
+{}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>& SparseMatConstIterator_<_Tp>::operator = (const SparseMatConstIterator_<_Tp>& it)
+{
+    return reinterpret_cast<SparseMatConstIterator_<_Tp>&>
+         (*reinterpret_cast<SparseMatConstIterator*>(this) =
+           reinterpret_cast<const SparseMatConstIterator&>(it));
+}
+
+template<typename _Tp> inline
+const _Tp& SparseMatConstIterator_<_Tp>::operator *() const
+{
+    return *(const _Tp*)this->ptr;
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp>& SparseMatConstIterator_<_Tp>::operator ++()
+{
+    SparseMatConstIterator::operator ++();
+    return *this;
+}
+
+template<typename _Tp> inline
+SparseMatConstIterator_<_Tp> SparseMatConstIterator_<_Tp>::operator ++(int)
+{
+    SparseMatConstIterator_<_Tp> it = *this;
+    SparseMatConstIterator::operator ++();
+    return it;
+}
+
+
+
+///////////////////////// SparseMatIterator_ ////////////////////////
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>::SparseMatIterator_()
+{}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>::SparseMatIterator_(SparseMat_<_Tp>* _m)
+    : SparseMatConstIterator_<_Tp>(_m)
+{}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>::SparseMatIterator_(SparseMat* _m)
+    : SparseMatConstIterator_<_Tp>(_m)
+{}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>::SparseMatIterator_(const SparseMatIterator_<_Tp>& it)
+    : SparseMatConstIterator_<_Tp>(it)
+{}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>& SparseMatIterator_<_Tp>::operator = (const SparseMatIterator_<_Tp>& it)
+{
+    return reinterpret_cast<SparseMatIterator_<_Tp>&>
+         (*reinterpret_cast<SparseMatConstIterator*>(this) =
+           reinterpret_cast<const SparseMatConstIterator&>(it));
+}
+
+template<typename _Tp> inline
+_Tp& SparseMatIterator_<_Tp>::operator *() const
+{
+    return *(_Tp*)this->ptr;
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp>& SparseMatIterator_<_Tp>::operator ++()
+{
+    SparseMatConstIterator::operator ++();
+    return *this;
+}
+
+template<typename _Tp> inline
+SparseMatIterator_<_Tp> SparseMatIterator_<_Tp>::operator ++(int)
+{
+    SparseMatIterator_<_Tp> it = *this;
+    SparseMatConstIterator::operator ++();
+    return it;
+}
+
+
+
+//////////////////////// MatCommaInitializer_ ///////////////////////
+
+template<typename _Tp> inline
+MatCommaInitializer_<_Tp>::MatCommaInitializer_(Mat_<_Tp>* _m)
+    : it(_m)
+{}
+
+template<typename _Tp> template<typename T2> inline
+MatCommaInitializer_<_Tp>& MatCommaInitializer_<_Tp>::operator , (T2 v)
+{
+    CV_DbgAssert( this->it < ((const Mat_<_Tp>*)this->it.m)->end() );
+    *this->it = _Tp(v);
+    ++this->it;
+    return *this;
+}
+
+template<typename _Tp> inline
+MatCommaInitializer_<_Tp>::operator Mat_<_Tp>() const
+{
+    CV_DbgAssert( this->it == ((const Mat_<_Tp>*)this->it.m)->end() );
+    return Mat_<_Tp>(*this->it.m);
+}
+
+
+template<typename _Tp, typename T2> static inline
+MatCommaInitializer_<_Tp> operator << (const Mat_<_Tp>& m, T2 val)
+{
+    MatCommaInitializer_<_Tp> commaInitializer((Mat_<_Tp>*)&m);
+    return (commaInitializer, val);
+}
+
+
+
+///////////////////////// Matrix Expressions ////////////////////////
+
+inline
+Mat& Mat::operator = (const MatExpr& e)
+{
+    e.op->assign(e, *this);
+    return *this;
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>::Mat_(const MatExpr& e)
+{
+    e.op->assign(e, *this, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+Mat_<_Tp>& Mat_<_Tp>::operator = (const MatExpr& e)
+{
+    e.op->assign(e, *this, traits::Type<_Tp>::value);
+    return *this;
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::zeros(int rows, int cols)
+{
+    return Mat::zeros(rows, cols, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::zeros(Size sz)
+{
+    return Mat::zeros(sz, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::ones(int rows, int cols)
+{
+    return Mat::ones(rows, cols, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::ones(Size sz)
+{
+    return Mat::ones(sz, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::eye(int rows, int cols)
+{
+    return Mat::eye(rows, cols, traits::Type<_Tp>::value);
+}
+
+template<typename _Tp> inline
+MatExpr Mat_<_Tp>::eye(Size sz)
+{
+    return Mat::eye(sz, traits::Type<_Tp>::value);
+}
+
+inline
+MatExpr::MatExpr()
+    : op(0), flags(0), a(Mat()), b(Mat()), c(Mat()), alpha(0), beta(0), s()
+{}
+
+inline
+MatExpr::MatExpr(const MatOp* _op, int _flags, const Mat& _a, const Mat& _b,
+                 const Mat& _c, double _alpha, double _beta, const Scalar& _s)
+    : op(_op), flags(_flags), a(_a), b(_b), c(_c), alpha(_alpha), beta(_beta), s(_s)
+{}
+
+inline
+MatExpr::operator Mat() const
+{
+    Mat m;
+    op->assign(*this, m);
+    return m;
+}
+
+template<typename _Tp> inline
+MatExpr::operator Mat_<_Tp>() const
+{
+    Mat_<_Tp> m;
+    op->assign(*this, m, traits::Type<_Tp>::value);
+    return m;
+}
+
+
+template<typename _Tp> static inline
+MatExpr min(const Mat_<_Tp>& a, const Mat_<_Tp>& b)
+{
+    return cv::min((const Mat&)a, (const Mat&)b);
+}
+
+template<typename _Tp> static inline
+MatExpr min(const Mat_<_Tp>& a, double s)
+{
+    return cv::min((const Mat&)a, s);
+}
+
+template<typename _Tp> static inline
+MatExpr min(double s, const Mat_<_Tp>& a)
+{
+    return cv::min((const Mat&)a, s);
+}
+
+template<typename _Tp> static inline
+MatExpr max(const Mat_<_Tp>& a, const Mat_<_Tp>& b)
+{
+    return cv::max((const Mat&)a, (const Mat&)b);
+}
+
+template<typename _Tp> static inline
+MatExpr max(const Mat_<_Tp>& a, double s)
+{
+    return cv::max((const Mat&)a, s);
+}
+
+template<typename _Tp> static inline
+MatExpr max(double s, const Mat_<_Tp>& a)
+{
+    return cv::max((const Mat&)a, s);
+}
+
+template<typename _Tp> static inline
+MatExpr abs(const Mat_<_Tp>& m)
+{
+    return cv::abs((const Mat&)m);
+}
