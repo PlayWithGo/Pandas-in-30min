@@ -3586,4 +3586,54 @@ CV_EXPORTS MatExpr operator / (const MatExpr& e, const Mat& m);
 CV_EXPORTS MatExpr operator / (const Mat& m, const MatExpr& e);
 CV_EXPORTS MatExpr operator / (const MatExpr& e, double s);
 CV_EXPORTS MatExpr operator / (double s, const MatExpr& e);
-CV_EXPORTS MatExpr operator / (const MatExpr& e1, c
+CV_EXPORTS MatExpr operator / (const MatExpr& e1, const MatExpr& e2);
+
+CV_EXPORTS MatExpr operator < (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator < (const Mat& a, double s);
+CV_EXPORTS MatExpr operator < (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator <= (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator <= (const Mat& a, double s);
+CV_EXPORTS MatExpr operator <= (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator == (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator == (const Mat& a, double s);
+CV_EXPORTS MatExpr operator == (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator != (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator != (const Mat& a, double s);
+CV_EXPORTS MatExpr operator != (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator >= (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator >= (const Mat& a, double s);
+CV_EXPORTS MatExpr operator >= (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator > (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator > (const Mat& a, double s);
+CV_EXPORTS MatExpr operator > (double s, const Mat& a);
+
+CV_EXPORTS MatExpr operator & (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator & (const Mat& a, const Scalar& s);
+CV_EXPORTS MatExpr operator & (const Scalar& s, const Mat& a);
+
+CV_EXPORTS MatExpr operator | (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator | (const Mat& a, const Scalar& s);
+CV_EXPORTS MatExpr operator | (const Scalar& s, const Mat& a);
+
+CV_EXPORTS MatExpr operator ^ (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator ^ (const Mat& a, const Scalar& s);
+CV_EXPORTS MatExpr operator ^ (const Scalar& s, const Mat& a);
+
+CV_EXPORTS MatExpr operator ~(const Mat& m);
+
+CV_EXPORTS MatExpr min(const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr min(const Mat& a, double s);
+CV_EXPORTS MatExpr min(double s, const Mat& a);
+
+CV_EXPORTS MatExpr max(const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr max(const Mat& a, double s);
+CV_EXPORTS MatExpr max(double s, const Mat& a);
+
+/** @brief Calculates an absolute value of each matrix element.
+
+abs is a meta-function that is expanded to one of ab
