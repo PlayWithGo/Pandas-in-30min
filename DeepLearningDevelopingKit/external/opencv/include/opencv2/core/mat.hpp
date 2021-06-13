@@ -3549,4 +3549,41 @@ public:
 
 //! @relates cv::MatExpr
 //! @{
-CV_EXPORTS MatExpr operator + (c
+CV_EXPORTS MatExpr operator + (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator + (const Mat& a, const Scalar& s);
+CV_EXPORTS MatExpr operator + (const Scalar& s, const Mat& a);
+CV_EXPORTS MatExpr operator + (const MatExpr& e, const Mat& m);
+CV_EXPORTS MatExpr operator + (const Mat& m, const MatExpr& e);
+CV_EXPORTS MatExpr operator + (const MatExpr& e, const Scalar& s);
+CV_EXPORTS MatExpr operator + (const Scalar& s, const MatExpr& e);
+CV_EXPORTS MatExpr operator + (const MatExpr& e1, const MatExpr& e2);
+
+CV_EXPORTS MatExpr operator - (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator - (const Mat& a, const Scalar& s);
+CV_EXPORTS MatExpr operator - (const Scalar& s, const Mat& a);
+CV_EXPORTS MatExpr operator - (const MatExpr& e, const Mat& m);
+CV_EXPORTS MatExpr operator - (const Mat& m, const MatExpr& e);
+CV_EXPORTS MatExpr operator - (const MatExpr& e, const Scalar& s);
+CV_EXPORTS MatExpr operator - (const Scalar& s, const MatExpr& e);
+CV_EXPORTS MatExpr operator - (const MatExpr& e1, const MatExpr& e2);
+
+CV_EXPORTS MatExpr operator - (const Mat& m);
+CV_EXPORTS MatExpr operator - (const MatExpr& e);
+
+CV_EXPORTS MatExpr operator * (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator * (const Mat& a, double s);
+CV_EXPORTS MatExpr operator * (double s, const Mat& a);
+CV_EXPORTS MatExpr operator * (const MatExpr& e, const Mat& m);
+CV_EXPORTS MatExpr operator * (const Mat& m, const MatExpr& e);
+CV_EXPORTS MatExpr operator * (const MatExpr& e, double s);
+CV_EXPORTS MatExpr operator * (double s, const MatExpr& e);
+CV_EXPORTS MatExpr operator * (const MatExpr& e1, const MatExpr& e2);
+
+CV_EXPORTS MatExpr operator / (const Mat& a, const Mat& b);
+CV_EXPORTS MatExpr operator / (const Mat& a, double s);
+CV_EXPORTS MatExpr operator / (double s, const Mat& a);
+CV_EXPORTS MatExpr operator / (const MatExpr& e, const Mat& m);
+CV_EXPORTS MatExpr operator / (const Mat& m, const MatExpr& e);
+CV_EXPORTS MatExpr operator / (const MatExpr& e, double s);
+CV_EXPORTS MatExpr operator / (double s, const MatExpr& e);
+CV_EXPORTS MatExpr operator / (const MatExpr& e1, c
