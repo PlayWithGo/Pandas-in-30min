@@ -3432,3 +3432,509 @@ MatExpr abs(const Mat_<_Tp>& m)
 {
     return cv::abs((const Mat&)m);
 }
+
+
+static inline
+Mat& operator += (Mat& a, const MatExpr& b)
+{
+    b.op->augAssignAdd(b, a);
+    return a;
+}
+
+static inline
+const Mat& operator += (const Mat& a, const MatExpr& b)
+{
+    b.op->augAssignAdd(b, (Mat&)a);
+    return a;
+}
+
+template<typename _Tp> static inline
+Mat_<_Tp>& operator += (Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignAdd(b, a);
+    return a;
+}
+
+template<typename _Tp> static inline
+const Mat_<_Tp>& operator += (const Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignAdd(b, (Mat&)a);
+    return a;
+}
+
+static inline
+Mat& operator -= (Mat& a, const MatExpr& b)
+{
+    b.op->augAssignSubtract(b, a);
+    return a;
+}
+
+static inline
+const Mat& operator -= (const Mat& a, const MatExpr& b)
+{
+    b.op->augAssignSubtract(b, (Mat&)a);
+    return a;
+}
+
+template<typename _Tp> static inline
+Mat_<_Tp>& operator -= (Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignSubtract(b, a);
+    return a;
+}
+
+template<typename _Tp> static inline
+const Mat_<_Tp>& operator -= (const Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignSubtract(b, (Mat&)a);
+    return a;
+}
+
+static inline
+Mat& operator *= (Mat& a, const MatExpr& b)
+{
+    b.op->augAssignMultiply(b, a);
+    return a;
+}
+
+static inline
+const Mat& operator *= (const Mat& a, const MatExpr& b)
+{
+    b.op->augAssignMultiply(b, (Mat&)a);
+    return a;
+}
+
+template<typename _Tp> static inline
+Mat_<_Tp>& operator *= (Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignMultiply(b, a);
+    return a;
+}
+
+template<typename _Tp> static inline
+const Mat_<_Tp>& operator *= (const Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignMultiply(b, (Mat&)a);
+    return a;
+}
+
+static inline
+Mat& operator /= (Mat& a, const MatExpr& b)
+{
+    b.op->augAssignDivide(b, a);
+    return a;
+}
+
+static inline
+const Mat& operator /= (const Mat& a, const MatExpr& b)
+{
+    b.op->augAssignDivide(b, (Mat&)a);
+    return a;
+}
+
+template<typename _Tp> static inline
+Mat_<_Tp>& operator /= (Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignDivide(b, a);
+    return a;
+}
+
+template<typename _Tp> static inline
+const Mat_<_Tp>& operator /= (const Mat_<_Tp>& a, const MatExpr& b)
+{
+    b.op->augAssignDivide(b, (Mat&)a);
+    return a;
+}
+
+
+//////////////////////////////// UMat ////////////////////////////////
+
+inline
+UMat::UMat(UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{}
+
+inline
+UMat::UMat(int _rows, int _cols, int _type, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create(_rows, _cols, _type);
+}
+
+inline
+UMat::UMat(int _rows, int _cols, int _type, const Scalar& _s, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create(_rows, _cols, _type);
+    *this = _s;
+}
+
+inline
+UMat::UMat(Size _sz, int _type, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create( _sz.height, _sz.width, _type );
+}
+
+inline
+UMat::UMat(Size _sz, int _type, const Scalar& _s, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create(_sz.height, _sz.width, _type);
+    *this = _s;
+}
+
+inline
+UMat::UMat(int _dims, const int* _sz, int _type, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create(_dims, _sz, _type);
+}
+
+inline
+UMat::UMat(int _dims, const int* _sz, int _type, const Scalar& _s, UMatUsageFlags _usageFlags)
+: flags(MAGIC_VAL), dims(0), rows(0), cols(0), allocator(0), usageFlags(_usageFlags), u(0), offset(0), size(&rows)
+{
+    create(_dims, _sz, _type);
+    *this = _s;
+}
+
+inline
+UMat::UMat(const UMat& m)
+: flags(m.flags), dims(m.dims), rows(m.rows), cols(m.cols), allocator(m.allocator),
+  usageFlags(m.usageFlags), u(m.u), offset(m.offset), size(&rows)
+{
+    addref();
+    if( m.dims <= 2 )
+    {
+        step[0] = m.step[0]; step[1] = m.step[1];
+    }
+    else
+    {
+        dims = 0;
+        copySize(m);
+    }
+}
+
+
+template<typename _Tp> inline
+UMat::UMat(const std::vector<_Tp>& vec, bool copyData)
+: flags(MAGIC_VAL | traits::Type<_Tp>::value | CV_MAT_CONT_FLAG), dims(2), rows((int)vec.size()),
+cols(1), allocator(0), usageFlags(USAGE_DEFAULT), u(0), offset(0), size(&rows)
+{
+    if(vec.empty())
+        return;
+    if( !copyData )
+    {
+        // !!!TODO!!!
+        CV_Error(Error::StsNotImplemented, "");
+    }
+    else
+        Mat((int)vec.size(), 1, traits::Type<_Tp>::value, (uchar*)&vec[0]).copyTo(*this);
+}
+
+inline
+UMat& UMat::operator = (const UMat& m)
+{
+    if( this != &m )
+    {
+        const_cast<UMat&>(m).addref();
+        release();
+        flags = m.flags;
+        if( dims <= 2 && m.dims <= 2 )
+        {
+            dims = m.dims;
+            rows = m.rows;
+            cols = m.cols;
+            step[0] = m.step[0];
+            step[1] = m.step[1];
+        }
+        else
+            copySize(m);
+        allocator = m.allocator;
+        if (usageFlags == USAGE_DEFAULT)
+            usageFlags = m.usageFlags;
+        u = m.u;
+        offset = m.offset;
+    }
+    return *this;
+}
+
+inline
+UMat UMat::row(int y) const
+{
+    return UMat(*this, Range(y, y + 1), Range::all());
+}
+
+inline
+UMat UMat::col(int x) const
+{
+    return UMat(*this, Range::all(), Range(x, x + 1));
+}
+
+inline
+UMat UMat::rowRange(int startrow, int endrow) const
+{
+    return UMat(*this, Range(startrow, endrow), Range::all());
+}
+
+inline
+UMat UMat::rowRange(const Range& r) const
+{
+    return UMat(*this, r, Range::all());
+}
+
+inline
+UMat UMat::colRange(int startcol, int endcol) const
+{
+    return UMat(*this, Range::all(), Range(startcol, endcol));
+}
+
+inline
+UMat UMat::colRange(const Range& r) const
+{
+    return UMat(*this, Range::all(), r);
+}
+
+inline
+UMat UMat::clone() const
+{
+    UMat m;
+    copyTo(m);
+    return m;
+}
+
+inline
+void UMat::assignTo( UMat& m, int _type ) const
+{
+    if( _type < 0 )
+        m = *this;
+    else
+        convertTo(m, _type);
+}
+
+inline
+void UMat::create(int _rows, int _cols, int _type, UMatUsageFlags _usageFlags)
+{
+    _type &= TYPE_MASK;
+    if( dims <= 2 && rows == _rows && cols == _cols && type() == _type && u )
+        return;
+    int sz[] = {_rows, _cols};
+    create(2, sz, _type, _usageFlags);
+}
+
+inline
+void UMat::create(Size _sz, int _type, UMatUsageFlags _usageFlags)
+{
+    create(_sz.height, _sz.width, _type, _usageFlags);
+}
+
+inline
+void UMat::addref()
+{
+    if( u )
+        CV_XADD(&(u->urefcount), 1);
+}
+
+inline void UMat::release()
+{
+    if( u && CV_XADD(&(u->urefcount), -1) == 1 )
+        deallocate();
+    for(int i = 0; i < dims; i++)
+        size.p[i] = 0;
+    u = 0;
+}
+
+inline
+UMat UMat::operator()( Range _rowRange, Range _colRange ) const
+{
+    return UMat(*this, _rowRange, _colRange);
+}
+
+inline
+UMat UMat::operator()( const Rect& roi ) const
+{
+    return UMat(*this, roi);
+}
+
+inline
+UMat UMat::operator()(const Range* ranges) const
+{
+    return UMat(*this, ranges);
+}
+
+inline
+UMat UMat::operator()(const std::vector<Range>& ranges) const
+{
+    return UMat(*this, ranges);
+}
+
+inline
+bool UMat::isContinuous() const
+{
+    return (flags & CONTINUOUS_FLAG) != 0;
+}
+
+inline
+bool UMat::isSubmatrix() const
+{
+    return (flags & SUBMATRIX_FLAG) != 0;
+}
+
+inline
+size_t UMat::elemSize() const
+{
+    return dims > 0 ? step.p[dims - 1] : 0;
+}
+
+inline
+size_t UMat::elemSize1() const
+{
+    return CV_ELEM_SIZE1(flags);
+}
+
+inline
+int UMat::type() const
+{
+    return CV_MAT_TYPE(flags);
+}
+
+inline
+int UMat::depth() const
+{
+    return CV_MAT_DEPTH(flags);
+}
+
+inline
+int UMat::channels() const
+{
+    return CV_MAT_CN(flags);
+}
+
+inline
+size_t UMat::step1(int i) const
+{
+    return step.p[i] / elemSize1();
+}
+
+inline
+bool UMat::empty() const
+{
+    return u == 0 || total() == 0 || dims == 0;
+}
+
+inline
+size_t UMat::total() const
+{
+    if( dims <= 2 )
+        return (size_t)rows * cols;
+    size_t p = 1;
+    for( int i = 0; i < dims; i++ )
+        p *= size[i];
+    return p;
+}
+
+#ifdef CV_CXX_MOVE_SEMANTICS
+
+inline
+UMat::UMat(UMat&& m)
+: flags(m.flags), dims(m.dims), rows(m.rows), cols(m.cols), allocator(m.allocator),
+  usageFlags(m.usageFlags), u(m.u), offset(m.offset), size(&rows)
+{
+    if (m.dims <= 2)  // move new step/size info
+    {
+        step[0] = m.step[0];
+        step[1] = m.step[1];
+    }
+    else
+    {
+        CV_DbgAssert(m.step.p != m.step.buf);
+        step.p = m.step.p;
+        size.p = m.size.p;
+        m.step.p = m.step.buf;
+        m.size.p = &m.rows;
+    }
+    m.flags = MAGIC_VAL; m.dims = m.rows = m.cols = 0;
+    m.allocator = NULL;
+    m.u = NULL;
+    m.offset = 0;
+}
+
+inline
+UMat& UMat::operator = (UMat&& m)
+{
+    if (this == &m)
+      return *this;
+    release();
+    flags = m.flags; dims = m.dims; rows = m.rows; cols = m.cols;
+    allocator = m.allocator; usageFlags = m.usageFlags;
+    u = m.u;
+    offset = m.offset;
+    if (step.p != step.buf) // release self step/size
+    {
+        fastFree(step.p);
+        step.p = step.buf;
+        size.p = &rows;
+    }
+    if (m.dims <= 2) // move new step/size info
+    {
+        step[0] = m.step[0];
+        step[1] = m.step[1];
+    }
+    else
+    {
+        CV_DbgAssert(m.step.p != m.step.buf);
+        step.p = m.step.p;
+        size.p = m.size.p;
+        m.step.p = m.step.buf;
+        m.size.p = &m.rows;
+    }
+    m.flags = MAGIC_VAL; m.dims = m.rows = m.cols = 0;
+    m.allocator = NULL;
+    m.u = NULL;
+    m.offset = 0;
+    return *this;
+}
+
+#endif
+
+
+inline bool UMatData::hostCopyObsolete() const { return (flags & HOST_COPY_OBSOLETE) != 0; }
+inline bool UMatData::deviceCopyObsolete() const { return (flags & DEVICE_COPY_OBSOLETE) != 0; }
+inline bool UMatData::deviceMemMapped() const { return (flags & DEVICE_MEM_MAPPED) != 0; }
+inline bool UMatData::copyOnMap() const { return (flags & COPY_ON_MAP) != 0; }
+inline bool UMatData::tempUMat() const { return (flags & TEMP_UMAT) != 0; }
+inline bool UMatData::tempCopiedUMat() const { return (flags & TEMP_COPIED_UMAT) == TEMP_COPIED_UMAT; }
+
+inline void UMatData::markDeviceMemMapped(bool flag)
+{
+  if(flag)
+    flags |= DEVICE_MEM_MAPPED;
+  else
+    flags &= ~DEVICE_MEM_MAPPED;
+}
+
+inline void UMatData::markHostCopyObsolete(bool flag)
+{
+    if(flag)
+        flags |= HOST_COPY_OBSOLETE;
+    else
+        flags &= ~HOST_COPY_OBSOLETE;
+}
+inline void UMatData::markDeviceCopyObsolete(bool flag)
+{
+    if(flag)
+        flags |= DEVICE_COPY_OBSOLETE;
+    else
+        flags &= ~DEVICE_COPY_OBSOLETE;
+}
+
+//! @endcond
+
+} //cv
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
+
+#endif
