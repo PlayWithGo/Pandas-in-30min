@@ -116,4 +116,13 @@ inline float32x4_t cv_vsqrtq_f32(float32x4_t val)
     return cv_vrecpq_f32(cv_vrsqrtq_f32(val));
 }
 
-inline float32x2_t cv_vsqrt_f32(float32x2_t 
+inline float32x2_t cv_vsqrt_f32(float32x2_t val)
+{
+    return cv_vrecp_f32(cv_vrsqrt_f32(val));
+}
+
+#endif
+
+//! @}
+
+#endif // OPENCV_HAL_NEON_UTILS_HPP
