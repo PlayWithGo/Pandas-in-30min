@@ -124,4 +124,82 @@ public:
     int halfFPConfig() const;
 
     bool endianLittle() const;
-    bool errorCorrectionSupp
+    bool errorCorrectionSupport() const;
+
+    enum
+    {
+        EXEC_KERNEL=(1 << 0),
+        EXEC_NATIVE_KERNEL=(1 << 1)
+    };
+    int executionCapabilities() const;
+
+    size_t globalMemCacheSize() const;
+
+    enum
+    {
+        NO_CACHE=0,
+        READ_ONLY_CACHE=1,
+        READ_WRITE_CACHE=2
+    };
+    int globalMemCacheType() const;
+    int globalMemCacheLineSize() const;
+    size_t globalMemSize() const;
+
+    size_t localMemSize() const;
+    enum
+    {
+        NO_LOCAL_MEM=0,
+        LOCAL_IS_LOCAL=1,
+        LOCAL_IS_GLOBAL=2
+    };
+    int localMemType() const;
+    bool hostUnifiedMemory() const;
+
+    bool imageSupport() const;
+
+    bool imageFromBufferSupport() const;
+    uint imagePitchAlignment() const;
+    uint imageBaseAddressAlignment() const;
+
+    /// deprecated, use isExtensionSupported() method (probably with "cl_khr_subgroups" value)
+    bool intelSubgroupsSupport() const;
+
+    size_t image2DMaxWidth() const;
+    size_t image2DMaxHeight() const;
+
+    size_t image3DMaxWidth() const;
+    size_t image3DMaxHeight() const;
+    size_t image3DMaxDepth() const;
+
+    size_t imageMaxBufferSize() const;
+    size_t imageMaxArraySize() const;
+
+    enum
+    {
+        UNKNOWN_VENDOR=0,
+        VENDOR_AMD=1,
+        VENDOR_INTEL=2,
+        VENDOR_NVIDIA=3
+    };
+    int vendorID() const;
+    // FIXIT
+    // dev.isAMD() doesn't work for OpenCL CPU devices from AMD OpenCL platform.
+    // This method should use platform name instead of vendor name.
+    // After fix restore code in arithm.cpp: ocl_compare()
+    inline bool isAMD() const { return vendorID() == VENDOR_AMD; }
+    inline bool isIntel() const { return vendorID() == VENDOR_INTEL; }
+    inline bool isNVidia() const { return vendorID() == VENDOR_NVIDIA; }
+
+    int maxClockFrequency() const;
+    int maxComputeUnits() const;
+    int maxConstantArgs() const;
+    size_t maxConstantBufferSize() const;
+
+    size_t maxMemAllocSize() const;
+    size_t maxParameterSize() const;
+
+    int maxReadImageArgs() const;
+    int maxWriteImageArgs() const;
+    int maxSamplers() const;
+
+    size_t maxWorkGroupSize() 
