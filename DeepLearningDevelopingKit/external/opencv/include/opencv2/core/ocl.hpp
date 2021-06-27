@@ -202,4 +202,88 @@ public:
     int maxWriteImageArgs() const;
     int maxSamplers() const;
 
-    size_t maxWorkGroupSize() 
+    size_t maxWorkGroupSize() const;
+    int maxWorkItemDims() const;
+    void maxWorkItemSizes(size_t*) const;
+
+    int memBaseAddrAlign() const;
+
+    int nativeVectorWidthChar() const;
+    int nativeVectorWidthShort() const;
+    int nativeVectorWidthInt() const;
+    int nativeVectorWidthLong() const;
+    int nativeVectorWidthFloat() const;
+    int nativeVectorWidthDouble() const;
+    int nativeVectorWidthHalf() const;
+
+    int preferredVectorWidthChar() const;
+    int preferredVectorWidthShort() const;
+    int preferredVectorWidthInt() const;
+    int preferredVectorWidthLong() const;
+    int preferredVectorWidthFloat() const;
+    int preferredVectorWidthDouble() const;
+    int preferredVectorWidthHalf() const;
+
+    size_t printfBufferSize() const;
+    size_t profilingTimerResolution() const;
+
+    static const Device& getDefault();
+
+protected:
+    struct Impl;
+    Impl* p;
+};
+
+
+class CV_EXPORTS Context
+{
+public:
+    Context();
+    explicit Context(int dtype);
+    ~Context();
+    Context(const Context& c);
+    Context& operator = (const Context& c);
+
+    bool create();
+    bool create(int dtype);
+    size_t ndevices() const;
+    const Device& device(size_t idx) const;
+    Program getProg(const ProgramSource& prog,
+                    const String& buildopt, String& errmsg);
+    void unloadProg(Program& prog);
+
+    static Context& getDefault(bool initialize = true);
+    void* ptr() const;
+
+    friend void initializeContextFromHandle(Context& ctx, void* platform, void* context, void* device);
+
+    bool useSVM() const;
+    void setUseSVM(bool enabled);
+
+    struct Impl;
+    inline Impl* getImpl() const { return (Impl*)p; }
+//protected:
+    Impl* p;
+};
+
+class CV_EXPORTS Platform
+{
+public:
+    Platform();
+    ~Platform();
+    Platform(const Platform& p);
+    Platform& operator = (const Platform& p);
+
+    void* ptr() const;
+    static Platform& getDefault();
+
+    friend void initializeContextFromHandle(Context& ctx, void* platform, void* context, void* device);
+protected:
+    struct Impl;
+    Impl* p;
+};
+
+/** @brief Attaches OpenCL context to OpenCV
+@note
+  OpenCV will check if available OpenCL platform has platformName name, then assign context to
+ 
