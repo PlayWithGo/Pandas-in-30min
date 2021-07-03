@@ -335,4 +335,58 @@ public:
     void* ptr() const;
     static Queue& getDefault();
 
-    /// @brief Returns OpenCL command queue wit
+    /// @brief Returns OpenCL command queue with enable profiling mode support
+    const Queue& getProfilingQueue() const;
+
+    struct Impl; friend struct Impl;
+    inline Impl* getImpl() const { return p; }
+protected:
+    Impl* p;
+};
+
+
+class CV_EXPORTS KernelArg
+{
+public:
+    enum { LOCAL=1, READ_ONLY=2, WRITE_ONLY=4, READ_WRITE=6, CONSTANT=8, PTR_ONLY = 16, NO_SIZE=256 };
+    KernelArg(int _flags, UMat* _m, int wscale=1, int iwscale=1, const void* _obj=0, size_t _sz=0);
+    KernelArg();
+
+    static KernelArg Local() { return KernelArg(LOCAL, 0); }
+    static KernelArg PtrWriteOnly(const UMat& m)
+    { return KernelArg(PTR_ONLY+WRITE_ONLY, (UMat*)&m); }
+    static KernelArg PtrReadOnly(const UMat& m)
+    { return KernelArg(PTR_ONLY+READ_ONLY, (UMat*)&m); }
+    static KernelArg PtrReadWrite(const UMat& m)
+    { return KernelArg(PTR_ONLY+READ_WRITE, (UMat*)&m); }
+    static KernelArg ReadWrite(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(READ_WRITE, (UMat*)&m, wscale, iwscale); }
+    static KernelArg ReadWriteNoSize(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(READ_WRITE+NO_SIZE, (UMat*)&m, wscale, iwscale); }
+    static KernelArg ReadOnly(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(READ_ONLY, (UMat*)&m, wscale, iwscale); }
+    static KernelArg WriteOnly(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(WRITE_ONLY, (UMat*)&m, wscale, iwscale); }
+    static KernelArg ReadOnlyNoSize(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(READ_ONLY+NO_SIZE, (UMat*)&m, wscale, iwscale); }
+    static KernelArg WriteOnlyNoSize(const UMat& m, int wscale=1, int iwscale=1)
+    { return KernelArg(WRITE_ONLY+NO_SIZE, (UMat*)&m, wscale, iwscale); }
+    static KernelArg Constant(const Mat& m);
+    template<typename _Tp> static KernelArg Constant(const _Tp* arr, size_t n)
+    { return KernelArg(CONSTANT, 0, 1, 1, (void*)arr, n); }
+
+    int flags;
+    UMat* m;
+    const void* obj;
+    size_t sz;
+    int wscale, iwscale;
+};
+
+
+class CV_EXPORTS Kernel
+{
+public:
+    Kernel();
+    Kernel(const char* kname, const Program& prog);
+    Kernel(const char* kname, const ProgramSource& prog,
+           const Strin
