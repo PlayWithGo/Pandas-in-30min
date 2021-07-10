@@ -597,3 +597,65 @@ class CV_EXPORTS Program
 {
 public:
     Program();
+    Program(const ProgramSource& src,
+            const String& buildflags, String& errmsg);
+    Program(const Program& prog);
+
+    Program& operator = (const Program& prog);
+    ~Program();
+
+    bool create(const ProgramSource& src,
+                const String& buildflags, String& errmsg);
+
+    void* ptr() const;
+
+    /**
+     * @brief Query device-specific program binary.
+     *
+     * Returns RAW OpenCL executable binary without additional attachments.
+     *
+     * @sa ProgramSource::fromBinary
+     *
+     * @param[out] binary output buffer
+     */
+    void getBinary(std::vector<char>& binary) const;
+
+    struct Impl; friend struct Impl;
+    inline Impl* getImpl() const { return (Impl*)p; }
+protected:
+    Impl* p;
+public:
+#ifndef OPENCV_REMOVE_DEPRECATED_API
+    // TODO Remove this
+    CV_DEPRECATED bool read(const String& buf, const String& buildflags); // removed, use ProgramSource instead
+    CV_DEPRECATED bool write(String& buf) const; // removed, use getBinary() method instead (RAW OpenCL binary)
+    CV_DEPRECATED const ProgramSource& source() const; // implementation removed
+    CV_DEPRECATED String getPrefix() const; // deprecated, implementation replaced
+    CV_DEPRECATED static String getPrefix(const String& buildflags); // deprecated, implementation replaced
+#endif
+};
+
+
+class CV_EXPORTS ProgramSource
+{
+public:
+    typedef uint64 hash_t; // deprecated
+
+    ProgramSource();
+    explicit ProgramSource(const String& module, const String& name, const String& codeStr, const String& codeHash);
+    explicit ProgramSource(const String& prog); // deprecated
+    explicit ProgramSource(const char* prog); // deprecated
+    ~ProgramSource();
+    ProgramSource(const ProgramSource& prog);
+    ProgramSource& operator = (const ProgramSource& prog);
+
+    const String& source() const; // deprecated
+    hash_t hash() const; // deprecated
+
+
+    /** @brief Describe OpenCL program binary.
+     * Do not call clCreateProgramWithBinary() and/or clBuildProgram().
+     *
+     * Caller should guarantee binary buffer lifetime greater than ProgramSource object (and any of its copies).
+     *
+     * This kind of bin
