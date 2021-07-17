@@ -754,4 +754,59 @@ CV_EXPORTS int predictOptimalVectorWidth(InputArray src1, InputArray src2 = noAr
                                          InputArray src7 = noArray(), InputArray src8 = noArray(), InputArray src9 = noArray(),
                                          OclVectorStrategy strat = OCL_VECTOR_DEFAULT);
 
-CV_EXPORTS int chec
+CV_EXPORTS int checkOptimalVectorWidth(const int *vectorWidths,
+                                       InputArray src1, InputArray src2 = noArray(), InputArray src3 = noArray(),
+                                       InputArray src4 = noArray(), InputArray src5 = noArray(), InputArray src6 = noArray(),
+                                       InputArray src7 = noArray(), InputArray src8 = noArray(), InputArray src9 = noArray(),
+                                       OclVectorStrategy strat = OCL_VECTOR_DEFAULT);
+
+// with OCL_VECTOR_MAX strategy
+CV_EXPORTS int predictOptimalVectorWidthMax(InputArray src1, InputArray src2 = noArray(), InputArray src3 = noArray(),
+                                            InputArray src4 = noArray(), InputArray src5 = noArray(), InputArray src6 = noArray(),
+                                            InputArray src7 = noArray(), InputArray src8 = noArray(), InputArray src9 = noArray());
+
+CV_EXPORTS void buildOptionsAddMatrixDescription(String& buildOptions, const String& name, InputArray _m);
+
+class CV_EXPORTS Image2D
+{
+public:
+    Image2D();
+
+    /**
+    @param src UMat object from which to get image properties and data
+    @param norm flag to enable the use of normalized channel data types
+    @param alias flag indicating that the image should alias the src UMat. If true, changes to the
+        image or src will be reflected in both objects.
+    */
+    explicit Image2D(const UMat &src, bool norm = false, bool alias = false);
+    Image2D(const Image2D & i);
+    ~Image2D();
+
+    Image2D & operator = (const Image2D & i);
+
+    /** Indicates if creating an aliased image should succeed.
+    Depends on the underlying platform and the dimensions of the UMat.
+    */
+    static bool canCreateAlias(const UMat &u);
+
+    /** Indicates if the image format is supported.
+    */
+    static bool isFormatSupported(int depth, int cn, bool norm);
+
+    void* ptr() const;
+protected:
+    struct Impl;
+    Impl* p;
+};
+
+class CV_EXPORTS Timer
+{
+public:
+    Timer(const Queue& q);
+    ~Timer();
+    void start();
+    void stop();
+
+    uint64 durationNS() const; //< duration in nanoseconds
+
+protected
