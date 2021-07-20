@@ -61,4 +61,71 @@ namespace cv
 namespace internal
 {
 
-t
+template<typename _Tp, int m> struct Matx_FastInvOp
+{
+    bool operator()(const Matx<_Tp, m, m>& a, Matx<_Tp, m, m>& b, int method) const
+    {
+        Matx<_Tp, m, m> temp = a;
+
+        // assume that b is all 0's on input => make it a unity matrix
+        for( int i = 0; i < m; i++ )
+            b(i, i) = (_Tp)1;
+
+        if( method == DECOMP_CHOLESKY )
+            return Cholesky(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m);
+
+        return LU(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m) != 0;
+    }
+};
+
+template<typename _Tp> struct Matx_FastInvOp<_Tp, 2>
+{
+    bool operator()(const Matx<_Tp, 2, 2>& a, Matx<_Tp, 2, 2>& b, int) const
+    {
+        _Tp d = (_Tp)determinant(a);
+        if( d == 0 )
+            return false;
+        d = 1/d;
+        b(1,1) = a(0,0)*d;
+        b(0,0) = a(1,1)*d;
+        b(0,1) = -a(0,1)*d;
+        b(1,0) = -a(1,0)*d;
+        return true;
+    }
+};
+
+template<typename _Tp> struct Matx_FastInvOp<_Tp, 3>
+{
+    bool operator()(const Matx<_Tp, 3, 3>& a, Matx<_Tp, 3, 3>& b, int) const
+    {
+        _Tp d = (_Tp)determinant(a);
+        if( d == 0 )
+            return false;
+        d = 1/d;
+        b(0,0) = (a(1,1) * a(2,2) - a(1,2) * a(2,1)) * d;
+        b(0,1) = (a(0,2) * a(2,1) - a(0,1) * a(2,2)) * d;
+        b(0,2) = (a(0,1) * a(1,2) - a(0,2) * a(1,1)) * d;
+
+        b(1,0) = (a(1,2) * a(2,0) - a(1,0) * a(2,2)) * d;
+        b(1,1) = (a(0,0) * a(2,2) - a(0,2) * a(2,0)) * d;
+        b(1,2) = (a(0,2) * a(1,0) - a(0,0) * a(1,2)) * d;
+
+        b(2,0) = (a(1,0) * a(2,1) - a(1,1) * a(2,0)) * d;
+        b(2,1) = (a(0,1) * a(2,0) - a(0,0) * a(2,1)) * d;
+        b(2,2) = (a(0,0) * a(1,1) - a(0,1) * a(1,0)) * d;
+        return true;
+    }
+};
+
+
+template<typename _Tp, int m, int n> struct Matx_FastSolveOp
+{
+    bool operator()(const Matx<_Tp, m, m>& a, const Matx<_Tp, m, n>& b,
+                    Matx<_Tp, m, n>& x, int method) const
+    {
+        Matx<_Tp, m, m> temp = a;
+        x = b;
+        if( method == DECOMP_CHOLESKY )
+            return Cholesky(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n);
+
+        return LU(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(
