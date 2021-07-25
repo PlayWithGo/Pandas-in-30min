@@ -128,4 +128,79 @@ template<typename _Tp, int m, int n> struct Matx_FastSolveOp
         if( method == DECOMP_CHOLESKY )
             return Cholesky(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n);
 
-        return LU(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(
+        return LU(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n) != 0;
+    }
+};
+
+template<typename _Tp> struct Matx_FastSolveOp<_Tp, 2, 1>
+{
+    bool operator()(const Matx<_Tp, 2, 2>& a, const Matx<_Tp, 2, 1>& b,
+                    Matx<_Tp, 2, 1>& x, int) const
+    {
+        _Tp d = (_Tp)determinant(a);
+        if( d == 0 )
+            return false;
+        d = 1/d;
+        x(0) = (b(0)*a(1,1) - b(1)*a(0,1))*d;
+        x(1) = (b(1)*a(0,0) - b(0)*a(1,0))*d;
+        return true;
+    }
+};
+
+template<typename _Tp> struct Matx_FastSolveOp<_Tp, 3, 1>
+{
+    bool operator()(const Matx<_Tp, 3, 3>& a, const Matx<_Tp, 3, 1>& b,
+                    Matx<_Tp, 3, 1>& x, int) const
+    {
+        _Tp d = (_Tp)determinant(a);
+        if( d == 0 )
+            return false;
+        d = 1/d;
+        x(0) = d*(b(0)*(a(1,1)*a(2,2) - a(1,2)*a(2,1)) -
+                a(0,1)*(b(1)*a(2,2) - a(1,2)*b(2)) +
+                a(0,2)*(b(1)*a(2,1) - a(1,1)*b(2)));
+
+        x(1) = d*(a(0,0)*(b(1)*a(2,2) - a(1,2)*b(2)) -
+                b(0)*(a(1,0)*a(2,2) - a(1,2)*a(2,0)) +
+                a(0,2)*(a(1,0)*b(2) - b(1)*a(2,0)));
+
+        x(2) = d*(a(0,0)*(a(1,1)*b(2) - b(1)*a(2,1)) -
+                a(0,1)*(a(1,0)*b(2) - b(1)*a(2,0)) +
+                b(0)*(a(1,0)*a(2,1) - a(1,1)*a(2,0)));
+        return true;
+    }
+};
+
+} // internal
+
+template<typename _Tp, int m, int n> inline
+Matx<_Tp,m,n> Matx<_Tp,m,n>::randu(_Tp a, _Tp b)
+{
+    Matx<_Tp,m,n> M;
+    cv::randu(M, Scalar(a), Scalar(b));
+    return M;
+}
+
+template<typename _Tp, int m, int n> inline
+Matx<_Tp,m,n> Matx<_Tp,m,n>::randn(_Tp a, _Tp b)
+{
+    Matx<_Tp,m,n> M;
+    cv::randn(M, Scalar(a), Scalar(b));
+    return M;
+}
+
+template<typename _Tp, int m, int n> inline
+Matx<_Tp, n, m> Matx<_Tp, m, n>::inv(int method, bool *p_is_ok /*= NULL*/) const
+{
+    Matx<_Tp, n, m> b;
+    bool ok;
+    if( method == DECOMP_LU || method == DECOMP_CHOLESKY )
+        ok = cv::internal::Matx_FastInvOp<_Tp, m>()(*this, b, method);
+    else
+    {
+        Mat A(*this, false), B(b, false);
+        ok = (invert(A, B, method) != 0);
+    }
+    if( NULL != p_is_ok ) { *p_is_ok = ok; }
+    return ok ? b : Matx<_Tp, n, m>::zeros();
+}
