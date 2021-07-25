@@ -204,3 +204,55 @@ Matx<_Tp, n, m> Matx<_Tp, m, n>::inv(int method, bool *p_is_ok /*= NULL*/) const
     if( NULL != p_is_ok ) { *p_is_ok = ok; }
     return ok ? b : Matx<_Tp, n, m>::zeros();
 }
+
+template<typename _Tp, int m, int n> template<int l> inline
+Matx<_Tp, n, l> Matx<_Tp, m, n>::solve(const Matx<_Tp, m, l>& rhs, int method) const
+{
+    Matx<_Tp, n, l> x;
+    bool ok;
+    if( method == DECOMP_LU || method == DECOMP_CHOLESKY )
+        ok = cv::internal::Matx_FastSolveOp<_Tp, m, l>()(*this, rhs, x, method);
+    else
+    {
+        Mat A(*this, false), B(rhs, false), X(x, false);
+        ok = cv::solve(A, B, X, method);
+    }
+
+    return ok ? x : Matx<_Tp, n, l>::zeros();
+}
+
+
+
+////////////////////////// Augmenting algebraic & logical operations //////////////////////////
+
+#define CV_MAT_AUG_OPERATOR1(op, cvop, A, B) \
+    static inline A& operator op (A& a, const B& b) { cvop; return a; }
+
+#define CV_MAT_AUG_OPERATOR(op, cvop, A, B)   \
+    CV_MAT_AUG_OPERATOR1(op, cvop, A, B)      \
+    CV_MAT_AUG_OPERATOR1(op, cvop, const A, B)
+
+#define CV_MAT_AUG_OPERATOR_T(op, cvop, A, B)                   \
+    template<typename _Tp> CV_MAT_AUG_OPERATOR1(op, cvop, A, B) \
+    template<typename _Tp> CV_MAT_AUG_OPERATOR1(op, cvop, const A, B)
+
+CV_MAT_AUG_OPERATOR  (+=, cv::add(a,b,a), Mat, Mat)
+CV_MAT_AUG_OPERATOR  (+=, cv::add(a,b,a), Mat, Scalar)
+CV_MAT_AUG_OPERATOR_T(+=, cv::add(a,b,a), Mat_<_Tp>, Mat)
+CV_MAT_AUG_OPERATOR_T(+=, cv::add(a,b,a), Mat_<_Tp>, Scalar)
+CV_MAT_AUG_OPERATOR_T(+=, cv::add(a,b,a), Mat_<_Tp>, Mat_<_Tp>)
+
+CV_MAT_AUG_OPERATOR  (-=, cv::subtract(a,b,a), Mat, Mat)
+CV_MAT_AUG_OPERATOR  (-=, cv::subtract(a,b,a), Mat, Scalar)
+CV_MAT_AUG_OPERATOR_T(-=, cv::subtract(a,b,a), Mat_<_Tp>, Mat)
+CV_MAT_AUG_OPERATOR_T(-=, cv::subtract(a,b,a), Mat_<_Tp>, Scalar)
+CV_MAT_AUG_OPERATOR_T(-=, cv::subtract(a,b,a), Mat_<_Tp>, Mat_<_Tp>)
+
+CV_MAT_AUG_OPERATOR  (*=, cv::gemm(a, b, 1, Mat(), 0, a, 0), Mat, Mat)
+CV_MAT_AUG_OPERATOR_T(*=, cv::gemm(a, b, 1, Mat(), 0, a, 0), Mat_<_Tp>, Mat)
+CV_MAT_AUG_OPERATOR_T(*=, cv::gemm(a, b, 1, Mat(), 0, a, 0), Mat_<_Tp>, Mat_<_Tp>)
+CV_MAT_AUG_OPERATOR  (*=, a.convertTo(a, -1, b), Mat, double)
+CV_MAT_AUG_OPERATOR_T(*=, a.convertTo(a, -1, b), Mat_<_Tp>, double)
+
+CV_MAT_AUG_OPERATOR  (/=, cv::divide(a,b,a), Mat, Mat)
+CV_MAT_AUG_OPERATOR_T(/=, cv::divide(a,b,a), Mat_
