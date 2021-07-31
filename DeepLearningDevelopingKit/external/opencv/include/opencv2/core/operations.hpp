@@ -347,4 +347,81 @@ inline unsigned RNG::operator ()()           { return next(); }
 
 inline int    RNG::uniform(int a, int b)       { return a == b ? a : (int)(next() % (b - a) + a); }
 inline float  RNG::uniform(float a, float b)   { return ((float)*this)*(b - a) + a; }
-inline double RNG::uniform(double a
+inline double RNG::uniform(double a, double b) { return ((double)*this)*(b - a) + a; }
+
+inline bool RNG::operator ==(const RNG& other) const { return state == other.state; }
+
+inline unsigned RNG::next()
+{
+    state = (uint64)(unsigned)state* /*CV_RNG_COEFF*/ 4164903690U + (unsigned)(state >> 32);
+    return (unsigned)state;
+}
+
+//! returns the next unifomly-distributed random number of the specified type
+template<typename _Tp> static inline _Tp randu()
+{
+  return (_Tp)theRNG();
+}
+
+///////////////////////////////// Formatted string generation /////////////////////////////////
+
+/** @brief Returns a text string formatted using the printf-like expression.
+
+The function acts like sprintf but forms and returns an STL string. It can be used to form an error
+message in the Exception constructor.
+@param fmt printf-compatible formatting specifiers.
+ */
+CV_EXPORTS String format( const char* fmt, ... );
+
+///////////////////////////////// Formatted output of cv::Mat /////////////////////////////////
+
+static inline
+Ptr<Formatted> format(InputArray mtx, int fmt)
+{
+    return Formatter::get(fmt)->format(mtx.getMat());
+}
+
+static inline
+int print(Ptr<Formatted> fmtd, FILE* stream = stdout)
+{
+    int written = 0;
+    fmtd->reset();
+    for(const char* str = fmtd->next(); str; str = fmtd->next())
+        written += fputs(str, stream);
+
+    return written;
+}
+
+static inline
+int print(const Mat& mtx, FILE* stream = stdout)
+{
+    return print(Formatter::get()->format(mtx), stream);
+}
+
+static inline
+int print(const UMat& mtx, FILE* stream = stdout)
+{
+    return print(Formatter::get()->format(mtx.getMat(ACCESS_READ)), stream);
+}
+
+template<typename _Tp> static inline
+int print(const std::vector<Point_<_Tp> >& vec, FILE* stream = stdout)
+{
+    return print(Formatter::get()->format(Mat(vec)), stream);
+}
+
+template<typename _Tp> static inline
+int print(const std::vector<Point3_<_Tp> >& vec, FILE* stream = stdout)
+{
+    return print(Formatter::get()->format(Mat(vec)), stream);
+}
+
+template<typename _Tp, int m, int n> static inline
+int print(const Matx<_Tp, m, n>& matx, FILE* stream = stdout)
+{
+    return print(Formatter::get()->format(cv::Mat(matx)), stream);
+}
+
+//! @endcond
+
+/****
