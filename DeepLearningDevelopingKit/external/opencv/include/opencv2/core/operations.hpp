@@ -301,4 +301,50 @@ template<typename _Tp, int m, int n, int nm> inline void
     SVD::compute( const Matx<_Tp, m, n>& a, Matx<_Tp, nm, 1>& w, Matx<_Tp, m, nm>& u, Matx<_Tp, n, nm>& vt )
 {
     CV_StaticAssert( nm == MIN(m, n), "Invalid size of output vector.");
-    Mat _a(a, false), _u(u, false), _w(w, false), _vt(vt, f
+    Mat _a(a, false), _u(u, false), _w(w, false), _vt(vt, false);
+    SVD::compute(_a, _w, _u, _vt);
+    CV_Assert(_w.data == (uchar*)&w.val[0] && _u.data == (uchar*)&u.val[0] && _vt.data == (uchar*)&vt.val[0]);
+}
+
+template<typename _Tp, int m, int n, int nm> inline void
+SVD::compute( const Matx<_Tp, m, n>& a, Matx<_Tp, nm, 1>& w )
+{
+    CV_StaticAssert( nm == MIN(m, n), "Invalid size of output vector.");
+    Mat _a(a, false), _w(w, false);
+    SVD::compute(_a, _w);
+    CV_Assert(_w.data == (uchar*)&w.val[0]);
+}
+
+template<typename _Tp, int m, int n, int nm, int nb> inline void
+SVD::backSubst( const Matx<_Tp, nm, 1>& w, const Matx<_Tp, m, nm>& u,
+                const Matx<_Tp, n, nm>& vt, const Matx<_Tp, m, nb>& rhs,
+                Matx<_Tp, n, nb>& dst )
+{
+    CV_StaticAssert( nm == MIN(m, n), "Invalid size of output vector.");
+    Mat _u(u, false), _w(w, false), _vt(vt, false), _rhs(rhs, false), _dst(dst, false);
+    SVD::backSubst(_w, _u, _vt, _rhs, _dst);
+    CV_Assert(_dst.data == (uchar*)&dst.val[0]);
+}
+
+
+
+/////////////////////////////////// Multiply-with-Carry RNG ///////////////////////////////////
+
+inline RNG::RNG()              { state = 0xffffffff; }
+inline RNG::RNG(uint64 _state) { state = _state ? _state : 0xffffffff; }
+
+inline RNG::operator uchar()    { return (uchar)next(); }
+inline RNG::operator schar()    { return (schar)next(); }
+inline RNG::operator ushort()   { return (ushort)next(); }
+inline RNG::operator short()    { return (short)next(); }
+inline RNG::operator int()      { return (int)next(); }
+inline RNG::operator unsigned() { return next(); }
+inline RNG::operator float()    { return next()*2.3283064365386962890625e-10f; }
+inline RNG::operator double()   { unsigned t = next(); return (((uint64)t << 32) | next()) * 5.4210108624275221700372640043497e-20; }
+
+inline unsigned RNG::operator ()(unsigned N) { return (unsigned)uniform(0,N); }
+inline unsigned RNG::operator ()()           { return next(); }
+
+inline int    RNG::uniform(int a, int b)       { return a == b ? a : (int)(next() % (b - a) + a); }
+inline float  RNG::uniform(float a, float b)   { return ((float)*this)*(b - a) + a; }
+inline double RNG::uniform(double a
