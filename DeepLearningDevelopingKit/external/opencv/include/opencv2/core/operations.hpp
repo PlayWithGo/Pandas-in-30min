@@ -482,4 +482,57 @@ partition( const std::vector<_Tp>& _vec, std::vector<int>& labels,
                 root2 = nodes[root2][PARENT];
 
             if( root2 != root )
-    
+            {
+                // unite both trees
+                int rank = nodes[root][RANK], rank2 = nodes[root2][RANK];
+                if( rank > rank2 )
+                    nodes[root2][PARENT] = root;
+                else
+                {
+                    nodes[root][PARENT] = root2;
+                    nodes[root2][RANK] += rank == rank2;
+                    root = root2;
+                }
+                CV_Assert( nodes[root][PARENT] < 0 );
+
+                int k = j, parent;
+
+                // compress the path from node2 to root
+                while( (parent = nodes[k][PARENT]) >= 0 )
+                {
+                    nodes[k][PARENT] = root;
+                    k = parent;
+                }
+
+                // compress the path from node to root
+                k = i;
+                while( (parent = nodes[k][PARENT]) >= 0 )
+                {
+                    nodes[k][PARENT] = root;
+                    k = parent;
+                }
+            }
+        }
+    }
+
+    // Final O(N) pass: enumerate classes
+    labels.resize(N);
+    int nclasses = 0;
+
+    for( i = 0; i < N; i++ )
+    {
+        int root = i;
+        while( nodes[root][PARENT] >= 0 )
+            root = nodes[root][PARENT];
+        // re-use the rank as the class label
+        if( nodes[root][RANK] >= 0 )
+            nodes[root][RANK] = ~nclasses++;
+        labels[i] = ~nodes[root][RANK];
+    }
+
+    return nclasses;
+}
+
+} // cv
+
+#endif
