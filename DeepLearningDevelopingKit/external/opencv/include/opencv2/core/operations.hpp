@@ -424,4 +424,62 @@ int print(const Matx<_Tp, m, n>& matx, FILE* stream = stdout)
 
 //! @endcond
 
-/****
+/****************************************************************************************\
+*                                  Auxiliary algorithms                                  *
+\****************************************************************************************/
+
+/** @brief Splits an element set into equivalency classes.
+
+The generic function partition implements an \f$O(N^2)\f$ algorithm for splitting a set of \f$N\f$ elements
+into one or more equivalency classes, as described in
+<http://en.wikipedia.org/wiki/Disjoint-set_data_structure> . The function returns the number of
+equivalency classes.
+@param _vec Set of elements stored as a vector.
+@param labels Output vector of labels. It contains as many elements as vec. Each label labels[i] is
+a 0-based cluster index of `vec[i]`.
+@param predicate Equivalence predicate (pointer to a boolean function of two arguments or an
+instance of the class that has the method bool operator()(const _Tp& a, const _Tp& b) ). The
+predicate returns true when the elements are certainly in the same class, and returns false if they
+may or may not be in the same class.
+@ingroup core_cluster
+*/
+template<typename _Tp, class _EqPredicate> int
+partition( const std::vector<_Tp>& _vec, std::vector<int>& labels,
+          _EqPredicate predicate=_EqPredicate())
+{
+    int i, j, N = (int)_vec.size();
+    const _Tp* vec = &_vec[0];
+
+    const int PARENT=0;
+    const int RANK=1;
+
+    std::vector<int> _nodes(N*2);
+    int (*nodes)[2] = (int(*)[2])&_nodes[0];
+
+    // The first O(N) pass: create N single-vertex trees
+    for(i = 0; i < N; i++)
+    {
+        nodes[i][PARENT]=-1;
+        nodes[i][RANK] = 0;
+    }
+
+    // The main O(N^2) pass: merge connected components
+    for( i = 0; i < N; i++ )
+    {
+        int root = i;
+
+        // find root
+        while( nodes[root][PARENT] >= 0 )
+            root = nodes[root][PARENT];
+
+        for( j = 0; j < N; j++ )
+        {
+            if( i == j || !predicate(vec[i], vec[j]))
+                continue;
+            int root2 = j;
+
+            while( nodes[root2][PARENT] >= 0 )
+                root2 = nodes[root2][PARENT];
+
+            if( root2 != root )
+    
