@@ -49,4 +49,69 @@
 #define CV__LEGACY_PERSISTENCE
 #endif
 
-#ifndef _
+#ifndef __cplusplus
+#  error persistence.hpp header must be compiled as C++
+#endif
+
+//! @addtogroup core_c
+//! @{
+
+/** @brief "black box" representation of the file storage associated with a file on disk.
+
+Several functions that are described below take CvFileStorage\* as inputs and allow the user to
+save or to load hierarchical collections that consist of scalar values, standard CXCore objects
+(such as matrices, sequences, graphs), and user-defined objects.
+
+OpenCV can read and write data in XML (<http://www.w3c.org/XML>), YAML (<http://www.yaml.org>) or
+JSON (<http://www.json.org/>) formats. Below is an example of 3x3 floating-point identity matrix A,
+stored in XML and YAML files
+using CXCore functions:
+XML:
+@code{.xml}
+    <?xml version="1.0">
+    <opencv_storage>
+    <A type_id="opencv-matrix">
+      <rows>3</rows>
+      <cols>3</cols>
+      <dt>f</dt>
+      <data>1. 0. 0. 0. 1. 0. 0. 0. 1.</data>
+    </A>
+    </opencv_storage>
+@endcode
+YAML:
+@code{.yaml}
+    %YAML:1.0
+    A: !!opencv-matrix
+      rows: 3
+      cols: 3
+      dt: f
+      data: [ 1., 0., 0., 0., 1., 0., 0., 0., 1.]
+@endcode
+As it can be seen from the examples, XML uses nested tags to represent hierarchy, while YAML uses
+indentation for that purpose (similar to the Python programming language).
+
+The same functions can read and write data in both formats; the particular format is determined by
+the extension of the opened file, ".xml" for XML files, ".yml" or ".yaml" for YAML and ".json" for
+JSON.
+ */
+typedef struct CvFileStorage CvFileStorage;
+typedef struct CvFileNode CvFileNode;
+typedef struct CvMat CvMat;
+typedef struct CvMatND CvMatND;
+
+//! @} core_c
+
+#include "opencv2/core/types.hpp"
+#include "opencv2/core/mat.hpp"
+
+namespace cv {
+
+/** @addtogroup core_xml
+
+XML/YAML/JSON file storages.     {#xml_storage}
+=======================
+Writing to a file storage.
+--------------------------
+You can store and then restore various OpenCV data structures to/from XML (<http://www.w3c.org/XML>),
+YAML (<http://www.yaml.org>) or JSON (<http://www.json.org/>) formats. Also, it is possible to store
+and load arbitrarily complex data structures, which in
