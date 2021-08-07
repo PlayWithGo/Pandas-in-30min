@@ -212,3 +212,52 @@ Several things can be noted by looking at the sample code and the output:
 -   To write a sequence, you first write the special string `[`, then write the elements, then
     write the closing `]`.
 
+-   In YAML/JSON (but not XML), mappings and sequences can be written in a compact Python-like inline
+    form. In the sample above matrix elements, as well as each feature, including its lbp value, is
+    stored in such inline form. To store a mapping/sequence in a compact form, put `:` after the
+    opening character, e.g. use `{:` instead of `{` and `[:` instead of `[`. When the
+    data is written to XML, those extra `:` are ignored.
+
+Reading data from a file storage.
+---------------------------------
+To read the previously written XML, YAML or JSON file, do the following:
+-#  Open the file storage using FileStorage::FileStorage constructor or FileStorage::open method.
+    In the current implementation the whole file is parsed and the whole representation of file
+    storage is built in memory as a hierarchy of file nodes (see FileNode)
+
+-#  Read the data you are interested in. Use FileStorage::operator [], FileNode::operator []
+    and/or FileNodeIterator.
+
+-#  Close the storage using FileStorage::release.
+
+Here is how to read the file created by the code sample above:
+@code
+    FileStorage fs2("test.yml", FileStorage::READ);
+
+    // first method: use (type) operator on FileNode.
+    int frameCount = (int)fs2["frameCount"];
+
+    String date;
+    // second method: use FileNode::operator >>
+    fs2["calibrationDate"] >> date;
+
+    Mat cameraMatrix2, distCoeffs2;
+    fs2["cameraMatrix"] >> cameraMatrix2;
+    fs2["distCoeffs"] >> distCoeffs2;
+
+    cout << "frameCount: " << frameCount << endl
+         << "calibration date: " << date << endl
+         << "camera matrix: " << cameraMatrix2 << endl
+         << "distortion coeffs: " << distCoeffs2 << endl;
+
+    FileNode features = fs2["features"];
+    FileNodeIterator it = features.begin(), it_end = features.end();
+    int idx = 0;
+    std::vector<uchar> lbpval;
+
+    // iterate through a sequence using FileNodeIterator
+    for( ; it != it_end; ++it, idx++ )
+    {
+        cout << "feature #" << idx << ": ";
+        cout << "x=" << (int)(*it)["x"] << ", y=" << (int)(*it)["y"] << ", lbp: (";
+        // you can also easily read numerical arrays using F
