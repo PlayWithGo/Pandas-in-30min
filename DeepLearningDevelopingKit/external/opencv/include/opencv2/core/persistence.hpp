@@ -171,4 +171,44 @@ cameraMatrix: !!opencv-matrix
    rows: 3
    cols: 3
    dt: d
-   data: [ 1
+   data: [ 1000., 0., 320., 0., 1000., 240., 0., 0., 1. ]
+distCoeffs: !!opencv-matrix
+   rows: 5
+   cols: 1
+   dt: d
+   data: [ 1.0000000000000001e-01, 1.0000000000000000e-02,
+       -1.0000000000000000e-03, 0., 0. ]
+features:
+   - { x:167, y:49, lbp:[ 1, 0, 0, 1, 1, 0, 1, 1 ] }
+   - { x:298, y:130, lbp:[ 0, 0, 0, 1, 0, 0, 1, 1 ] }
+   - { x:344, y:158, lbp:[ 1, 1, 0, 0, 0, 0, 1, 0 ] }
+@endcode
+
+As an exercise, you can replace ".yml" with ".xml" or ".json" in the sample above and see, how the
+corresponding XML file will look like.
+
+Several things can be noted by looking at the sample code and the output:
+
+-   The produced YAML (and XML/JSON) consists of heterogeneous collections that can be nested. There are
+    2 types of collections: named collections (mappings) and unnamed collections (sequences). In mappings
+    each element has a name and is accessed by name. This is similar to structures and std::map in
+    C/C++ and dictionaries in Python. In sequences elements do not have names, they are accessed by
+    indices. This is similar to arrays and std::vector in C/C++ and lists, tuples in Python.
+    "Heterogeneous" means that elements of each single collection can have different types.
+
+    Top-level collection in YAML/XML/JSON is a mapping. Each matrix is stored as a mapping, and the matrix
+    elements are stored as a sequence. Then, there is a sequence of features, where each feature is
+    represented a mapping, and lbp value in a nested sequence.
+
+-   When you write to a mapping (a structure), you write element name followed by its value. When you
+    write to a sequence, you simply write the elements one by one. OpenCV data structures (such as
+    cv::Mat) are written in absolutely the same way as simple C data structures - using `<<`
+    operator.
+
+-   To write a mapping, you first write the special string `{` to the storage, then write the
+    elements as pairs (`fs << <element_name> << <element_value>`) and then write the closing
+    `}`.
+
+-   To write a sequence, you first write the special string `[`, then write the elements, then
+    write the closing `]`.
+
