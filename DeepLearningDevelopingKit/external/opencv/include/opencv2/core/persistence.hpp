@@ -260,4 +260,60 @@ Here is how to read the file created by the code sample above:
     {
         cout << "feature #" << idx << ": ";
         cout << "x=" << (int)(*it)["x"] << ", y=" << (int)(*it)["y"] << ", lbp: (";
-        // you can also easily read numerical arrays using F
+        // you can also easily read numerical arrays using FileNode >> std::vector operator.
+        (*it)["lbp"] >> lbpval;
+        for( int i = 0; i < (int)lbpval.size(); i++ )
+            cout << " " << (int)lbpval[i];
+        cout << ")" << endl;
+    }
+    fs2.release();
+@endcode
+
+Format specification    {#format_spec}
+--------------------
+`([count]{u|c|w|s|i|f|d})`... where the characters correspond to fundamental C++ types:
+-   `u` 8-bit unsigned number
+-   `c` 8-bit signed number
+-   `w` 16-bit unsigned number
+-   `s` 16-bit signed number
+-   `i` 32-bit signed number
+-   `f` single precision floating-point number
+-   `d` double precision floating-point number
+-   `r` pointer, 32 lower bits of which are written as a signed integer. The type can be used to
+    store structures with links between the elements.
+
+`count` is the optional counter of values of a given type. For example, `2if` means that each array
+element is a structure of 2 integers, followed by a single-precision floating-point number. The
+equivalent notations of the above specification are `iif`, `2i1f` and so forth. Other examples: `u`
+means that the array consists of bytes, and `2d` means the array consists of pairs of doubles.
+
+@see @ref filestorage.cpp
+*/
+
+//! @{
+
+/** @example filestorage.cpp
+A complete example using the FileStorage interface
+*/
+
+////////////////////////// XML & YAML I/O //////////////////////////
+
+class CV_EXPORTS FileNode;
+class CV_EXPORTS FileNodeIterator;
+
+/** @brief XML/YAML/JSON file storage class that encapsulates all the information necessary for writing or
+reading data to/from a file.
+ */
+class CV_EXPORTS_W FileStorage
+{
+public:
+    //! file storage mode
+    enum Mode
+    {
+        READ        = 0, //!< value, open the file for reading
+        WRITE       = 1, //!< value, open the file for writing
+        APPEND      = 2, //!< value, open the file for appending
+        MEMORY      = 4, //!< flag, read data from source or write data to the internal buffer (which is
+                         //!< returned by FileStorage::release)
+        FORMAT_MASK = (7<<3), //!< mask for format flags
+        FORMAT_AUTO = 0,      //!< flag, 
