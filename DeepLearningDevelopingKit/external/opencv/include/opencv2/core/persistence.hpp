@@ -365,4 +365,57 @@ public:
     @param encoding Encoding of the file. Note that UTF-16 XML encoding is not supported currently and
     you should use 8-bit encoding instead of it.
      */
-    CV_WRAP virtual bool open(const String& filename, int flags, const Strin
+    CV_WRAP virtual bool open(const String& filename, int flags, const String& encoding=String());
+
+    /** @brief Checks whether the file is opened.
+
+    @returns true if the object is associated with the current file and false otherwise. It is a
+    good practice to call this method after you tried to open a file.
+     */
+    CV_WRAP virtual bool isOpened() const;
+
+    /** @brief Closes the file and releases all the memory buffers.
+
+    Call this method after all I/O operations with the storage are finished.
+     */
+    CV_WRAP virtual void release();
+
+    /** @brief Closes the file and releases all the memory buffers.
+
+    Call this method after all I/O operations with the storage are finished. If the storage was
+    opened for writing data and FileStorage::WRITE was specified
+     */
+    CV_WRAP virtual String releaseAndGetString();
+
+    /** @brief Returns the first element of the top-level mapping.
+    @returns The first element of the top-level mapping.
+     */
+    CV_WRAP FileNode getFirstTopLevelNode() const;
+
+    /** @brief Returns the top-level mapping
+    @param streamidx Zero-based index of the stream. In most cases there is only one stream in the file.
+    However, YAML supports multiple streams and so there can be several.
+    @returns The top-level mapping.
+     */
+    CV_WRAP FileNode root(int streamidx=0) const;
+
+    /** @brief Returns the specified element of the top-level mapping.
+    @param nodename Name of the file node.
+    @returns Node with the given name.
+     */
+    FileNode operator[](const String& nodename) const;
+
+    /** @overload */
+    CV_WRAP_AS(getNode) FileNode operator[](const char* nodename) const;
+
+    /** @brief Returns the obsolete C FileStorage structure.
+    @returns Pointer to the underlying C FileStorage structure
+     */
+    CvFileStorage* operator *() { return fs.get(); }
+
+    /** @overload */
+    const CvFileStorage* operator *() const { return fs.get(); }
+
+    /** @brief Writes multiple numbers.
+
+    Writes one or more numbers of the specified format to the currently writ
