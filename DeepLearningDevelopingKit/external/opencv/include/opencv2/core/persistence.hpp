@@ -316,4 +316,53 @@ public:
         MEMORY      = 4, //!< flag, read data from source or write data to the internal buffer (which is
                          //!< returned by FileStorage::release)
         FORMAT_MASK = (7<<3), //!< mask for format flags
-        FORMAT_AUTO = 0,      //!< flag, 
+        FORMAT_AUTO = 0,      //!< flag, auto format
+        FORMAT_XML  = (1<<3), //!< flag, XML format
+        FORMAT_YAML = (2<<3), //!< flag, YAML format
+        FORMAT_JSON = (3<<3), //!< flag, JSON format
+
+        BASE64      = 64,     //!< flag, write rawdata in Base64 by default. (consider using WRITE_BASE64)
+        WRITE_BASE64 = BASE64 | WRITE, //!< flag, enable both WRITE and BASE64
+    };
+    enum
+    {
+        UNDEFINED      = 0,
+        VALUE_EXPECTED = 1,
+        NAME_EXPECTED  = 2,
+        INSIDE_MAP     = 4
+    };
+
+    /** @brief The constructors.
+
+    The full constructor opens the file. Alternatively you can use the default constructor and then
+    call FileStorage::open.
+     */
+    CV_WRAP FileStorage();
+
+    /** @overload
+    @copydoc open()
+    */
+    CV_WRAP FileStorage(const String& filename, int flags, const String& encoding=String());
+
+    /** @overload */
+    FileStorage(CvFileStorage* fs, bool owning=true);
+
+    //! the destructor. calls release()
+    virtual ~FileStorage();
+
+    /** @brief Opens a file.
+
+    See description of parameters in FileStorage::FileStorage. The method calls FileStorage::release
+    before opening the file.
+    @param filename Name of the file to open or the text string to read the data from.
+       Extension of the file (.xml, .yml/.yaml or .json) determines its format (XML, YAML or JSON
+        respectively). Also you can append .gz to work with compressed files, for example myHugeMatrix.xml.gz. If both
+        FileStorage::WRITE and FileStorage::MEMORY flags are specified, source is used just to specify
+        the output file format (e.g. mydata.xml, .yml etc.). A file name can also contain parameters.
+        You can use this format, "*?base64" (e.g. "file.json?base64" (case sensitive)), as an alternative to
+        FileStorage::BASE64 flag.
+    @param flags Mode of operation. One of FileStorage::Mode
+    @param encoding Encoding of the file. Note that UTF-16 XML encoding is not supported currently and
+    you should use 8-bit encoding instead of it.
+     */
+    CV_WRAP virtual bool open(const String& filename, int flags, const Strin
