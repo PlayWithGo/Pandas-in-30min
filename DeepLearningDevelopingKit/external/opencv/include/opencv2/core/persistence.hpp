@@ -418,4 +418,57 @@ public:
 
     /** @brief Writes multiple numbers.
 
-    Writes one or more numbers of the specified format to the currently writ
+    Writes one or more numbers of the specified format to the currently written structure. Usually it is
+    more convenient to use operator `<<` instead of this method.
+    @param fmt Specification of each array element, see @ref format_spec "format specification"
+    @param vec Pointer to the written array.
+    @param len Number of the uchar elements to write.
+     */
+    void writeRaw( const String& fmt, const uchar* vec, size_t len );
+
+    /** @brief Writes the registered C structure (CvMat, CvMatND, CvSeq).
+    @param name Name of the written object.
+    @param obj Pointer to the object.
+    @see ocvWrite for details.
+     */
+    void writeObj( const String& name, const void* obj );
+
+    /**
+     * @brief Simplified writing API to use with bindings.
+     * @param name Name of the written object
+     * @param val Value of the written object
+     */
+    CV_WRAP void write(const String& name, double val);
+    /// @overload
+    CV_WRAP void write(const String& name, const String& val);
+    /// @overload
+    CV_WRAP void write(const String& name, InputArray val);
+
+    /** @brief Writes a comment.
+
+    The function writes a comment into file storage. The comments are skipped when the storage is read.
+    @param comment The written comment, single-line or multi-line
+    @param append If true, the function tries to put the comment at the end of current line.
+    Else if the comment is multi-line, or if it does not fit at the end of the current
+    line, the comment starts a new line.
+     */
+    CV_WRAP void writeComment(const String& comment, bool append = false);
+
+    /** @brief Returns the normalized object name for the specified name of a file.
+    @param filename Name of a file
+    @returns The normalized object name.
+     */
+    static String getDefaultObjectName(const String& filename);
+
+    /** @brief Returns the current format.
+     * @returns The current format, see FileStorage::Mode
+     */
+    CV_WRAP int getFormat() const;
+
+    Ptr<CvFileStorage> fs; //!< the underlying C FileStorage structure
+    String elname; //!< the currently written element
+    std::vector<char> structs; //!< the stack of written structures
+    int state; //!< the writer state
+};
+
+template<> CV_
