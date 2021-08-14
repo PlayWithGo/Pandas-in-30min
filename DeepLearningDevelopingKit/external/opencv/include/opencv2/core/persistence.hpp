@@ -471,4 +471,48 @@ public:
     int state; //!< the writer state
 };
 
-template<> CV_
+template<> CV_EXPORTS void DefaultDeleter<CvFileStorage>::operator ()(CvFileStorage* obj) const;
+
+/** @brief File Storage Node class.
+
+The node is used to store each and every element of the file storage opened for reading. When
+XML/YAML file is read, it is first parsed and stored in the memory as a hierarchical collection of
+nodes. Each node can be a "leaf" that is contain a single number or a string, or be a collection of
+other nodes. There can be named collections (mappings) where each element has a name and it is
+accessed by a name, and ordered collections (sequences) where elements do not have names but rather
+accessed by index. Type of the file node can be determined using FileNode::type method.
+
+Note that file nodes are only used for navigating file storages opened for reading. When a file
+storage is opened for writing, no data is stored in memory after it is written.
+ */
+class CV_EXPORTS_W_SIMPLE FileNode
+{
+public:
+    //! type of the file storage node
+    enum Type
+    {
+        NONE      = 0, //!< empty node
+        INT       = 1, //!< an integer
+        REAL      = 2, //!< floating-point number
+        FLOAT     = REAL, //!< synonym or REAL
+        STR       = 3, //!< text string in UTF-8 encoding
+        STRING    = STR, //!< synonym for STR
+        REF       = 4, //!< integer of size size_t. Typically used for storing complex dynamic structures where some elements reference the others
+        SEQ       = 5, //!< sequence
+        MAP       = 6, //!< mapping
+        TYPE_MASK = 7,
+        FLOW      = 8,  //!< compact representation of a sequence or mapping. Used only by YAML writer
+        USER      = 16, //!< a registered object (e.g. a matrix)
+        EMPTY     = 32, //!< empty structure (sequence or mapping)
+        NAMED     = 64  //!< the node has a name (i.e. it is element of a mapping)
+    };
+    /** @brief The constructors.
+
+    These constructors are used to create a default file node, construct it from obsolete structures or
+    from the another file node.
+     */
+    CV_WRAP FileNode();
+
+    /** @overload
+    @param fs Pointer to the obsolete file storage structure.
+    @p
