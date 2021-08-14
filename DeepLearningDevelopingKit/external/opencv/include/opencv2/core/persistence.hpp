@@ -624,4 +624,53 @@ public:
     These constructors are used to create a default iterator, set it to specific element in a file node
     or construct it from another iterator.
      */
-    FileNodeIte
+    FileNodeIterator();
+
+    /** @overload
+    @param fs File storage for the iterator.
+    @param node File node for the iterator.
+    @param ofs Index of the element in the node. The created iterator will point to this element.
+    */
+    FileNodeIterator(const CvFileStorage* fs, const CvFileNode* node, size_t ofs=0);
+
+    /** @overload
+    @param it Iterator to be used as initialization for the created iterator.
+    */
+    FileNodeIterator(const FileNodeIterator& it);
+
+    //! returns the currently observed element
+    FileNode operator *() const;
+    //! accesses the currently observed element methods
+    FileNode operator ->() const;
+
+    //! moves iterator to the next node
+    FileNodeIterator& operator ++ ();
+    //! moves iterator to the next node
+    FileNodeIterator operator ++ (int);
+    //! moves iterator to the previous node
+    FileNodeIterator& operator -- ();
+    //! moves iterator to the previous node
+    FileNodeIterator operator -- (int);
+    //! moves iterator forward by the specified offset (possibly negative)
+    FileNodeIterator& operator += (int ofs);
+    //! moves iterator backward by the specified offset (possibly negative)
+    FileNodeIterator& operator -= (int ofs);
+
+    /** @brief Reads node elements to the buffer with the specified format.
+
+    Usually it is more convenient to use operator `>>` instead of this method.
+    @param fmt Specification of each array element. See @ref format_spec "format specification"
+    @param vec Pointer to the destination array.
+    @param maxCount Number of elements to read. If it is greater than number of remaining elements then
+    all of them will be read.
+     */
+    FileNodeIterator& readRaw( const String& fmt, uchar* vec,
+                               size_t maxCount=(size_t)INT_MAX );
+
+    struct SeqReader
+    {
+      int          header_size;
+      void*        seq;        /* sequence, beign read; CvSeq      */
+      void*        block;      /* current block;        CvSeqBlock */
+      schar*       ptr;        /* pointer to element be read next */
+      schar*       block_min;  /* pointer to the beginning of bl
