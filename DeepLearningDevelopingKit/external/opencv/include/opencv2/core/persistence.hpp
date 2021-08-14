@@ -515,4 +515,58 @@ public:
 
     /** @overload
     @param fs Pointer to the obsolete file storage structure.
-    @p
+    @param node File node to be used as initialization for the created file node.
+    */
+    FileNode(const CvFileStorage* fs, const CvFileNode* node);
+
+    /** @overload
+    @param node File node to be used as initialization for the created file node.
+    */
+    FileNode(const FileNode& node);
+
+    /** @brief Returns element of a mapping node or a sequence node.
+    @param nodename Name of an element in the mapping node.
+    @returns Returns the element with the given identifier.
+     */
+    FileNode operator[](const String& nodename) const;
+
+    /** @overload
+    @param nodename Name of an element in the mapping node.
+    */
+    CV_WRAP_AS(getNode) FileNode operator[](const char* nodename) const;
+
+    /** @overload
+    @param i Index of an element in the sequence node.
+    */
+    CV_WRAP_AS(at) FileNode operator[](int i) const;
+
+    /** @brief Returns type of the node.
+    @returns Type of the node. See FileNode::Type
+     */
+    CV_WRAP int type() const;
+
+    //! returns true if the node is empty
+    CV_WRAP bool empty() const;
+    //! returns true if the node is a "none" object
+    CV_WRAP bool isNone() const;
+    //! returns true if the node is a sequence
+    CV_WRAP bool isSeq() const;
+    //! returns true if the node is a mapping
+    CV_WRAP bool isMap() const;
+    //! returns true if the node is an integer
+    CV_WRAP bool isInt() const;
+    //! returns true if the node is a floating-point number
+    CV_WRAP bool isReal() const;
+    //! returns true if the node is a text string
+    CV_WRAP bool isString() const;
+    //! returns true if the node has a name
+    CV_WRAP bool isNamed() const;
+    //! returns the node name or an empty string if the node is nameless
+    CV_WRAP String name() const;
+    //! returns the number of elements in the node, if it is a sequence or mapping, or 1 otherwise.
+    CV_WRAP size_t size() const;
+    //! returns the node content as an integer. If the node stores floating-point number, it is rounded.
+    operator int() const;
+    //! returns the node content as float
+    operator float() const;
+    //! return
