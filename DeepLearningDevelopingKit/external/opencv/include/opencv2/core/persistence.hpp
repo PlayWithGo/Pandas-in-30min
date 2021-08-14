@@ -569,4 +569,59 @@ public:
     operator int() const;
     //! returns the node content as float
     operator float() const;
-    //! return
+    //! returns the node content as double
+    operator double() const;
+    //! returns the node content as text string
+    operator String() const;
+    operator std::string() const;
+
+    //! returns pointer to the underlying file node
+    CvFileNode* operator *();
+    //! returns pointer to the underlying file node
+    const CvFileNode* operator* () const;
+
+    //! returns iterator pointing to the first node element
+    FileNodeIterator begin() const;
+    //! returns iterator pointing to the element following the last node element
+    FileNodeIterator end() const;
+
+    /** @brief Reads node elements to the buffer with the specified format.
+
+    Usually it is more convenient to use operator `>>` instead of this method.
+    @param fmt Specification of each array element. See @ref format_spec "format specification"
+    @param vec Pointer to the destination array.
+    @param len Number of elements to read. If it is greater than number of remaining elements then all
+    of them will be read.
+     */
+    void readRaw( const String& fmt, uchar* vec, size_t len ) const;
+
+    //! reads the registered object and returns pointer to it
+    void* readObj() const;
+
+    //! Simplified reading API to use with bindings.
+    CV_WRAP double real() const;
+    //! Simplified reading API to use with bindings.
+    CV_WRAP String string() const;
+    //! Simplified reading API to use with bindings.
+    CV_WRAP Mat mat() const;
+
+    // do not use wrapper pointer classes for better efficiency
+    const CvFileStorage* fs;
+    const CvFileNode* node;
+};
+
+
+/** @brief used to iterate through sequences and mappings.
+
+A standard STL notation, with node.begin(), node.end() denoting the beginning and the end of a
+sequence, stored in node. See the data reading sample in the beginning of the section.
+ */
+class CV_EXPORTS FileNodeIterator
+{
+public:
+    /** @brief The constructors.
+
+    These constructors are used to create a default iterator, set it to specific element in a file node
+    or construct it from another iterator.
+     */
+    FileNodeIte
