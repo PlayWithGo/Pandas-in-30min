@@ -673,4 +673,51 @@ public:
       void*        seq;        /* sequence, beign read; CvSeq      */
       void*        block;      /* current block;        CvSeqBlock */
       schar*       ptr;        /* pointer to element be read next */
-      schar*       block_min;  /* pointer to the beginning of bl
+      schar*       block_min;  /* pointer to the beginning of block */
+      schar*       block_max;  /* pointer to the end of block */
+      int          delta_index;/* = seq->first->start_index   */
+      schar*       prev_elem;  /* pointer to previous element */
+    };
+
+    const CvFileStorage* fs;
+    const CvFileNode* container;
+    SeqReader reader;
+    size_t remaining;
+};
+
+//! @} core_xml
+
+/////////////////// XML & YAML I/O implementation //////////////////
+
+//! @relates cv::FileStorage
+//! @{
+
+CV_EXPORTS void write( FileStorage& fs, const String& name, int value );
+CV_EXPORTS void write( FileStorage& fs, const String& name, float value );
+CV_EXPORTS void write( FileStorage& fs, const String& name, double value );
+CV_EXPORTS void write( FileStorage& fs, const String& name, const String& value );
+CV_EXPORTS void write( FileStorage& fs, const String& name, const Mat& value );
+CV_EXPORTS void write( FileStorage& fs, const String& name, const SparseMat& value );
+#ifdef CV__LEGACY_PERSISTENCE
+CV_EXPORTS void write( FileStorage& fs, const String& name, const std::vector<KeyPoint>& value);
+CV_EXPORTS void write( FileStorage& fs, const String& name, const std::vector<DMatch>& value);
+#endif
+
+CV_EXPORTS void writeScalar( FileStorage& fs, int value );
+CV_EXPORTS void writeScalar( FileStorage& fs, float value );
+CV_EXPORTS void writeScalar( FileStorage& fs, double value );
+CV_EXPORTS void writeScalar( FileStorage& fs, const String& value );
+
+//! @}
+
+//! @relates cv::FileNode
+//! @{
+
+CV_EXPORTS void read(const FileNode& node, int& value, int default_value);
+CV_EXPORTS void read(const FileNode& node, float& value, float default_value);
+CV_EXPORTS void read(const FileNode& node, double& value, double default_value);
+CV_EXPORTS void read(const FileNode& node, String& value, const String& default_value);
+CV_EXPORTS void read(const FileNode& node, std::string& value, const std::string& default_value);
+CV_EXPORTS void read(const FileNode& node, Mat& mat, const Mat& default_mat = Mat() );
+CV_EXPORTS void read(const FileNode& node, SparseMat& mat, const SparseMat& default_mat = SparseMat() );
+#ifdef CV__LEGACY_
