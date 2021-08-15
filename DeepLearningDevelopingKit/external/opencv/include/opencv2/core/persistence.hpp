@@ -720,4 +720,43 @@ CV_EXPORTS void read(const FileNode& node, String& value, const String& default_
 CV_EXPORTS void read(const FileNode& node, std::string& value, const std::string& default_value);
 CV_EXPORTS void read(const FileNode& node, Mat& mat, const Mat& default_mat = Mat() );
 CV_EXPORTS void read(const FileNode& node, SparseMat& mat, const SparseMat& default_mat = SparseMat() );
-#ifdef CV__LEGACY_
+#ifdef CV__LEGACY_PERSISTENCE
+CV_EXPORTS void read(const FileNode& node, std::vector<KeyPoint>& keypoints);
+CV_EXPORTS void read(const FileNode& node, std::vector<DMatch>& matches);
+#endif
+CV_EXPORTS void read(const FileNode& node, KeyPoint& value, const KeyPoint& default_value);
+CV_EXPORTS void read(const FileNode& node, DMatch& value, const DMatch& default_value);
+
+template<typename _Tp> static inline void read(const FileNode& node, Point_<_Tp>& value, const Point_<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 2 ? default_value : Point_<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]));
+}
+
+template<typename _Tp> static inline void read(const FileNode& node, Point3_<_Tp>& value, const Point3_<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 3 ? default_value : Point3_<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]),
+                                                            saturate_cast<_Tp>(temp[2]));
+}
+
+template<typename _Tp> static inline void read(const FileNode& node, Size_<_Tp>& value, const Size_<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 2 ? default_value : Size_<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]));
+}
+
+template<typename _Tp> static inline void read(const FileNode& node, Complex<_Tp>& value, const Complex<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 2 ? default_value : Complex<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]));
+}
+
+template<typename _Tp> static inline void read(const FileNode& node, Rect_<_Tp>& value, const Rect_<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 4 ? default_value : Rect_<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]),
+                                                          saturate_cast<_Tp>(temp[2]), saturate_cast<_Tp>(temp[3]));
+}
+
+templa
