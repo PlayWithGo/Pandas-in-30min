@@ -759,4 +759,64 @@ template<typename _Tp> static inline void read(const FileNode& node, Rect_<_Tp>&
                                                           saturate_cast<_Tp>(temp[2]), saturate_cast<_Tp>(temp[3]));
 }
 
-templa
+template<typename _Tp, int cn> static inline void read(const FileNode& node, Vec<_Tp, cn>& value, const Vec<_Tp, cn>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != cn ? default_value : Vec<_Tp, cn>(&temp[0]);
+}
+
+template<typename _Tp> static inline void read(const FileNode& node, Scalar_<_Tp>& value, const Scalar_<_Tp>& default_value)
+{
+    std::vector<_Tp> temp; FileNodeIterator it = node.begin(); it >> temp;
+    value = temp.size() != 4 ? default_value : Scalar_<_Tp>(saturate_cast<_Tp>(temp[0]), saturate_cast<_Tp>(temp[1]),
+                                                            saturate_cast<_Tp>(temp[2]), saturate_cast<_Tp>(temp[3]));
+}
+
+static inline void read(const FileNode& node, Range& value, const Range& default_value)
+{
+    Point2i temp(value.start, value.end); const Point2i default_temp = Point2i(default_value.start, default_value.end);
+    read(node, temp, default_temp);
+    value.start = temp.x; value.end = temp.y;
+}
+
+//! @}
+
+/** @brief Writes string to a file storage.
+@relates cv::FileStorage
+ */
+CV_EXPORTS FileStorage& operator << (FileStorage& fs, const String& str);
+
+//! @cond IGNORED
+
+namespace internal
+{
+    class CV_EXPORTS WriteStructContext
+    {
+    public:
+        WriteStructContext(FileStorage& _fs, const String& name, int flags, const String& typeName = String());
+        ~WriteStructContext();
+    private:
+        FileStorage* fs;
+    };
+
+    template<typename _Tp, int numflag> class VecWriterProxy
+    {
+    public:
+        VecWriterProxy( FileStorage* _fs ) : fs(_fs) {}
+        void operator()(const std::vector<_Tp>& vec) const
+        {
+            size_t count = vec.size();
+            for (size_t i = 0; i < count; i++)
+                write(*fs, vec[i]);
+        }
+    private:
+        FileStorage* fs;
+    };
+
+    template<typename _Tp> class VecWriterProxy<_Tp, 1>
+    {
+    public:
+        VecWriterProxy( FileStorage* _fs ) : fs(_fs) {}
+        void operator()(const std::vector<_Tp>& vec) const
+        {
+            int _fmt = traits::SafeFmt<_Tp>::f
