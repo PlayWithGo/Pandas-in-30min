@@ -819,4 +819,86 @@ namespace internal
         VecWriterProxy( FileStorage* _fs ) : fs(_fs) {}
         void operator()(const std::vector<_Tp>& vec) const
         {
-            int _fmt = traits::SafeFmt<_Tp>::f
+            int _fmt = traits::SafeFmt<_Tp>::fmt;
+            char fmt[] = { (char)((_fmt >> 8) + '1'), (char)_fmt, '\0' };
+            fs->writeRaw(fmt, !vec.empty() ? (uchar*)&vec[0] : 0, vec.size() * sizeof(_Tp));
+        }
+    private:
+        FileStorage* fs;
+    };
+
+    template<typename _Tp, int numflag> class VecReaderProxy
+    {
+    public:
+        VecReaderProxy( FileNodeIterator* _it ) : it(_it) {}
+        void operator()(std::vector<_Tp>& vec, size_t count) const
+        {
+            count = std::min(count, it->remaining);
+            vec.resize(count);
+            for (size_t i = 0; i < count; i++, ++(*it))
+                read(**it, vec[i], _Tp());
+        }
+    private:
+        FileNodeIterator* it;
+    };
+
+    template<typename _Tp> class VecReaderProxy<_Tp, 1>
+    {
+    public:
+        VecReaderProxy( FileNodeIterator* _it ) : it(_it) {}
+        void operator()(std::vector<_Tp>& vec, size_t count) const
+        {
+            size_t remaining = it->remaining;
+            size_t cn = DataType<_Tp>::channels;
+            int _fmt = traits::SafeFmt<_Tp>::fmt;
+            CV_Assert((_fmt >> 8) < 9);
+            char fmt[] = { (char)((_fmt >> 8)+'1'), (char)_fmt, '\0' };
+            CV_Assert((remaining % cn) == 0);
+            size_t remaining1 = remaining / cn;
+            count = count < remaining1 ? count : remaining1;
+            vec.resize(count);
+            it->readRaw(fmt, !vec.empty() ? (uchar*)&vec[0] : 0, count*sizeof(_Tp));
+        }
+    private:
+        FileNodeIterator* it;
+    };
+
+} // internal
+
+//! @endcond
+
+//! @relates cv::FileStorage
+//! @{
+
+template<typename _Tp> static inline
+void write(FileStorage& fs, const _Tp& value)
+{
+    write(fs, String(), value);
+}
+
+template<> inline
+void write( FileStorage& fs, const int& value )
+{
+    writeScalar(fs, value);
+}
+
+template<> inline
+void write( FileStorage& fs, const float& value )
+{
+    writeScalar(fs, value);
+}
+
+template<> inline
+void write( FileStorage& fs, const double& value )
+{
+    writeScalar(fs, value);
+}
+
+template<> inline
+void write( FileStorage& fs, const String& value )
+{
+    writeScalar(fs, value);
+}
+
+template<typename _Tp> static inline
+void write(FileStora
