@@ -1136,4 +1136,96 @@ void read( FileNodeIterator& it, std::vector<_Tp>& vec, size_t maxCount = (size_
 }
 
 template<typename _Tp> static inline
-void read( const FileNode& node, std::vector<_Tp>& vec, const std::vector<_Tp>& default_value = std::vector
+void read( const FileNode& node, std::vector<_Tp>& vec, const std::vector<_Tp>& default_value = std::vector<_Tp>() )
+{
+    if(!node.node)
+        vec = default_value;
+    else
+    {
+        FileNodeIterator it = node.begin();
+        read( it, vec );
+    }
+}
+
+static inline
+void read( const FileNode& node, std::vector<KeyPoint>& vec, const std::vector<KeyPoint>& default_value )
+{
+    if(!node.node)
+        vec = default_value;
+    else
+        read(node, vec);
+}
+
+static inline
+void read( const FileNode& node, std::vector<DMatch>& vec, const std::vector<DMatch>& default_value )
+{
+    if(!node.node)
+        vec = default_value;
+    else
+        read(node, vec);
+}
+
+//! @} FileNode
+
+//! @relates cv::FileStorage
+//! @{
+
+/** @brief Writes data to a file storage.
+ */
+template<typename _Tp> static inline
+FileStorage& operator << (FileStorage& fs, const _Tp& value)
+{
+    if( !fs.isOpened() )
+        return fs;
+    if( fs.state == FileStorage::NAME_EXPECTED + FileStorage::INSIDE_MAP )
+        CV_Error( Error::StsError, "No element name has been given" );
+    write( fs, fs.elname, value );
+    if( fs.state & FileStorage::INSIDE_MAP )
+        fs.state = FileStorage::NAME_EXPECTED + FileStorage::INSIDE_MAP;
+    return fs;
+}
+
+/** @brief Writes data to a file storage.
+ */
+static inline
+FileStorage& operator << (FileStorage& fs, const char* str)
+{
+    return (fs << String(str));
+}
+
+/** @brief Writes data to a file storage.
+ */
+static inline
+FileStorage& operator << (FileStorage& fs, char* value)
+{
+    return (fs << String(value));
+}
+
+//! @} FileStorage
+
+//! @relates cv::FileNodeIterator
+//! @{
+
+/** @brief Reads data from a file storage.
+ */
+template<typename _Tp> static inline
+FileNodeIterator& operator >> (FileNodeIterator& it, _Tp& value)
+{
+    read( *it, value, _Tp());
+    return ++it;
+}
+
+/** @brief Reads data from a file storage.
+ */
+template<typename _Tp> static inline
+FileNodeIterator& operator >> (FileNodeIterator& it, std::vector<_Tp>& vec)
+{
+    cv::internal::VecReaderProxy<_Tp, traits::SafeFmt<_Tp>::fmt != 0> r(&it);
+    r(vec, (size_t)INT_MAX);
+    return it;
+}
+
+//! @} FileNodeIterator
+
+//! @relates cv::FileNode
+/
