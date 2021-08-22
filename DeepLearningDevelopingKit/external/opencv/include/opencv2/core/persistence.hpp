@@ -1344,4 +1344,16 @@ inline String::String(const FileNode& fn): cstr_(0), len_(0) { read(fn, *this, *
 //! @endcond
 
 
-CV_EXPORTS void cvStartWriteRawData_Ba
+CV_EXPORTS void cvStartWriteRawData_Base64(::CvFileStorage * fs, const char* name, int len, const char* dt);
+
+CV_EXPORTS void cvWriteRawData_Base64(::CvFileStorage * fs, const void* _data, int len);
+
+CV_EXPORTS void cvEndWriteRawData_Base64(::CvFileStorage * fs);
+
+CV_EXPORTS void cvWriteMat_Base64(::CvFileStorage* fs, const char* name, const ::CvMat* mat);
+
+CV_EXPORTS void cvWriteMatND_Base64(::CvFileStorage* fs, const char* name, const ::CvMatND* mat);
+
+} // cv
+
+#endif // OPENCV_CORE_PERSISTENCE_HPP
