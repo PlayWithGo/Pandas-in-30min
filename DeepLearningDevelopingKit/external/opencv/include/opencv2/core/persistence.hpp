@@ -1315,4 +1315,33 @@ bool operator < (const FileNodeIterator& it1, const FileNodeIterator& it2)
 //! @cond IGNORED
 
 inline FileNode FileStorage::getFirstTopLevelNode() const { FileNode r = root(); FileNodeIterator it = r.begin(); return it != r.end() ? *it : FileNode(); }
-inline F
+inline FileNode::FileNode() : fs(0), node(0) {}
+inline FileNode::FileNode(const CvFileStorage* _fs, const CvFileNode* _node) : fs(_fs), node(_node) {}
+inline FileNode::FileNode(const FileNode& _node) : fs(_node.fs), node(_node.node) {}
+inline bool FileNode::empty() const    { return node   == 0;    }
+inline bool FileNode::isNone() const   { return type() == NONE; }
+inline bool FileNode::isSeq() const    { return type() == SEQ;  }
+inline bool FileNode::isMap() const    { return type() == MAP;  }
+inline bool FileNode::isInt() const    { return type() == INT;  }
+inline bool FileNode::isReal() const   { return type() == REAL; }
+inline bool FileNode::isString() const { return type() == STR;  }
+inline CvFileNode* FileNode::operator *() { return (CvFileNode*)node; }
+inline const CvFileNode* FileNode::operator* () const { return node; }
+inline FileNode::operator int() const    { int value;    read(*this, value, 0);     return value; }
+inline FileNode::operator float() const  { float value;  read(*this, value, 0.f);   return value; }
+inline FileNode::operator double() const { double value; read(*this, value, 0.);    return value; }
+inline FileNode::operator String() const { String value; read(*this, value, value); return value; }
+inline double FileNode::real() const  { return double(*this); }
+inline String FileNode::string() const { return String(*this); }
+inline Mat FileNode::mat() const { Mat value; read(*this, value, value);    return value; }
+inline FileNodeIterator FileNode::begin() const { return FileNodeIterator(fs, node); }
+inline FileNodeIterator FileNode::end() const   { return FileNodeIterator(fs, node, size()); }
+inline void FileNode::readRaw( const String& fmt, uchar* vec, size_t len ) const { begin().readRaw( fmt, vec, len ); }
+inline FileNode FileNodeIterator::operator *() const  { return FileNode(fs, (const CvFileNode*)(const void*)reader.ptr); }
+inline FileNode FileNodeIterator::operator ->() const { return FileNode(fs, (const CvFileNode*)(const void*)reader.ptr); }
+inline String::String(const FileNode& fn): cstr_(0), len_(0) { read(fn, *this, *this); }
+
+//! @endcond
+
+
+CV_EXPORTS void cvStartWriteRawData_Ba
