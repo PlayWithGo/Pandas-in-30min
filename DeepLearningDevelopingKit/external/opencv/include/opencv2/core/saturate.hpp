@@ -67,4 +67,41 @@ namespace cv
  uchar a = saturate_cast<uchar>(-100); // a = 0 (UCHAR_MIN)
  short b = saturate_cast<short>(33333.33333); // b = 32767 (SHRT_MAX)
  @endcode
- Such clipping is done when the target type is unsigned cha
+ Such clipping is done when the target type is unsigned char , signed char , unsigned short or
+ signed short . For 32-bit integers, no clipping is done.
+
+ When the parameter is a floating-point value and the target type is an integer (8-, 16- or 32-bit),
+ the floating-point value is first rounded to the nearest integer and then clipped if needed (when
+ the target type is 8- or 16-bit).
+
+ This operation is used in the simplest or most complex image processing functions in OpenCV.
+
+ @param v Function parameter.
+ @sa add, subtract, multiply, divide, Mat::convertTo
+ */
+template<typename _Tp> static inline _Tp saturate_cast(uchar v)    { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(schar v)    { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(ushort v)   { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(short v)    { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(unsigned v) { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(int v)      { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(float v)    { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(double v)   { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(int64 v)    { return _Tp(v); }
+/** @overload */
+template<typename _Tp> static inline _Tp saturate_cast(uint64 v)   { return _Tp(v); }
+
+template<> inline uchar saturate_cast<uchar>(schar v)        { return (uchar)std::max((int)v, 0); }
+template<> inline uchar saturate_cast<uchar>(ushort v)       { return (uchar)std::min((unsigned)v, (unsigned)UCHAR_MAX); }
+template<> inline uchar saturate_cast<uchar>(int v)          { return (uchar)((unsigned)v <= UCHAR_MAX ? v : v > 0 ? UCHAR_MAX : 0); }
+template<> inline uchar saturate_cast<uchar>(short v)        { return saturate_cast<uchar>((int)v); }
+template<> inline uchar saturate_cast<uchar>(unsigned v)     { return (uchar)std::min(v, (unsigned)UCHAR_MAX); }
+template<> inline uchar saturate_cast<uchar>(float v)    
