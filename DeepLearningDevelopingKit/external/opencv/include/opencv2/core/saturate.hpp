@@ -144,4 +144,22 @@ template<> inline int saturate_cast<int>(double v)           { return cvRound(v)
 
 template<> inline unsigned saturate_cast<unsigned>(schar v)  { return (unsigned)std::max(v, (schar)0); }
 template<> inline unsigned saturate_cast<unsigned>(short v)  { return (unsigned)std::max(v, (short)0); }
-template<> inline unsigned satura
+template<> inline unsigned saturate_cast<unsigned>(int v)    { return (unsigned)std::max(v, (int)0); }
+template<> inline unsigned saturate_cast<unsigned>(int64 v)  { return (unsigned)((uint64)v <= (uint64)UINT_MAX ? v : v > 0 ? UINT_MAX : 0); }
+template<> inline unsigned saturate_cast<unsigned>(uint64 v) { return (unsigned)std::min(v, (uint64)UINT_MAX); }
+// we intentionally do not clip negative numbers, to make -1 become 0xffffffff etc.
+template<> inline unsigned saturate_cast<unsigned>(float v)  { return static_cast<unsigned>(cvRound(v)); }
+template<> inline unsigned saturate_cast<unsigned>(double v) { return static_cast<unsigned>(cvRound(v)); }
+
+template<> inline uint64 saturate_cast<uint64>(schar v)      { return (uint64)std::max(v, (schar)0); }
+template<> inline uint64 saturate_cast<uint64>(short v)      { return (uint64)std::max(v, (short)0); }
+template<> inline uint64 saturate_cast<uint64>(int v)        { return (uint64)std::max(v, (int)0); }
+template<> inline uint64 saturate_cast<uint64>(int64 v)      { return (uint64)std::max(v, (int64)0); }
+
+template<> inline int64 saturate_cast<int64>(uint64 v)       { return (int64)std::min(v, (uint64)LLONG_MAX); }
+
+//! @}
+
+} // cv
+
+#endif // OPENCV_CORE_SATURATE_HPP
