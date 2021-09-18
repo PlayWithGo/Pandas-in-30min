@@ -128,4 +128,36 @@ inline void _mm_deinterleave_epi8(__m128i & v_r0, __m128i & v_r1, __m128i & v_g0
     __m128i layer1_chunk2 = _mm_unpacklo_epi8(v_r1, v_b1);
     __m128i layer1_chunk3 = _mm_unpackhi_epi8(v_r1, v_b1);
     __m128i layer1_chunk4 = _mm_unpacklo_epi8(v_g0, v_a0);
-    __m1
+    __m128i layer1_chunk5 = _mm_unpackhi_epi8(v_g0, v_a0);
+    __m128i layer1_chunk6 = _mm_unpacklo_epi8(v_g1, v_a1);
+    __m128i layer1_chunk7 = _mm_unpackhi_epi8(v_g1, v_a1);
+
+    __m128i layer2_chunk0 = _mm_unpacklo_epi8(layer1_chunk0, layer1_chunk4);
+    __m128i layer2_chunk1 = _mm_unpackhi_epi8(layer1_chunk0, layer1_chunk4);
+    __m128i layer2_chunk2 = _mm_unpacklo_epi8(layer1_chunk1, layer1_chunk5);
+    __m128i layer2_chunk3 = _mm_unpackhi_epi8(layer1_chunk1, layer1_chunk5);
+    __m128i layer2_chunk4 = _mm_unpacklo_epi8(layer1_chunk2, layer1_chunk6);
+    __m128i layer2_chunk5 = _mm_unpackhi_epi8(layer1_chunk2, layer1_chunk6);
+    __m128i layer2_chunk6 = _mm_unpacklo_epi8(layer1_chunk3, layer1_chunk7);
+    __m128i layer2_chunk7 = _mm_unpackhi_epi8(layer1_chunk3, layer1_chunk7);
+
+    __m128i layer3_chunk0 = _mm_unpacklo_epi8(layer2_chunk0, layer2_chunk4);
+    __m128i layer3_chunk1 = _mm_unpackhi_epi8(layer2_chunk0, layer2_chunk4);
+    __m128i layer3_chunk2 = _mm_unpacklo_epi8(layer2_chunk1, layer2_chunk5);
+    __m128i layer3_chunk3 = _mm_unpackhi_epi8(layer2_chunk1, layer2_chunk5);
+    __m128i layer3_chunk4 = _mm_unpacklo_epi8(layer2_chunk2, layer2_chunk6);
+    __m128i layer3_chunk5 = _mm_unpackhi_epi8(layer2_chunk2, layer2_chunk6);
+    __m128i layer3_chunk6 = _mm_unpacklo_epi8(layer2_chunk3, layer2_chunk7);
+    __m128i layer3_chunk7 = _mm_unpackhi_epi8(layer2_chunk3, layer2_chunk7);
+
+    __m128i layer4_chunk0 = _mm_unpacklo_epi8(layer3_chunk0, layer3_chunk4);
+    __m128i layer4_chunk1 = _mm_unpackhi_epi8(layer3_chunk0, layer3_chunk4);
+    __m128i layer4_chunk2 = _mm_unpacklo_epi8(layer3_chunk1, layer3_chunk5);
+    __m128i layer4_chunk3 = _mm_unpackhi_epi8(layer3_chunk1, layer3_chunk5);
+    __m128i layer4_chunk4 = _mm_unpacklo_epi8(layer3_chunk2, layer3_chunk6);
+    __m128i layer4_chunk5 = _mm_unpackhi_epi8(layer3_chunk2, layer3_chunk6);
+    __m128i layer4_chunk6 = _mm_unpacklo_epi8(layer3_chunk3, layer3_chunk7);
+    __m128i layer4_chunk7 = _mm_unpackhi_epi8(layer3_chunk3, layer3_chunk7);
+
+    v_r0 = _mm_unpacklo_epi8(layer4_chunk0, layer4_chunk4);
+    v_r1 = _mm_unpackhi_epi8(layer4_chunk0, lay
