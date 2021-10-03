@@ -538,4 +538,43 @@ inline void _mm_deinterleave_ps(__m128 & v_r0, __m128 & v_r1, __m128 & v_g0, __m
                                 __m128 & v_b0, __m128 & v_b1, __m128 & v_a0, __m128 & v_a1)
 {
     __m128 layer1_chunk0 = _mm_unpacklo_ps(v_r0, v_b0);
-    __m128 layer1_chunk1 = _mm_unpackhi_
+    __m128 layer1_chunk1 = _mm_unpackhi_ps(v_r0, v_b0);
+    __m128 layer1_chunk2 = _mm_unpacklo_ps(v_r1, v_b1);
+    __m128 layer1_chunk3 = _mm_unpackhi_ps(v_r1, v_b1);
+    __m128 layer1_chunk4 = _mm_unpacklo_ps(v_g0, v_a0);
+    __m128 layer1_chunk5 = _mm_unpackhi_ps(v_g0, v_a0);
+    __m128 layer1_chunk6 = _mm_unpacklo_ps(v_g1, v_a1);
+    __m128 layer1_chunk7 = _mm_unpackhi_ps(v_g1, v_a1);
+
+    __m128 layer2_chunk0 = _mm_unpacklo_ps(layer1_chunk0, layer1_chunk4);
+    __m128 layer2_chunk1 = _mm_unpackhi_ps(layer1_chunk0, layer1_chunk4);
+    __m128 layer2_chunk2 = _mm_unpacklo_ps(layer1_chunk1, layer1_chunk5);
+    __m128 layer2_chunk3 = _mm_unpackhi_ps(layer1_chunk1, layer1_chunk5);
+    __m128 layer2_chunk4 = _mm_unpacklo_ps(layer1_chunk2, layer1_chunk6);
+    __m128 layer2_chunk5 = _mm_unpackhi_ps(layer1_chunk2, layer1_chunk6);
+    __m128 layer2_chunk6 = _mm_unpacklo_ps(layer1_chunk3, layer1_chunk7);
+    __m128 layer2_chunk7 = _mm_unpackhi_ps(layer1_chunk3, layer1_chunk7);
+
+    v_r0 = _mm_unpacklo_ps(layer2_chunk0, layer2_chunk4);
+    v_r1 = _mm_unpackhi_ps(layer2_chunk0, layer2_chunk4);
+    v_g0 = _mm_unpacklo_ps(layer2_chunk1, layer2_chunk5);
+    v_g1 = _mm_unpackhi_ps(layer2_chunk1, layer2_chunk5);
+    v_b0 = _mm_unpacklo_ps(layer2_chunk2, layer2_chunk6);
+    v_b1 = _mm_unpackhi_ps(layer2_chunk2, layer2_chunk6);
+    v_a0 = _mm_unpacklo_ps(layer2_chunk3, layer2_chunk7);
+    v_a1 = _mm_unpackhi_ps(layer2_chunk3, layer2_chunk7);
+}
+
+inline void _mm_interleave_ps(__m128 & v_r0, __m128 & v_r1, __m128 & v_g0, __m128 & v_g1)
+{
+    const int mask_lo = _MM_SHUFFLE(2, 0, 2, 0), mask_hi = _MM_SHUFFLE(3, 1, 3, 1);
+
+    __m128 layer2_chunk0 = _mm_shuffle_ps(v_r0, v_r1, mask_lo);
+    __m128 layer2_chunk2 = _mm_shuffle_ps(v_r0, v_r1, mask_hi);
+    __m128 layer2_chunk1 = _mm_shuffle_ps(v_g0, v_g1, mask_lo);
+    __m128 layer2_chunk3 = _mm_shuffle_ps(v_g0, v_g1, mask_hi);
+
+    __m128 layer1_chunk0 = _mm_shuffle_ps(layer2_chunk0, layer2_chunk1, mask_lo);
+    __m128 layer1_chunk2 = _mm_shuffle_ps(layer2_chunk0, layer2_chunk1, mask_hi);
+    __m128 layer1_chunk1 = _mm_shuffle_ps(layer2_chunk2, layer2_chunk3, mask_lo);
+    __m128 laye
