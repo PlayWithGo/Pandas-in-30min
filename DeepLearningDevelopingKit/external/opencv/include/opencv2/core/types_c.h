@@ -115,4 +115,35 @@ typedef void CvArr;
 
 typedef int CVStatus;
 
-/** @s
+/** @see cv::Error::Code */
+enum {
+ CV_StsOk=                       0,  /**< everything is ok                */
+ CV_StsBackTrace=               -1,  /**< pseudo error for back trace     */
+ CV_StsError=                   -2,  /**< unknown /unspecified error      */
+ CV_StsInternal=                -3,  /**< internal error (bad state)      */
+ CV_StsNoMem=                   -4,  /**< insufficient memory             */
+ CV_StsBadArg=                  -5,  /**< function arg/param is bad       */
+ CV_StsBadFunc=                 -6,  /**< unsupported function            */
+ CV_StsNoConv=                  -7,  /**< iter. didn't converge           */
+ CV_StsAutoTrace=               -8,  /**< tracing                         */
+ CV_HeaderIsNull=               -9,  /**< image header is NULL            */
+ CV_BadImageSize=              -10,  /**< image size is invalid           */
+ CV_BadOffset=                 -11,  /**< offset is invalid               */
+ CV_BadDataPtr=                -12,  /**/
+ CV_BadStep=                   -13,  /**< image step is wrong, this may happen for a non-continuous matrix */
+ CV_BadModelOrChSeq=           -14,  /**/
+ CV_BadNumChannels=            -15,  /**< bad number of channels, for example, some functions accept only single channel matrices */
+ CV_BadNumChannel1U=           -16,  /**/
+ CV_BadDepth=                  -17,  /**< input image depth is not supported by the function */
+ CV_BadAlphaChannel=           -18,  /**/
+ CV_BadOrder=                  -19,  /**< number of dimensions is out of range */
+ CV_BadOrigin=                 -20,  /**< incorrect input origin               */
+ CV_BadAlign=                  -21,  /**< incorrect input align                */
+ CV_BadCallBack=               -22,  /**/
+ CV_BadTileSize=               -23,  /**/
+ CV_BadCOI=                    -24,  /**< input COI is not supported           */
+ CV_BadROISize=                -25,  /**< incorrect input roi                  */
+ CV_MaskIsTiled=               -26,  /**/
+ CV_StsNullPtr=                -27,  /**< null pointer */
+ CV_StsVecLengthErr=           -28,  /**< incorrect vector length */
+ CV_
