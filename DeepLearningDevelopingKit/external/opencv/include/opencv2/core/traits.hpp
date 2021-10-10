@@ -351,3 +351,48 @@ public: \
     typedef CheckMember_##X type; \
     enum { value = sizeof(func<Derived>(0)) == sizeof(CV_YES) }; \
 };
+
+CV_CREATE_MEMBER_CHECK(fmt)
+CV_CREATE_MEMBER_CHECK(type)
+
+} // namespace internal
+
+
+template<typename T>
+struct Depth
+{ enum { value = DataType<T>::depth }; };
+
+template<typename T>
+struct Type
+{ enum { value = DataType<T>::type }; };
+
+/** Similar to traits::Type<T> but has value = -1 in case of unknown type (instead of compiler error) */
+template<typename T, bool available = internal::CheckMember_type< DataType<T> >::value >
+struct SafeType {};
+
+template<typename T>
+struct SafeType<T, false>
+{ enum { value = -1 }; };
+
+template<typename T>
+struct SafeType<T, true>
+{ enum { value = Type<T>::value }; };
+
+
+template<typename T, bool available = internal::CheckMember_fmt< DataType<T> >::value >
+struct SafeFmt {};
+
+template<typename T>
+struct SafeFmt<T, false>
+{ enum { fmt = 0 }; };
+
+template<typename T>
+struct SafeFmt<T, true>
+{ enum { fmt = DataType<T>::fmt }; };
+
+
+} // namespace
+
+} // cv
+
+#endif // OPENCV_CORE_TRAITS_HPP
