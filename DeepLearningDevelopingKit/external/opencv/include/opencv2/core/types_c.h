@@ -146,4 +146,34 @@ enum {
  CV_MaskIsTiled=               -26,  /**/
  CV_StsNullPtr=                -27,  /**< null pointer */
  CV_StsVecLengthErr=           -28,  /**< incorrect vector length */
- CV_
+ CV_StsFilterStructContentErr= -29,  /**< incorrect filter structure content */
+ CV_StsKernelStructContentErr= -30,  /**< incorrect transform kernel content */
+ CV_StsFilterOffsetErr=        -31,  /**< incorrect filter offset value */
+ CV_StsBadSize=                -201, /**< the input/output structure size is incorrect  */
+ CV_StsDivByZero=              -202, /**< division by zero */
+ CV_StsInplaceNotSupported=    -203, /**< in-place operation is not supported */
+ CV_StsObjectNotFound=         -204, /**< request can't be completed */
+ CV_StsUnmatchedFormats=       -205, /**< formats of input/output arrays differ */
+ CV_StsBadFlag=                -206, /**< flag is wrong or not supported */
+ CV_StsBadPoint=               -207, /**< bad CvPoint */
+ CV_StsBadMask=                -208, /**< bad format of mask (neither 8uC1 nor 8sC1)*/
+ CV_StsUnmatchedSizes=         -209, /**< sizes of input/output structures do not match */
+ CV_StsUnsupportedFormat=      -210, /**< the data format/type is not supported by the function*/
+ CV_StsOutOfRange=             -211, /**< some of parameters are out of range */
+ CV_StsParseError=             -212, /**< invalid syntax/structure of the parsed file */
+ CV_StsNotImplemented=         -213, /**< the requested function/feature is not implemented */
+ CV_StsBadMemBlock=            -214, /**< an allocated block has been corrupted */
+ CV_StsAssert=                 -215, /**< assertion failed   */
+ CV_GpuNotSupported=           -216, /**< no CUDA support    */
+ CV_GpuApiCallError=           -217, /**< GPU API call error */
+ CV_OpenGlNotSupported=        -218, /**< no OpenGL support  */
+ CV_OpenGlApiCallError=        -219, /**< OpenGL API call error */
+ CV_OpenCLApiCallError=        -220, /**< OpenCL API call error */
+ CV_OpenCLDoubleNotSupported=  -221,
+ CV_OpenCLInitError=           -222, /**< OpenCL initialization error */
+ CV_OpenCLNoAMDBlasFft=        -223
+};
+
+/****************************************************************************************\
+*                             Common macros and inline functions                         *
+\****
