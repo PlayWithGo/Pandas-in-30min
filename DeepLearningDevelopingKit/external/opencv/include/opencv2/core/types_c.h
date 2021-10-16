@@ -235,4 +235,70 @@ CV_INLINE unsigned cvRandInt( CvRNG* rng )
 
 /** @brief Returns a floating-point random number and updates RNG.
 
-The function returns a uniformly-distributed random floating-point number bet
+The function returns a uniformly-distributed random floating-point number between 0 and 1 (1 is not
+included).
+@param rng RNG state initialized by cvRNG
+ */
+CV_INLINE double cvRandReal( CvRNG* rng )
+{
+    return cvRandInt(rng)*2.3283064365386962890625e-10 /* 2^-32 */;
+}
+
+/****************************************************************************************\
+*                                  Image type (IplImage)                                 *
+\****************************************************************************************/
+
+#ifndef HAVE_IPL
+
+/*
+ * The following definitions (until #endif)
+ * is an extract from IPL headers.
+ * Copyright (c) 1995 Intel Corporation.
+ */
+#define IPL_DEPTH_SIGN 0x80000000
+
+#define IPL_DEPTH_1U     1
+#define IPL_DEPTH_8U     8
+#define IPL_DEPTH_16U   16
+#define IPL_DEPTH_32F   32
+
+#define IPL_DEPTH_8S  (IPL_DEPTH_SIGN| 8)
+#define IPL_DEPTH_16S (IPL_DEPTH_SIGN|16)
+#define IPL_DEPTH_32S (IPL_DEPTH_SIGN|32)
+
+#define IPL_DATA_ORDER_PIXEL  0
+#define IPL_DATA_ORDER_PLANE  1
+
+#define IPL_ORIGIN_TL 0
+#define IPL_ORIGIN_BL 1
+
+#define IPL_ALIGN_4BYTES   4
+#define IPL_ALIGN_8BYTES   8
+#define IPL_ALIGN_16BYTES 16
+#define IPL_ALIGN_32BYTES 32
+
+#define IPL_ALIGN_DWORD   IPL_ALIGN_4BYTES
+#define IPL_ALIGN_QWORD   IPL_ALIGN_8BYTES
+
+#define IPL_BORDER_CONSTANT   0
+#define IPL_BORDER_REPLICATE  1
+#define IPL_BORDER_REFLECT    2
+#define IPL_BORDER_WRAP       3
+
+/** The IplImage is taken from the Intel Image Processing Library, in which the format is native. OpenCV
+only supports a subset of possible IplImage formats, as outlined in the parameter list above.
+
+In addition to the above restrictions, OpenCV handles ROIs differently. OpenCV functions require
+that the image size or ROI size of all source and destination images match exactly. On the other
+hand, the Intel Image Processing Library processes the area of intersection between the source and
+destination images (or ROIs), allowing them to vary independently.
+*/
+typedef struct
+#ifdef __cplusplus
+  CV_EXPORTS
+#endif
+_IplImage
+{
+    int  nSize;             /**< sizeof(IplImage) */
+    int  ID;                /**< version (=0)*/
+    int  nChannels;         /**< Most of OpenCV functions 
