@@ -339,3 +339,80 @@ IplImage;
 
 typedef struct _IplTileInfo IplTileInfo;
 
+typedef struct _IplROI
+{
+    int  coi; /**< 0 - no COI (all channels are selected), 1 - 0th channel is selected ...*/
+    int  xOffset;
+    int  yOffset;
+    int  width;
+    int  height;
+}
+IplROI;
+
+typedef struct _IplConvKernel
+{
+    int  nCols;
+    int  nRows;
+    int  anchorX;
+    int  anchorY;
+    int *values;
+    int  nShiftR;
+}
+IplConvKernel;
+
+typedef struct _IplConvKernelFP
+{
+    int  nCols;
+    int  nRows;
+    int  anchorX;
+    int  anchorY;
+    float *values;
+}
+IplConvKernelFP;
+
+#define IPL_IMAGE_HEADER 1
+#define IPL_IMAGE_DATA   2
+#define IPL_IMAGE_ROI    4
+
+#endif/*HAVE_IPL*/
+
+/** extra border mode */
+#define IPL_BORDER_REFLECT_101    4
+#define IPL_BORDER_TRANSPARENT    5
+
+#define IPL_IMAGE_MAGIC_VAL  ((int)sizeof(IplImage))
+#define CV_TYPE_NAME_IMAGE "opencv-image"
+
+#define CV_IS_IMAGE_HDR(img) \
+    ((img) != NULL && ((const IplImage*)(img))->nSize == sizeof(IplImage))
+
+#define CV_IS_IMAGE(img) \
+    (CV_IS_IMAGE_HDR(img) && ((IplImage*)img)->imageData != NULL)
+
+/** for storing double-precision
+   floating point data in IplImage's */
+#define IPL_DEPTH_64F  64
+
+/** get reference to pixel at (col,row),
+   for multi-channel images (col) should be multiplied by number of channels */
+#define CV_IMAGE_ELEM( image, elemtype, row, col )       \
+    (((elemtype*)((image)->imageData + (image)->widthStep*(row)))[(col)])
+
+/****************************************************************************************\
+*                                  Matrix type (CvMat)                                   *
+\****************************************************************************************/
+
+#define CV_AUTO_STEP  0x7fffffff
+#define CV_WHOLE_ARR  cvSlice( 0, 0x3fffffff )
+
+#define CV_MAGIC_MASK       0xFFFF0000
+#define CV_MAT_MAGIC_VAL    0x42420000
+#define CV_TYPE_NAME_MAT    "opencv-matrix"
+
+/** Matrix elements are stored row by row. Element (i, j) (i - 0-based row index, j - 0-based column
+index) of a matrix can be retrieved or modified using CV_MAT_ELEM macro:
+
+    uchar pixval = CV_MAT_ELEM(grayimg, uchar, i, j)
+    CV_MAT_ELEM(cameraMatrix, float, 0, 2) = image.width*0.5f;
+
+To access multip
