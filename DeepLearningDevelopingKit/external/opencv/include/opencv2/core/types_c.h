@@ -415,4 +415,92 @@ index) of a matrix can be retrieved or modified using CV_MAT_ELEM macro:
     uchar pixval = CV_MAT_ELEM(grayimg, uchar, i, j)
     CV_MAT_ELEM(cameraMatrix, float, 0, 2) = image.width*0.5f;
 
-To access multip
+To access multiple-channel matrices, you can use
+CV_MAT_ELEM(matrix, type, i, j\*nchannels + channel_idx).
+
+@deprecated CvMat is now obsolete; consider using Mat instead.
+ */
+typedef struct CvMat
+{
+    int type;
+    int step;
+
+    /* for internal use only */
+    int* refcount;
+    int hdr_refcount;
+
+    union
+    {
+        uchar* ptr;
+        short* s;
+        int* i;
+        float* fl;
+        double* db;
+    } data;
+
+#ifdef __cplusplus
+    union
+    {
+        int rows;
+        int height;
+    };
+
+    union
+    {
+        int cols;
+        int width;
+    };
+#else
+    int rows;
+    int cols;
+#endif
+
+
+#ifdef __cplusplus
+    CvMat() {}
+    CvMat(const CvMat& m) { memcpy(this, &m, sizeof(CvMat));}
+    CvMat(const cv::Mat& m);
+#endif
+
+}
+CvMat;
+
+
+#define CV_IS_MAT_HDR(mat) \
+    ((mat) != NULL && \
+    (((const CvMat*)(mat))->type & CV_MAGIC_MASK) == CV_MAT_MAGIC_VAL && \
+    ((const CvMat*)(mat))->cols > 0 && ((const CvMat*)(mat))->rows > 0)
+
+#define CV_IS_MAT_HDR_Z(mat) \
+    ((mat) != NULL && \
+    (((const CvMat*)(mat))->type & CV_MAGIC_MASK) == CV_MAT_MAGIC_VAL && \
+    ((const CvMat*)(mat))->cols >= 0 && ((const CvMat*)(mat))->rows >= 0)
+
+#define CV_IS_MAT(mat) \
+    (CV_IS_MAT_HDR(mat) && ((const CvMat*)(mat))->data.ptr != NULL)
+
+#define CV_IS_MASK_ARR(mat) \
+    (((mat)->type & (CV_MAT_TYPE_MASK & ~CV_8SC1)) == 0)
+
+#define CV_ARE_TYPES_EQ(mat1, mat2) \
+    ((((mat1)->type ^ (mat2)->type) & CV_MAT_TYPE_MASK) == 0)
+
+#define CV_ARE_CNS_EQ(mat1, mat2) \
+    ((((mat1)->type ^ (mat2)->type) & CV_MAT_CN_MASK) == 0)
+
+#define CV_ARE_DEPTHS_EQ(mat1, mat2) \
+    ((((mat1)->type ^ (mat2)->type) & CV_MAT_DEPTH_MASK) == 0)
+
+#define CV_ARE_SIZES_EQ(mat1, mat2) \
+    ((mat1)->rows == (mat2)->rows && (mat1)->cols == (mat2)->cols)
+
+#define CV_IS_MAT_CONST(mat)  \
+    (((mat)->rows|(mat)->cols) == 1)
+
+#define IPL2CV_DEPTH(depth) \
+    ((((CV_8U)+(CV_16U<<4)+(CV_32F<<8)+(CV_64F<<16)+(CV_8S<<20)+ \
+    (CV_16S<<24)+(CV_32S<<28)) >> ((((depth) & 0xF0) >> 2) + \
+    (((depth) & IPL_DEPTH_SIGN) ? 20 : 0))) & 15)
+
+/** Inline constructor. No data is allocated internally!!!
+ * (Use t
