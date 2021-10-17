@@ -503,4 +503,64 @@ CvMat;
     (((depth) & IPL_DEPTH_SIGN) ? 20 : 0))) & 15)
 
 /** Inline constructor. No data is allocated internally!!!
- * (Use t
+ * (Use together with cvCreateData, or use cvCreateMat instead to
+ * get a matrix with allocated data):
+ */
+CV_INLINE CvMat cvMat( int rows, int cols, int type, void* data CV_DEFAULT(NULL))
+{
+    CvMat m;
+
+    assert( (unsigned)CV_MAT_DEPTH(type) <= CV_64F );
+    type = CV_MAT_TYPE(type);
+    m.type = CV_MAT_MAGIC_VAL | CV_MAT_CONT_FLAG | type;
+    m.cols = cols;
+    m.rows = rows;
+    m.step = m.cols*CV_ELEM_SIZE(type);
+    m.data.ptr = (uchar*)data;
+    m.refcount = NULL;
+    m.hdr_refcount = 0;
+
+    return m;
+}
+
+#ifdef __cplusplus
+inline CvMat::CvMat(const cv::Mat& m)
+{
+    CV_DbgAssert(m.dims <= 2);
+    *this = cvMat(m.rows, m.dims == 1 ? 1 : m.cols, m.type(), m.data);
+    step = (int)m.step[0];
+    type = (type & ~cv::Mat::CONTINUOUS_FLAG) | (m.flags & cv::Mat::CONTINUOUS_FLAG);
+}
+#endif
+
+
+#define CV_MAT_ELEM_PTR_FAST( mat, row, col, pix_size )  \
+    (assert( (unsigned)(row) < (unsigned)(mat).rows &&   \
+             (unsigned)(col) < (unsigned)(mat).cols ),   \
+     (mat).data.ptr + (size_t)(mat).step*(row) + (pix_size)*(col))
+
+#define CV_MAT_ELEM_PTR( mat, row, col )                 \
+    CV_MAT_ELEM_PTR_FAST( mat, row, col, CV_ELEM_SIZE((mat).type) )
+
+#define CV_MAT_ELEM( mat, elemtype, row, col )           \
+    (*(elemtype*)CV_MAT_ELEM_PTR_FAST( mat, row, col, sizeof(elemtype)))
+
+/** @brief Returns the particular element of single-channel floating-point matrix.
+
+The function is a fast replacement for cvGetReal2D in the case of single-channel floating-point
+matrices. It is faster because it is inline, it does fewer checks for array type and array element
+type, and it checks for the row and column ranges only in debug mode.
+@param mat Input matrix
+@param row The zero-based index of row
+@param col The zero-based index of column
+ */
+CV_INLINE  double  cvmGet( const CvMat* mat, int row, int col )
+{
+    int type;
+
+    type = CV_MAT_TYPE(mat->type);
+    assert( (unsigned)row < (unsigned)mat->rows &&
+            (unsigned)col < (unsigned)mat->cols );
+
+    if( type == CV_32FC1 )
+        
