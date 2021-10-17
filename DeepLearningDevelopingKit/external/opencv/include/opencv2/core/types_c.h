@@ -563,4 +563,82 @@ CV_INLINE  double  cvmGet( const CvMat* mat, int row, int col )
             (unsigned)col < (unsigned)mat->cols );
 
     if( type == CV_32FC1 )
-        
+        return ((float*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col];
+    else
+    {
+        assert( type == CV_64FC1 );
+        return ((double*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col];
+    }
+}
+
+/** @brief Sets a specific element of a single-channel floating-point matrix.
+
+The function is a fast replacement for cvSetReal2D in the case of single-channel floating-point
+matrices. It is faster because it is inline, it does fewer checks for array type and array element
+type, and it checks for the row and column ranges only in debug mode.
+@param mat The matrix
+@param row The zero-based index of row
+@param col The zero-based index of column
+@param value The new value of the matrix element
+ */
+CV_INLINE  void  cvmSet( CvMat* mat, int row, int col, double value )
+{
+    int type;
+    type = CV_MAT_TYPE(mat->type);
+    assert( (unsigned)row < (unsigned)mat->rows &&
+            (unsigned)col < (unsigned)mat->cols );
+
+    if( type == CV_32FC1 )
+        ((float*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col] = (float)value;
+    else
+    {
+        assert( type == CV_64FC1 );
+        ((double*)(void*)(mat->data.ptr + (size_t)mat->step*row))[col] = value;
+    }
+}
+
+
+CV_INLINE int cvIplDepth( int type )
+{
+    int depth = CV_MAT_DEPTH(type);
+    return CV_ELEM_SIZE1(depth)*8 | (depth == CV_8S || depth == CV_16S ||
+           depth == CV_32S ? IPL_DEPTH_SIGN : 0);
+}
+
+
+/****************************************************************************************\
+*                       Multi-dimensional dense array (CvMatND)                          *
+\****************************************************************************************/
+
+#define CV_MATND_MAGIC_VAL    0x42430000
+#define CV_TYPE_NAME_MATND    "opencv-nd-matrix"
+
+#define CV_MAX_DIM            32
+#define CV_MAX_DIM_HEAP       1024
+
+/**
+  @deprecated consider using cv::Mat instead
+  */
+typedef struct
+#ifdef __cplusplus
+  CV_EXPORTS
+#endif
+CvMatND
+{
+    int type;
+    int dims;
+
+    int* refcount;
+    int hdr_refcount;
+
+    union
+    {
+        uchar* ptr;
+        float* fl;
+        double* db;
+        int* i;
+        short* s;
+    } data;
+
+    struct
+   
