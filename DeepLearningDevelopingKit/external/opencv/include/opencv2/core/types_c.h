@@ -641,4 +641,89 @@ CvMatND
     } data;
 
     struct
-   
+    {
+        int size;
+        int step;
+    }
+    dim[CV_MAX_DIM];
+
+#ifdef __cplusplus
+    CvMatND() {}
+    CvMatND(const cv::Mat& m);
+#endif
+}
+CvMatND;
+
+#define CV_IS_MATND_HDR(mat) \
+    ((mat) != NULL && (((const CvMatND*)(mat))->type & CV_MAGIC_MASK) == CV_MATND_MAGIC_VAL)
+
+#define CV_IS_MATND(mat) \
+    (CV_IS_MATND_HDR(mat) && ((const CvMatND*)(mat))->data.ptr != NULL)
+
+
+/****************************************************************************************\
+*                      Multi-dimensional sparse array (CvSparseMat)                      *
+\****************************************************************************************/
+
+#define CV_SPARSE_MAT_MAGIC_VAL    0x42440000
+#define CV_TYPE_NAME_SPARSE_MAT    "opencv-sparse-matrix"
+
+struct CvSet;
+
+typedef struct
+#ifdef __cplusplus
+  CV_EXPORTS
+#endif
+CvSparseMat
+{
+    int type;
+    int dims;
+    int* refcount;
+    int hdr_refcount;
+
+    struct CvSet* heap;
+    void** hashtable;
+    int hashsize;
+    int valoffset;
+    int idxoffset;
+    int size[CV_MAX_DIM];
+
+#ifdef __cplusplus
+    void copyToSparseMat(cv::SparseMat& m) const;
+#endif
+}
+CvSparseMat;
+
+#ifdef __cplusplus
+    CV_EXPORTS CvSparseMat* cvCreateSparseMat(const cv::SparseMat& m);
+#endif
+
+#define CV_IS_SPARSE_MAT_HDR(mat) \
+    ((mat) != NULL && \
+    (((const CvSparseMat*)(mat))->type & CV_MAGIC_MASK) == CV_SPARSE_MAT_MAGIC_VAL)
+
+#define CV_IS_SPARSE_MAT(mat) \
+    CV_IS_SPARSE_MAT_HDR(mat)
+
+/**************** iteration through a sparse array *****************/
+
+typedef struct CvSparseNode
+{
+    unsigned hashval;
+    struct CvSparseNode* next;
+}
+CvSparseNode;
+
+typedef struct CvSparseMatIterator
+{
+    CvSparseMat* mat;
+    CvSparseNode* node;
+    int curidx;
+}
+CvSparseMatIterator;
+
+#define CV_NODE_VAL(mat,node)   ((void*)((uchar*)(node) + (mat)->valoffset))
+#define CV_NODE_IDX(mat,node)   ((int*)((uchar*)(node) + (mat)->idxoffset))
+
+/****************************************************************************************\
+*                                         Histogram                             
