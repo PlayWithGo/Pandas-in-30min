@@ -726,4 +726,63 @@ CvSparseMatIterator;
 #define CV_NODE_IDX(mat,node)   ((int*)((uchar*)(node) + (mat)->idxoffset))
 
 /****************************************************************************************\
-*                                         Histogram                             
+*                                         Histogram                                      *
+\****************************************************************************************/
+
+typedef int CvHistType;
+
+#define CV_HIST_MAGIC_VAL     0x42450000
+#define CV_HIST_UNIFORM_FLAG  (1 << 10)
+
+/** indicates whether bin ranges are set already or not */
+#define CV_HIST_RANGES_FLAG   (1 << 11)
+
+#define CV_HIST_ARRAY         0
+#define CV_HIST_SPARSE        1
+#define CV_HIST_TREE          CV_HIST_SPARSE
+
+/** should be used as a parameter only,
+   it turns to CV_HIST_UNIFORM_FLAG of hist->type */
+#define CV_HIST_UNIFORM       1
+
+typedef struct CvHistogram
+{
+    int     type;
+    CvArr*  bins;
+    float   thresh[CV_MAX_DIM][2];  /**< For uniform histograms.                      */
+    float** thresh2;                /**< For non-uniform histograms.                  */
+    CvMatND mat;                    /**< Embedded matrix header for array histograms. */
+}
+CvHistogram;
+
+#define CV_IS_HIST( hist ) \
+    ((hist) != NULL  && \
+     (((CvHistogram*)(hist))->type & CV_MAGIC_MASK) == CV_HIST_MAGIC_VAL && \
+     (hist)->bins != NULL)
+
+#define CV_IS_UNIFORM_HIST( hist ) \
+    (((hist)->type & CV_HIST_UNIFORM_FLAG) != 0)
+
+#define CV_IS_SPARSE_HIST( hist ) \
+    CV_IS_SPARSE_MAT((hist)->bins)
+
+#define CV_HIST_HAS_RANGES( hist ) \
+    (((hist)->type & CV_HIST_RANGES_FLAG) != 0)
+
+/****************************************************************************************\
+*                      Other supplementary data type definitions                         *
+\****************************************************************************************/
+
+/*************************************** CvRect *****************************************/
+/** @sa Rect_ */
+typedef struct CvRect
+{
+    int x;
+    int y;
+    int width;
+    int height;
+
+#ifdef __cplusplus
+    CvRect(int _x = 0, int _y = 0, int w = 0, int h = 0): x(_x), y(_y), width(w), height(h) {}
+    template<typename _Tp>
+    CvRect(const cv::Rect_<_Tp>& r): x(cv::saturate_cast<int>(r.x)), y(cv::saturate_cast<int>(r.y)), width(cv::saturate_cast<int>(r.width)), height(cv::saturate_cast<int>(r.height)) {}
