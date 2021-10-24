@@ -1066,4 +1066,69 @@ typedef struct CvBox2D
                           /**< and the first side (i.e. length) in degrees */
 
 #ifdef __cplusplus
-    CvBox2D(CvPoint2D32f c = CvPoint2D32f(), CvSize2D32f s = CvSize2D32f(), f
+    CvBox2D(CvPoint2D32f c = CvPoint2D32f(), CvSize2D32f s = CvSize2D32f(), float a = 0) : center(c), size(s), angle(a) {}
+    CvBox2D(const cv::RotatedRect& rr) : center(rr.center), size(rr.size), angle(rr.angle) {}
+    operator cv::RotatedRect() const { return cv::RotatedRect(center, size, angle); }
+#endif
+}
+CvBox2D;
+
+
+/** Line iterator state: */
+typedef struct CvLineIterator
+{
+    /** Pointer to the current point: */
+    uchar* ptr;
+
+    /* Bresenham algorithm state: */
+    int  err;
+    int  plus_delta;
+    int  minus_delta;
+    int  plus_step;
+    int  minus_step;
+}
+CvLineIterator;
+
+
+
+/************************************* CvSlice ******************************************/
+#define CV_WHOLE_SEQ_END_INDEX 0x3fffffff
+#define CV_WHOLE_SEQ  cvSlice(0, CV_WHOLE_SEQ_END_INDEX)
+
+typedef struct CvSlice
+{
+    int  start_index, end_index;
+
+#if defined(__cplusplus) && !defined(__CUDACC__)
+    CvSlice(int start = 0, int end = 0) : start_index(start), end_index(end) {}
+    CvSlice(const cv::Range& r) { *this = (r.start != INT_MIN && r.end != INT_MAX) ? CvSlice(r.start, r.end) : CvSlice(0, CV_WHOLE_SEQ_END_INDEX); }
+    operator cv::Range() const { return (start_index == 0 && end_index == CV_WHOLE_SEQ_END_INDEX ) ? cv::Range::all() : cv::Range(start_index, end_index); }
+#endif
+}
+CvSlice;
+
+CV_INLINE  CvSlice  cvSlice( int start, int end )
+{
+    CvSlice slice;
+    slice.start_index = start;
+    slice.end_index = end;
+
+    return slice;
+}
+
+
+
+/************************************* CvScalar *****************************************/
+/** @sa Scalar_
+ */
+typedef struct CvScalar
+{
+    double val[4];
+
+#ifdef __cplusplus
+    CvScalar() {}
+    CvScalar(double d0, double d1 = 0, double d2 = 0, double d3 = 0) { val[0] = d0; val[1] = d1; val[2] = d2; val[3] = d3; }
+    template<typename _Tp>
+    CvScalar(const cv::Scalar_<_Tp>& s) { val[0] = s.val[0]; val[1] = s.val[1]; val[2] = s.val[2]; val[3] = s.val[3]; }
+    template<typename _Tp>
+    operator cv::Scalar_<_Tp>() const { return cv::Scalar_<_Tp>(cv::saturate_cast<_Tp>(val[0]), cv::saturate_cast<
