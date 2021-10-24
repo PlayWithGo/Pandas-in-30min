@@ -877,3 +877,108 @@ typedef struct CvPoint
 #endif
 }
 CvPoint;
+
+/** constructs CvPoint structure. */
+CV_INLINE  CvPoint  cvPoint( int x, int y )
+{
+    CvPoint p;
+
+    p.x = x;
+    p.y = y;
+
+    return p;
+}
+
+
+typedef struct CvPoint2D32f
+{
+    float x;
+    float y;
+
+#ifdef __cplusplus
+    CvPoint2D32f(float _x = 0, float _y = 0): x(_x), y(_y) {}
+    template<typename _Tp>
+    CvPoint2D32f(const cv::Point_<_Tp>& pt): x((float)pt.x), y((float)pt.y) {}
+    template<typename _Tp>
+    operator cv::Point_<_Tp>() const { return cv::Point_<_Tp>(cv::saturate_cast<_Tp>(x), cv::saturate_cast<_Tp>(y)); }
+#endif
+}
+CvPoint2D32f;
+
+/** constructs CvPoint2D32f structure. */
+CV_INLINE  CvPoint2D32f  cvPoint2D32f( double x, double y )
+{
+    CvPoint2D32f p;
+
+    p.x = (float)x;
+    p.y = (float)y;
+
+    return p;
+}
+
+/** converts CvPoint to CvPoint2D32f. */
+CV_INLINE  CvPoint2D32f  cvPointTo32f( CvPoint point )
+{
+    return cvPoint2D32f( (float)point.x, (float)point.y );
+}
+
+/** converts CvPoint2D32f to CvPoint. */
+CV_INLINE  CvPoint  cvPointFrom32f( CvPoint2D32f point )
+{
+    CvPoint ipt;
+    ipt.x = cvRound(point.x);
+    ipt.y = cvRound(point.y);
+
+    return ipt;
+}
+
+
+typedef struct CvPoint3D32f
+{
+    float x;
+    float y;
+    float z;
+
+#ifdef __cplusplus
+    CvPoint3D32f(float _x = 0, float _y = 0, float _z = 0): x(_x), y(_y), z(_z) {}
+    template<typename _Tp>
+    CvPoint3D32f(const cv::Point3_<_Tp>& pt): x((float)pt.x), y((float)pt.y), z((float)pt.z) {}
+    template<typename _Tp>
+    operator cv::Point3_<_Tp>() const { return cv::Point3_<_Tp>(cv::saturate_cast<_Tp>(x), cv::saturate_cast<_Tp>(y), cv::saturate_cast<_Tp>(z)); }
+#endif
+}
+CvPoint3D32f;
+
+/** constructs CvPoint3D32f structure. */
+CV_INLINE  CvPoint3D32f  cvPoint3D32f( double x, double y, double z )
+{
+    CvPoint3D32f p;
+
+    p.x = (float)x;
+    p.y = (float)y;
+    p.z = (float)z;
+
+    return p;
+}
+
+
+typedef struct CvPoint2D64f
+{
+    double x;
+    double y;
+}
+CvPoint2D64f;
+
+/** constructs CvPoint2D64f structure.*/
+CV_INLINE  CvPoint2D64f  cvPoint2D64f( double x, double y )
+{
+    CvPoint2D64f p;
+
+    p.x = x;
+    p.y = y;
+
+    return p;
+}
+
+
+typedef struc
