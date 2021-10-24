@@ -786,3 +786,94 @@ typedef struct CvRect
     CvRect(int _x = 0, int _y = 0, int w = 0, int h = 0): x(_x), y(_y), width(w), height(h) {}
     template<typename _Tp>
     CvRect(const cv::Rect_<_Tp>& r): x(cv::saturate_cast<int>(r.x)), y(cv::saturate_cast<int>(r.y)), width(cv::saturate_cast<int>(r.width)), height(cv::saturate_cast<int>(r.height)) {}
+    template<typename _Tp>
+    operator cv::Rect_<_Tp>() const { return cv::Rect_<_Tp>((_Tp)x, (_Tp)y, (_Tp)width, (_Tp)height); }
+#endif
+}
+CvRect;
+
+/** constructs CvRect structure. */
+CV_INLINE  CvRect  cvRect( int x, int y, int width, int height )
+{
+    CvRect r;
+
+    r.x = x;
+    r.y = y;
+    r.width = width;
+    r.height = height;
+
+    return r;
+}
+
+
+CV_INLINE  IplROI  cvRectToROI( CvRect rect, int coi )
+{
+    IplROI roi;
+    roi.xOffset = rect.x;
+    roi.yOffset = rect.y;
+    roi.width = rect.width;
+    roi.height = rect.height;
+    roi.coi = coi;
+
+    return roi;
+}
+
+
+CV_INLINE  CvRect  cvROIToRect( IplROI roi )
+{
+    return cvRect( roi.xOffset, roi.yOffset, roi.width, roi.height );
+}
+
+/*********************************** CvTermCriteria *************************************/
+
+#define CV_TERMCRIT_ITER    1
+#define CV_TERMCRIT_NUMBER  CV_TERMCRIT_ITER
+#define CV_TERMCRIT_EPS     2
+
+/** @sa TermCriteria
+ */
+typedef struct CvTermCriteria
+{
+    int    type;  /**< may be combination of
+                     CV_TERMCRIT_ITER
+                     CV_TERMCRIT_EPS */
+    int    max_iter;
+    double epsilon;
+
+#ifdef __cplusplus
+    CvTermCriteria(int _type = 0, int _iter = 0, double _eps = 0) : type(_type), max_iter(_iter), epsilon(_eps)  {}
+    CvTermCriteria(const cv::TermCriteria& t) : type(t.type), max_iter(t.maxCount), epsilon(t.epsilon)  {}
+    operator cv::TermCriteria() const { return cv::TermCriteria(type, max_iter, epsilon); }
+#endif
+
+}
+CvTermCriteria;
+
+CV_INLINE  CvTermCriteria  cvTermCriteria( int type, int max_iter, double epsilon )
+{
+    CvTermCriteria t;
+
+    t.type = type;
+    t.max_iter = max_iter;
+    t.epsilon = (float)epsilon;
+
+    return t;
+}
+
+
+/******************************* CvPoint and variants ***********************************/
+
+typedef struct CvPoint
+{
+    int x;
+    int y;
+
+#ifdef __cplusplus
+    CvPoint(int _x = 0, int _y = 0): x(_x), y(_y) {}
+    template<typename _Tp>
+    CvPoint(const cv::Point_<_Tp>& pt): x((int)pt.x), y((int)pt.y) {}
+    template<typename _Tp>
+    operator cv::Point_<_Tp>() const { return cv::Point_<_Tp>(cv::saturate_cast<_Tp>(x), cv::saturate_cast<_Tp>(y)); }
+#endif
+}
+CvPoint;
