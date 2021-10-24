@@ -981,4 +981,89 @@ CV_INLINE  CvPoint2D64f  cvPoint2D64f( double x, double y )
 }
 
 
-typedef struc
+typedef struct CvPoint3D64f
+{
+    double x;
+    double y;
+    double z;
+}
+CvPoint3D64f;
+
+/** constructs CvPoint3D64f structure. */
+CV_INLINE  CvPoint3D64f  cvPoint3D64f( double x, double y, double z )
+{
+    CvPoint3D64f p;
+
+    p.x = x;
+    p.y = y;
+    p.z = z;
+
+    return p;
+}
+
+
+/******************************** CvSize's & CvBox **************************************/
+
+typedef struct CvSize
+{
+    int width;
+    int height;
+
+#ifdef __cplusplus
+    CvSize(int w = 0, int h = 0): width(w), height(h) {}
+    template<typename _Tp>
+    CvSize(const cv::Size_<_Tp>& sz): width(cv::saturate_cast<int>(sz.width)), height(cv::saturate_cast<int>(sz.height)) {}
+    template<typename _Tp>
+    operator cv::Size_<_Tp>() const { return cv::Size_<_Tp>(cv::saturate_cast<_Tp>(width), cv::saturate_cast<_Tp>(height)); }
+#endif
+}
+CvSize;
+
+/** constructs CvSize structure. */
+CV_INLINE  CvSize  cvSize( int width, int height )
+{
+    CvSize s;
+
+    s.width = width;
+    s.height = height;
+
+    return s;
+}
+
+typedef struct CvSize2D32f
+{
+    float width;
+    float height;
+
+#ifdef __cplusplus
+    CvSize2D32f(float w = 0, float h = 0): width(w), height(h) {}
+    template<typename _Tp>
+    CvSize2D32f(const cv::Size_<_Tp>& sz): width(cv::saturate_cast<float>(sz.width)), height(cv::saturate_cast<float>(sz.height)) {}
+    template<typename _Tp>
+    operator cv::Size_<_Tp>() const { return cv::Size_<_Tp>(cv::saturate_cast<_Tp>(width), cv::saturate_cast<_Tp>(height)); }
+#endif
+}
+CvSize2D32f;
+
+/** constructs CvSize2D32f structure. */
+CV_INLINE  CvSize2D32f  cvSize2D32f( double width, double height )
+{
+    CvSize2D32f s;
+
+    s.width = (float)width;
+    s.height = (float)height;
+
+    return s;
+}
+
+/** @sa RotatedRect
+ */
+typedef struct CvBox2D
+{
+    CvPoint2D32f center;  /**< Center of the box.                          */
+    CvSize2D32f  size;    /**< Box width and length.                       */
+    float angle;          /**< Angle between the horizontal axis           */
+                          /**< and the first side (i.e. length) in degrees */
+
+#ifdef __cplusplus
+    CvBox2D(CvPoint2D32f c = CvPoint2D32f(), CvSize2D32f s = CvSize2D32f(), f
