@@ -1131,4 +1131,75 @@ typedef struct CvScalar
     template<typename _Tp>
     CvScalar(const cv::Scalar_<_Tp>& s) { val[0] = s.val[0]; val[1] = s.val[1]; val[2] = s.val[2]; val[3] = s.val[3]; }
     template<typename _Tp>
-    operator cv::Scalar_<_Tp>() const { return cv::Scalar_<_Tp>(cv::saturate_cast<_Tp>(val[0]), cv::saturate_cast<
+    operator cv::Scalar_<_Tp>() const { return cv::Scalar_<_Tp>(cv::saturate_cast<_Tp>(val[0]), cv::saturate_cast<_Tp>(val[1]), cv::saturate_cast<_Tp>(val[2]), cv::saturate_cast<_Tp>(val[3])); }
+    template<typename _Tp, int cn>
+    CvScalar(const cv::Vec<_Tp, cn>& v)
+    {
+        int i;
+        for( i = 0; i < (cn < 4 ? cn : 4); i++ ) val[i] = v.val[i];
+        for( ; i < 4; i++ ) val[i] = 0;
+    }
+#endif
+}
+CvScalar;
+
+CV_INLINE  CvScalar  cvScalar( double val0, double val1 CV_DEFAULT(0),
+                               double val2 CV_DEFAULT(0), double val3 CV_DEFAULT(0))
+{
+    CvScalar scalar;
+    scalar.val[0] = val0; scalar.val[1] = val1;
+    scalar.val[2] = val2; scalar.val[3] = val3;
+    return scalar;
+}
+
+
+CV_INLINE  CvScalar  cvRealScalar( double val0 )
+{
+    CvScalar scalar;
+    scalar.val[0] = val0;
+    scalar.val[1] = scalar.val[2] = scalar.val[3] = 0;
+    return scalar;
+}
+
+CV_INLINE  CvScalar  cvScalarAll( double val0123 )
+{
+    CvScalar scalar;
+    scalar.val[0] = val0123;
+    scalar.val[1] = val0123;
+    scalar.val[2] = val0123;
+    scalar.val[3] = val0123;
+    return scalar;
+}
+
+/****************************************************************************************\
+*                                   Dynamic Data structures                              *
+\****************************************************************************************/
+
+/******************************** Memory storage ****************************************/
+
+typedef struct CvMemBlock
+{
+    struct CvMemBlock*  prev;
+    struct CvMemBlock*  next;
+}
+CvMemBlock;
+
+#define CV_STORAGE_MAGIC_VAL    0x42890000
+
+typedef struct CvMemStorage
+{
+    int signature;
+    CvMemBlock* bottom;           /**< First allocated block.                   */
+    CvMemBlock* top;              /**< Current memory block - top of the stack. */
+    struct  CvMemStorage* parent; /**< We get new blocks from parent as needed. */
+    int block_size;               /**< Block size.                              */
+    int free_space;               /**< Remaining free space in current block.   */
+}
+CvMemStorage;
+
+#define CV_IS_STORAGE(storage)  \
+    ((storage) != NULL &&       \
+    (((CvMemStorage*)(storage))->signature & CV_MAGIC_MASK) == CV_STORAGE_MAGIC_VAL)
+
+
+typedef
