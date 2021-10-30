@@ -1202,4 +1202,51 @@ CvMemStorage;
     (((CvMemStorage*)(storage))->signature & CV_MAGIC_MASK) == CV_STORAGE_MAGIC_VAL)
 
 
-typedef
+typedef struct CvMemStoragePos
+{
+    CvMemBlock* top;
+    int free_space;
+}
+CvMemStoragePos;
+
+
+/*********************************** Sequence *******************************************/
+
+typedef struct CvSeqBlock
+{
+    struct CvSeqBlock*  prev; /**< Previous sequence block.                   */
+    struct CvSeqBlock*  next; /**< Next sequence block.                       */
+  int    start_index;         /**< Index of the first element in the block +  */
+                              /**< sequence->first->start_index.              */
+    int    count;             /**< Number of elements in the block.           */
+    schar* data;              /**< Pointer to the first element of the block. */
+}
+CvSeqBlock;
+
+
+#define CV_TREE_NODE_FIELDS(node_type)                               \
+    int       flags;             /**< Miscellaneous flags.     */      \
+    int       header_size;       /**< Size of sequence header. */      \
+    struct    node_type* h_prev; /**< Previous sequence.       */      \
+    struct    node_type* h_next; /**< Next sequence.           */      \
+    struct    node_type* v_prev; /**< 2nd previous sequence.   */      \
+    struct    node_type* v_next  /**< 2nd next sequence.       */
+
+/**
+   Read/Write sequence.
+   Elements can be dynamically inserted to or deleted from the sequence.
+*/
+#define CV_SEQUENCE_FIELDS()                                              \
+    CV_TREE_NODE_FIELDS(CvSeq);                                           \
+    int       total;          /**< Total number of elements.            */  \
+    int       elem_size;      /**< Size of sequence element in bytes.   */  \
+    schar*    block_max;      /**< Maximal bound of the last block.     */  \
+    schar*    ptr;            /**< Current write pointer.               */  \
+    int       delta_elems;    /**< Grow seq this many at a time.        */  \
+    CvMemStorage* storage;    /**< Where the seq is stored.             */  \
+    CvSeqBlock* free_blocks;  /**< Free blocks list.                    */  \
+    CvSeqBlock* first;        /**< Pointer to the first sequence block. */
+
+typedef struct CvSeq
+{
+    CV_SEQUENCE_FI
