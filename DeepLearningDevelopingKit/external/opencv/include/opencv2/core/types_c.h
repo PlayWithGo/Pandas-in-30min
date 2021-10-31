@@ -1403,4 +1403,49 @@ typedef CvContour CvPoint2DSeq;
 #define CV_SEQ_ELTYPE_POINT          CV_32SC2  /**< (x,y) */
 #define CV_SEQ_ELTYPE_CODE           CV_8UC1   /**< freeman code: 0..7 */
 #define CV_SEQ_ELTYPE_GENERIC        0
-#define CV_SEQ_ELTYPE_PTR 
+#define CV_SEQ_ELTYPE_PTR            CV_USRTYPE1
+#define CV_SEQ_ELTYPE_PPOINT         CV_SEQ_ELTYPE_PTR  /**< &(x,y) */
+#define CV_SEQ_ELTYPE_INDEX          CV_32SC1  /**< #(x,y) */
+#define CV_SEQ_ELTYPE_GRAPH_EDGE     0  /**< &next_o, &next_d, &vtx_o, &vtx_d */
+#define CV_SEQ_ELTYPE_GRAPH_VERTEX   0  /**< first_edge, &(x,y) */
+#define CV_SEQ_ELTYPE_TRIAN_ATR      0  /**< vertex of the binary tree   */
+#define CV_SEQ_ELTYPE_CONNECTED_COMP 0  /**< connected component  */
+#define CV_SEQ_ELTYPE_POINT3D        CV_32FC3  /**< (x,y,z)  */
+
+#define CV_SEQ_KIND_BITS        2
+#define CV_SEQ_KIND_MASK        (((1 << CV_SEQ_KIND_BITS) - 1)<<CV_SEQ_ELTYPE_BITS)
+
+/** types of sequences */
+#define CV_SEQ_KIND_GENERIC     (0 << CV_SEQ_ELTYPE_BITS)
+#define CV_SEQ_KIND_CURVE       (1 << CV_SEQ_ELTYPE_BITS)
+#define CV_SEQ_KIND_BIN_TREE    (2 << CV_SEQ_ELTYPE_BITS)
+
+/** types of sparse sequences (sets) */
+#define CV_SEQ_KIND_GRAPH       (1 << CV_SEQ_ELTYPE_BITS)
+#define CV_SEQ_KIND_SUBDIV2D    (2 << CV_SEQ_ELTYPE_BITS)
+
+#define CV_SEQ_FLAG_SHIFT       (CV_SEQ_KIND_BITS + CV_SEQ_ELTYPE_BITS)
+
+/** flags for curves */
+#define CV_SEQ_FLAG_CLOSED     (1 << CV_SEQ_FLAG_SHIFT)
+#define CV_SEQ_FLAG_SIMPLE     (0 << CV_SEQ_FLAG_SHIFT)
+#define CV_SEQ_FLAG_CONVEX     (0 << CV_SEQ_FLAG_SHIFT)
+#define CV_SEQ_FLAG_HOLE       (2 << CV_SEQ_FLAG_SHIFT)
+
+/** flags for graphs */
+#define CV_GRAPH_FLAG_ORIENTED (1 << CV_SEQ_FLAG_SHIFT)
+
+#define CV_GRAPH               CV_SEQ_KIND_GRAPH
+#define CV_ORIENTED_GRAPH      (CV_SEQ_KIND_GRAPH|CV_GRAPH_FLAG_ORIENTED)
+
+/** point sets */
+#define CV_SEQ_POINT_SET       (CV_SEQ_KIND_GENERIC| CV_SEQ_ELTYPE_POINT)
+#define CV_SEQ_POINT3D_SET     (CV_SEQ_KIND_GENERIC| CV_SEQ_ELTYPE_POINT3D)
+#define CV_SEQ_POLYLINE        (CV_SEQ_KIND_CURVE  | CV_SEQ_ELTYPE_POINT)
+#define CV_SEQ_POLYGON         (CV_SEQ_FLAG_CLOSED | CV_SEQ_POLYLINE )
+#define CV_SEQ_CONTOUR         CV_SEQ_POLYGON
+#define CV_SEQ_SIMPLE_POLYGON  (CV_SEQ_FLAG_SIMPLE | CV_SEQ_POLYGON  )
+
+/** chain-coded curves */
+#define CV_SEQ_CHAIN           (CV_SEQ_KIND_CURVE  | CV_SEQ_ELTYPE_CODE)
+#define CV_SEQ_CHAIN_CONTOUR   (CV_SEQ_FLAG_CLOSED | CV_
