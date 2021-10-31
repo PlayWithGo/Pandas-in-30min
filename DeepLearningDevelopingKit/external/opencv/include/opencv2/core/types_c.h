@@ -1313,4 +1313,94 @@ adjacency list.
 @{
 */
 #define CV_GRAPH_EDGE_FIELDS()      \
-    int flags;
+    int flags;                      \
+    float weight;                   \
+    struct CvGraphEdge* next[2];    \
+    struct CvGraphVtx* vtx[2];
+
+
+#define CV_GRAPH_VERTEX_FIELDS()    \
+    int flags;                      \
+    struct CvGraphEdge* first;
+
+
+typedef struct CvGraphEdge
+{
+    CV_GRAPH_EDGE_FIELDS()
+}
+CvGraphEdge;
+
+typedef struct CvGraphVtx
+{
+    CV_GRAPH_VERTEX_FIELDS()
+}
+CvGraphVtx;
+
+typedef struct CvGraphVtx2D
+{
+    CV_GRAPH_VERTEX_FIELDS()
+    CvPoint2D32f* ptr;
+}
+CvGraphVtx2D;
+
+/**
+   Graph is "derived" from the set (this is set a of vertices)
+   and includes another set (edges)
+*/
+#define  CV_GRAPH_FIELDS()   \
+    CV_SET_FIELDS()          \
+    CvSet* edges;
+
+typedef struct CvGraph
+{
+    CV_GRAPH_FIELDS()
+}
+CvGraph;
+
+#define CV_TYPE_NAME_GRAPH "opencv-graph"
+
+/** @} */
+
+/*********************************** Chain/Contour *************************************/
+
+typedef struct CvChain
+{
+    CV_SEQUENCE_FIELDS()
+    CvPoint  origin;
+}
+CvChain;
+
+#define CV_CONTOUR_FIELDS()  \
+    CV_SEQUENCE_FIELDS()     \
+    CvRect rect;             \
+    int color;               \
+    int reserved[3];
+
+typedef struct CvContour
+{
+    CV_CONTOUR_FIELDS()
+}
+CvContour;
+
+typedef CvContour CvPoint2DSeq;
+
+/****************************************************************************************\
+*                                    Sequence types                                      *
+\****************************************************************************************/
+
+#define CV_SEQ_MAGIC_VAL             0x42990000
+
+#define CV_IS_SEQ(seq) \
+    ((seq) != NULL && (((CvSeq*)(seq))->flags & CV_MAGIC_MASK) == CV_SEQ_MAGIC_VAL)
+
+#define CV_SET_MAGIC_VAL             0x42980000
+#define CV_IS_SET(set) \
+    ((set) != NULL && (((CvSeq*)(set))->flags & CV_MAGIC_MASK) == CV_SET_MAGIC_VAL)
+
+#define CV_SEQ_ELTYPE_BITS           12
+#define CV_SEQ_ELTYPE_MASK           ((1 << CV_SEQ_ELTYPE_BITS) - 1)
+
+#define CV_SEQ_ELTYPE_POINT          CV_32SC2  /**< (x,y) */
+#define CV_SEQ_ELTYPE_CODE           CV_8UC1   /**< freeman code: 0..7 */
+#define CV_SEQ_ELTYPE_GENERIC        0
+#define CV_SEQ_ELTYPE_PTR 
