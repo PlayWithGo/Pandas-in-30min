@@ -1249,4 +1249,68 @@ CvSeqBlock;
 
 typedef struct CvSeq
 {
-    CV_SEQUENCE_FI
+    CV_SEQUENCE_FIELDS()
+}
+CvSeq;
+
+#define CV_TYPE_NAME_SEQ             "opencv-sequence"
+#define CV_TYPE_NAME_SEQ_TREE        "opencv-sequence-tree"
+
+/*************************************** Set ********************************************/
+/** @brief Set
+  Order is not preserved. There can be gaps between sequence elements.
+  After the element has been inserted it stays in the same place all the time.
+  The MSB(most-significant or sign bit) of the first field (flags) is 0 iff the element exists.
+*/
+#define CV_SET_ELEM_FIELDS(elem_type)   \
+    int  flags;                         \
+    struct elem_type* next_free;
+
+typedef struct CvSetElem
+{
+    CV_SET_ELEM_FIELDS(CvSetElem)
+}
+CvSetElem;
+
+#define CV_SET_FIELDS()      \
+    CV_SEQUENCE_FIELDS()     \
+    CvSetElem* free_elems;   \
+    int active_count;
+
+typedef struct CvSet
+{
+    CV_SET_FIELDS()
+}
+CvSet;
+
+
+#define CV_SET_ELEM_IDX_MASK   ((1 << 26) - 1)
+#define CV_SET_ELEM_FREE_FLAG  (1 << (sizeof(int)*8-1))
+
+/** Checks whether the element pointed by ptr belongs to a set or not */
+#define CV_IS_SET_ELEM( ptr )  (((CvSetElem*)(ptr))->flags >= 0)
+
+/************************************* Graph ********************************************/
+
+/** @name Graph
+
+We represent a graph as a set of vertices. Vertices contain their adjacency lists (more exactly,
+pointers to first incoming or outcoming edge (or 0 if isolated vertex)). Edges are stored in
+another set. There is a singly-linked list of incoming/outcoming edges for each vertex.
+
+Each edge consists of:
+
+- Two pointers to the starting and ending vertices (vtx[0] and vtx[1] respectively).
+
+    A graph may be oriented or not. In the latter case, edges between vertex i to vertex j are not
+distinguished during search operations.
+
+- Two pointers to next edges for the starting and ending vertices, where next[0] points to the
+next edge in the vtx[0] adjacency list and next[1] points to the next edge in the vtx[1]
+adjacency list.
+
+@see CvGraphEdge, CvGraphVtx, CvGraphVtx2D, CvGraph
+@{
+*/
+#define CV_GRAPH_EDGE_FIELDS()      \
+    int flags;
