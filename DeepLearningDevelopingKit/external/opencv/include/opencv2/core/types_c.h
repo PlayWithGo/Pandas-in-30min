@@ -1501,4 +1501,51 @@ typedef CvContour CvPoint2DSeq;
 #define CV_IS_GRAPH( seq )    \
     (CV_IS_SET(seq) && CV_SEQ_KIND((CvSet*)(seq)) == CV_SEQ_KIND_GRAPH)
 
-#define CV_IS_GRAPH_ORI
+#define CV_IS_GRAPH_ORIENTED( seq )   \
+    (((seq)->flags & CV_GRAPH_FLAG_ORIENTED) != 0)
+
+#define CV_IS_SUBDIV2D( seq )  \
+    (CV_IS_SET(seq) && CV_SEQ_KIND((CvSet*)(seq)) == CV_SEQ_KIND_SUBDIV2D)
+
+/****************************************************************************************/
+/*                            Sequence writer & reader                                  */
+/****************************************************************************************/
+
+#define CV_SEQ_WRITER_FIELDS()                                     \
+    int          header_size;                                      \
+    CvSeq*       seq;        /**< the sequence written */            \
+    CvSeqBlock*  block;      /**< current block */                   \
+    schar*       ptr;        /**< pointer to free space */           \
+    schar*       block_min;  /**< pointer to the beginning of block*/\
+    schar*       block_max;  /**< pointer to the end of block */
+
+typedef struct CvSeqWriter
+{
+    CV_SEQ_WRITER_FIELDS()
+}
+CvSeqWriter;
+
+
+#define CV_SEQ_READER_FIELDS()                                      \
+    int          header_size;                                       \
+    CvSeq*       seq;        /**< sequence, beign read */             \
+    CvSeqBlock*  block;      /**< current block */                    \
+    schar*       ptr;        /**< pointer to element be read next */  \
+    schar*       block_min;  /**< pointer to the beginning of block */\
+    schar*       block_max;  /**< pointer to the end of block */      \
+    int          delta_index;/**< = seq->first->start_index   */      \
+    schar*       prev_elem;  /**< pointer to previous element */
+
+typedef struct CvSeqReader
+{
+    CV_SEQ_READER_FIELDS()
+}
+CvSeqReader;
+
+/****************************************************************************************/
+/*                                Operations on sequences                               */
+/****************************************************************************************/
+
+#define  CV_SEQ_ELEM( seq, elem_type, index )                    \
+/** assert gives some guarantee that <seq> parameter is valid */  \
+(   assert(sizeof((seq)->first[0]) == sizeof(CvSeqB
