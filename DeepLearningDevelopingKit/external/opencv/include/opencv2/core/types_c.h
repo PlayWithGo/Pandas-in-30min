@@ -1448,4 +1448,57 @@ typedef CvContour CvPoint2DSeq;
 
 /** chain-coded curves */
 #define CV_SEQ_CHAIN           (CV_SEQ_KIND_CURVE  | CV_SEQ_ELTYPE_CODE)
-#define CV_SEQ_CHAIN_CONTOUR   (CV_SEQ_FLAG_CLOSED | CV_
+#define CV_SEQ_CHAIN_CONTOUR   (CV_SEQ_FLAG_CLOSED | CV_SEQ_CHAIN)
+
+/** binary tree for the contour */
+#define CV_SEQ_POLYGON_TREE    (CV_SEQ_KIND_BIN_TREE  | CV_SEQ_ELTYPE_TRIAN_ATR)
+
+/** sequence of the connected components */
+#define CV_SEQ_CONNECTED_COMP  (CV_SEQ_KIND_GENERIC  | CV_SEQ_ELTYPE_CONNECTED_COMP)
+
+/** sequence of the integer numbers */
+#define CV_SEQ_INDEX           (CV_SEQ_KIND_GENERIC  | CV_SEQ_ELTYPE_INDEX)
+
+#define CV_SEQ_ELTYPE( seq )   ((seq)->flags & CV_SEQ_ELTYPE_MASK)
+#define CV_SEQ_KIND( seq )     ((seq)->flags & CV_SEQ_KIND_MASK )
+
+/** flag checking */
+#define CV_IS_SEQ_INDEX( seq )      ((CV_SEQ_ELTYPE(seq) == CV_SEQ_ELTYPE_INDEX) && \
+                                     (CV_SEQ_KIND(seq) == CV_SEQ_KIND_GENERIC))
+
+#define CV_IS_SEQ_CURVE( seq )      (CV_SEQ_KIND(seq) == CV_SEQ_KIND_CURVE)
+#define CV_IS_SEQ_CLOSED( seq )     (((seq)->flags & CV_SEQ_FLAG_CLOSED) != 0)
+#define CV_IS_SEQ_CONVEX( seq )     0
+#define CV_IS_SEQ_HOLE( seq )       (((seq)->flags & CV_SEQ_FLAG_HOLE) != 0)
+#define CV_IS_SEQ_SIMPLE( seq )     1
+
+/** type checking macros */
+#define CV_IS_SEQ_POINT_SET( seq ) \
+    ((CV_SEQ_ELTYPE(seq) == CV_32SC2 || CV_SEQ_ELTYPE(seq) == CV_32FC2))
+
+#define CV_IS_SEQ_POINT_SUBSET( seq ) \
+    (CV_IS_SEQ_INDEX( seq ) || CV_SEQ_ELTYPE(seq) == CV_SEQ_ELTYPE_PPOINT)
+
+#define CV_IS_SEQ_POLYLINE( seq )   \
+    (CV_SEQ_KIND(seq) == CV_SEQ_KIND_CURVE && CV_IS_SEQ_POINT_SET(seq))
+
+#define CV_IS_SEQ_POLYGON( seq )   \
+    (CV_IS_SEQ_POLYLINE(seq) && CV_IS_SEQ_CLOSED(seq))
+
+#define CV_IS_SEQ_CHAIN( seq )   \
+    (CV_SEQ_KIND(seq) == CV_SEQ_KIND_CURVE && (seq)->elem_size == 1)
+
+#define CV_IS_SEQ_CONTOUR( seq )   \
+    (CV_IS_SEQ_CLOSED(seq) && (CV_IS_SEQ_POLYLINE(seq) || CV_IS_SEQ_CHAIN(seq)))
+
+#define CV_IS_SEQ_CHAIN_CONTOUR( seq ) \
+    (CV_IS_SEQ_CHAIN( seq ) && CV_IS_SEQ_CLOSED( seq ))
+
+#define CV_IS_SEQ_POLYGON_TREE( seq ) \
+    (CV_SEQ_ELTYPE (seq) ==  CV_SEQ_ELTYPE_TRIAN_ATR &&    \
+    CV_SEQ_KIND( seq ) ==  CV_SEQ_KIND_BIN_TREE )
+
+#define CV_IS_GRAPH( seq )    \
+    (CV_IS_SET(seq) && CV_SEQ_KIND((CvSet*)(seq)) == CV_SEQ_KIND_GRAPH)
+
+#define CV_IS_GRAPH_ORI
