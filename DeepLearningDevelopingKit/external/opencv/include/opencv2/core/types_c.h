@@ -1548,4 +1548,48 @@ CvSeqReader;
 
 #define  CV_SEQ_ELEM( seq, elem_type, index )                    \
 /** assert gives some guarantee that <seq> parameter is valid */  \
-(   assert(sizeof((seq)->first[0]) == sizeof(CvSeqB
+(   assert(sizeof((seq)->first[0]) == sizeof(CvSeqBlock) &&      \
+    (seq)->elem_size == sizeof(elem_type)),                      \
+    (elem_type*)((seq)->first && (unsigned)index <               \
+    (unsigned)((seq)->first->count) ?                            \
+    (seq)->first->data + (index) * sizeof(elem_type) :           \
+    cvGetSeqElem( (CvSeq*)(seq), (index) )))
+#define CV_GET_SEQ_ELEM( elem_type, seq, index ) CV_SEQ_ELEM( (seq), elem_type, (index) )
+
+/** Add element to sequence: */
+#define CV_WRITE_SEQ_ELEM_VAR( elem_ptr, writer )     \
+{                                                     \
+    if( (writer).ptr >= (writer).block_max )          \
+    {                                                 \
+        cvCreateSeqBlock( &writer);                   \
+    }                                                 \
+    memcpy((writer).ptr, elem_ptr, (writer).seq->elem_size);\
+    (writer).ptr += (writer).seq->elem_size;          \
+}
+
+#define CV_WRITE_SEQ_ELEM( elem, writer )             \
+{                                                     \
+    assert( (writer).seq->elem_size == sizeof(elem)); \
+    if( (writer).ptr >= (writer).block_max )          \
+    {                                                 \
+        cvCreateSeqBlock( &writer);                   \
+    }                                                 \
+    assert( (writer).ptr <= (writer).block_max - sizeof(elem));\
+    memcpy((writer).ptr, &(elem), sizeof(elem));      \
+    (writer).ptr += sizeof(elem);                     \
+}
+
+
+/** Move reader position forward: */
+#define CV_NEXT_SEQ_ELEM( elem_size, reader )                 \
+{                                                             \
+    if( ((reader).ptr += (elem_size)) >= (reader).block_max ) \
+    {                                                         \
+        cvChangeSeqBlock( &(reader), 1 );                     \
+    }                                                         \
+}
+
+
+/** Move reader position backward: */
+#define CV_PREV_SEQ_ELEM( elem_size, reader )                \
+{                                   
