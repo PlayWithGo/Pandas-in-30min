@@ -1592,4 +1592,44 @@ CvSeqReader;
 
 /** Move reader position backward: */
 #define CV_PREV_SEQ_ELEM( elem_size, reader )                \
-{                                   
+{                                                            \
+    if( ((reader).ptr -= (elem_size)) < (reader).block_min ) \
+    {                                                        \
+        cvChangeSeqBlock( &(reader), -1 );                   \
+    }                                                        \
+}
+
+/** Read element and move read position forward: */
+#define CV_READ_SEQ_ELEM( elem, reader )                       \
+{                                                              \
+    assert( (reader).seq->elem_size == sizeof(elem));          \
+    memcpy( &(elem), (reader).ptr, sizeof((elem)));            \
+    CV_NEXT_SEQ_ELEM( sizeof(elem), reader )                   \
+}
+
+/** Read element and move read position backward: */
+#define CV_REV_READ_SEQ_ELEM( elem, reader )                     \
+{                                                                \
+    assert( (reader).seq->elem_size == sizeof(elem));            \
+    memcpy(&(elem), (reader).ptr, sizeof((elem)));               \
+    CV_PREV_SEQ_ELEM( sizeof(elem), reader )                     \
+}
+
+
+#define CV_READ_CHAIN_POINT( _pt, reader )                              \
+{                                                                       \
+    (_pt) = (reader).pt;                                                \
+    if( (reader).ptr )                                                  \
+    {                                                                   \
+        CV_READ_SEQ_ELEM( (reader).code, (reader));                     \
+        assert( ((reader).code & ~7) == 0 );                            \
+        (reader).pt.x += (reader).deltas[(int)(reader).code][0];        \
+        (reader).pt.y += (reader).deltas[(int)(reader).code][1];        \
+    }                                                                   \
+}
+
+#define CV_CURRENT_POINT( reader )  (*((CvPoint*)((reader).ptr)))
+#define CV_PREV_POINT( reader )     (*((CvPoint*)((reader).prev_elem)))
+
+#define CV_READ_EDGE( pt1, pt2, reader )               \
+{                               
