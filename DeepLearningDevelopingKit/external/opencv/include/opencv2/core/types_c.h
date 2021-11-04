@@ -1632,4 +1632,54 @@ CvSeqReader;
 #define CV_PREV_POINT( reader )     (*((CvPoint*)((reader).prev_elem)))
 
 #define CV_READ_EDGE( pt1, pt2, reader )               \
-{                               
+{                                                      \
+    assert( sizeof(pt1) == sizeof(CvPoint) &&          \
+            sizeof(pt2) == sizeof(CvPoint) &&          \
+            reader.seq->elem_size == sizeof(CvPoint)); \
+    (pt1) = CV_PREV_POINT( reader );                   \
+    (pt2) = CV_CURRENT_POINT( reader );                \
+    (reader).prev_elem = (reader).ptr;                 \
+    CV_NEXT_SEQ_ELEM( sizeof(CvPoint), (reader));      \
+}
+
+/************ Graph macros ************/
+
+/** Return next graph edge for given vertex: */
+#define  CV_NEXT_GRAPH_EDGE( edge, vertex )                              \
+     (assert((edge)->vtx[0] == (vertex) || (edge)->vtx[1] == (vertex)),  \
+      (edge)->next[(edge)->vtx[1] == (vertex)])
+
+
+
+/****************************************************************************************\
+*             Data structures for persistence (a.k.a serialization) functionality        *
+\****************************************************************************************/
+
+/** "black box" file storage */
+typedef struct CvFileStorage CvFileStorage;
+
+/** Storage flags: */
+#define CV_STORAGE_READ          0
+#define CV_STORAGE_WRITE         1
+#define CV_STORAGE_WRITE_TEXT    CV_STORAGE_WRITE
+#define CV_STORAGE_WRITE_BINARY  CV_STORAGE_WRITE
+#define CV_STORAGE_APPEND        2
+#define CV_STORAGE_MEMORY        4
+#define CV_STORAGE_FORMAT_MASK   (7<<3)
+#define CV_STORAGE_FORMAT_AUTO   0
+#define CV_STORAGE_FORMAT_XML    8
+#define CV_STORAGE_FORMAT_YAML  16
+#define CV_STORAGE_FORMAT_JSON  24
+#define CV_STORAGE_BASE64       64
+#define CV_STORAGE_WRITE_BASE64  (CV_STORAGE_BASE64 | CV_STORAGE_WRITE)
+
+/** @brief List of attributes. :
+
+In the current implementation, attributes are used to pass extra parameters when writing user
+objects (see cvWrite). XML attributes inside tags are not supported, aside from the object type
+specification (type_id attribute).
+@see cvAttrList, cvAttrValue
+ */
+typedef struct CvAttrList
+{
+    const char** attr;         /**< NULL-terminated array of (attribute_name,attr
