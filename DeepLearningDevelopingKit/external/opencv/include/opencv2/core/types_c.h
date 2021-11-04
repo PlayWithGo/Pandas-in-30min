@@ -1682,4 +1682,65 @@ specification (type_id attribute).
  */
 typedef struct CvAttrList
 {
-    const char** attr;         /**< NULL-terminated array of (attribute_name,attr
+    const char** attr;         /**< NULL-terminated array of (attribute_name,attribute_value) pairs. */
+    struct CvAttrList* next;   /**< Pointer to next chunk of the attributes list.                    */
+}
+CvAttrList;
+
+/** initializes CvAttrList structure */
+CV_INLINE CvAttrList cvAttrList( const char** attr CV_DEFAULT(NULL),
+                                 CvAttrList* next CV_DEFAULT(NULL) )
+{
+    CvAttrList l;
+    l.attr = attr;
+    l.next = next;
+
+    return l;
+}
+
+struct CvTypeInfo;
+
+#define CV_NODE_NONE        0
+#define CV_NODE_INT         1
+#define CV_NODE_INTEGER     CV_NODE_INT
+#define CV_NODE_REAL        2
+#define CV_NODE_FLOAT       CV_NODE_REAL
+#define CV_NODE_STR         3
+#define CV_NODE_STRING      CV_NODE_STR
+#define CV_NODE_REF         4 /**< not used */
+#define CV_NODE_SEQ         5
+#define CV_NODE_MAP         6
+#define CV_NODE_TYPE_MASK   7
+
+#define CV_NODE_TYPE(flags)  ((flags) & CV_NODE_TYPE_MASK)
+
+/** file node flags */
+#define CV_NODE_FLOW        8 /**<Used only for writing structures in YAML format. */
+#define CV_NODE_USER        16
+#define CV_NODE_EMPTY       32
+#define CV_NODE_NAMED       64
+
+#define CV_NODE_IS_INT(flags)        (CV_NODE_TYPE(flags) == CV_NODE_INT)
+#define CV_NODE_IS_REAL(flags)       (CV_NODE_TYPE(flags) == CV_NODE_REAL)
+#define CV_NODE_IS_STRING(flags)     (CV_NODE_TYPE(flags) == CV_NODE_STRING)
+#define CV_NODE_IS_SEQ(flags)        (CV_NODE_TYPE(flags) == CV_NODE_SEQ)
+#define CV_NODE_IS_MAP(flags)        (CV_NODE_TYPE(flags) == CV_NODE_MAP)
+#define CV_NODE_IS_COLLECTION(flags) (CV_NODE_TYPE(flags) >= CV_NODE_SEQ)
+#define CV_NODE_IS_FLOW(flags)       (((flags) & CV_NODE_FLOW) != 0)
+#define CV_NODE_IS_EMPTY(flags)      (((flags) & CV_NODE_EMPTY) != 0)
+#define CV_NODE_IS_USER(flags)       (((flags) & CV_NODE_USER) != 0)
+#define CV_NODE_HAS_NAME(flags)      (((flags) & CV_NODE_NAMED) != 0)
+
+#define CV_NODE_SEQ_SIMPLE 256
+#define CV_NODE_SEQ_IS_SIMPLE(seq) (((seq)->flags & CV_NODE_SEQ_SIMPLE) != 0)
+
+typedef struct CvString
+{
+    int len;
+    char* ptr;
+}
+CvString;
+
+/** All the keys (names) of elements in the readed file storage
+   are stored in the hash to speed up the lookup operations: */
+typedef struct CvStringHas
