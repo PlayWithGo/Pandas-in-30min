@@ -1743,4 +1743,59 @@ CvString;
 
 /** All the keys (names) of elements in the readed file storage
    are stored in the hash to speed up the lookup operations: */
-typedef struct CvStringHas
+typedef struct CvStringHashNode
+{
+    unsigned hashval;
+    CvString str;
+    struct CvStringHashNode* next;
+}
+CvStringHashNode;
+
+typedef struct CvGenericHash CvFileNodeHash;
+
+/** Basic element of the file storage - scalar or collection: */
+typedef struct CvFileNode
+{
+    int tag;
+    struct CvTypeInfo* info; /**< type information
+            (only for user-defined object, for others it is 0) */
+    union
+    {
+        double f; /**< scalar floating-point number */
+        int i;    /**< scalar integer number */
+        CvString str; /**< text string */
+        CvSeq* seq; /**< sequence (ordered collection of file nodes) */
+        CvFileNodeHash* map; /**< map (collection of named file nodes) */
+    } data;
+}
+CvFileNode;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+typedef int (CV_CDECL *CvIsInstanceFunc)( const void* struct_ptr );
+typedef void (CV_CDECL *CvReleaseFunc)( void** struct_dblptr );
+typedef void* (CV_CDECL *CvReadFunc)( CvFileStorage* storage, CvFileNode* node );
+typedef void (CV_CDECL *CvWriteFunc)( CvFileStorage* storage, const char* name,
+                                      const void* struct_ptr, CvAttrList attributes );
+typedef void* (CV_CDECL *CvCloneFunc)( const void* struct_ptr );
+#ifdef __cplusplus
+}
+#endif
+
+/** @brief Type information
+
+The structure contains information about one of the standard or user-defined types. Instances of the
+type may or may not contain a pointer to the corresponding CvTypeInfo structure. In any case, there
+is a way to find the type info structure for a given object using the cvTypeOf function.
+Alternatively, type info can be found by type name using cvFindType, which is used when an object
+is read from file storage. The user can register a new type with cvRegisterType that adds the type
+information structure into the beginning of the type list. Thus, it is possible to create
+specialized types from generic standard types and override the basic methods.
+ */
+typedef struct CvTypeInfo
+{
+    int flags; /**< not used */
+    int header_size; /**< sizeof(CvTypeInfo) */
+    struct CvTypeInfo* prev; /**< previous registered type in the list */
+    str
