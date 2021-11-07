@@ -1798,4 +1798,40 @@ typedef struct CvTypeInfo
     int flags; /**< not used */
     int header_size; /**< sizeof(CvTypeInfo) */
     struct CvTypeInfo* prev; /**< previous registered type in the list */
-    str
+    struct CvTypeInfo* next; /**< next registered type in the list */
+    const char* type_name; /**< type name, written to file storage */
+    CvIsInstanceFunc is_instance; /**< checks if the passed object belongs to the type */
+    CvReleaseFunc release; /**< releases object (memory etc.) */
+    CvReadFunc read; /**< reads object from file storage */
+    CvWriteFunc write; /**< writes object to file storage */
+    CvCloneFunc clone; /**< creates a copy of the object */
+}
+CvTypeInfo;
+
+
+/**** System data types ******/
+
+typedef struct CvPluginFuncInfo
+{
+    void** func_addr;
+    void* default_func_addr;
+    const char* func_names;
+    int search_modules;
+    int loaded_from;
+}
+CvPluginFuncInfo;
+
+typedef struct CvModuleInfo
+{
+    struct CvModuleInfo* next;
+    const char* name;
+    const char* version;
+    CvPluginFuncInfo* func_tab;
+}
+CvModuleInfo;
+
+/** @} */
+
+#endif /*OPENCV_CORE_TYPES_H*/
+
+/* End of file. */
