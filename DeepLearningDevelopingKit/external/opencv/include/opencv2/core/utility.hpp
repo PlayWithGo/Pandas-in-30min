@@ -1126,3 +1126,116 @@ public:
         for(size_t i = 0; i < m_childs.size(); i++)
         {
             m_childs[i]->m_pParent = 0; // avoid excessive parent vector trimming
+            delete m_childs[i];
+        }
+        m_childs.clear();
+    }
+
+    int getDepth()
+    {
+        int   count   = 0;
+        Node *pParent = m_pParent;
+        while(pParent) count++, pParent = pParent->m_pParent;
+        return count;
+    }
+
+public:
+    OBJECT                     m_payload;
+    Node<OBJECT>*              m_pParent;
+    std::vector<Node<OBJECT>*> m_childs;
+};
+
+// Instrumentation external interface
+namespace instr
+{
+
+#if !defined OPENCV_ABI_CHECK
+
+enum TYPE
+{
+    TYPE_GENERAL = 0,   // OpenCV API function, e.g. exported function
+    TYPE_MARKER,        // Information marker
+    TYPE_WRAPPER,       // Wrapper function for implementation
+    TYPE_FUN,           // Simple function call
+};
+
+enum IMPL
+{
+    IMPL_PLAIN = 0,
+    IMPL_IPP,
+    IMPL_OPENCL,
+};
+
+struct NodeDataTls
+{
+    NodeDataTls()
+    {
+        m_ticksTotal = 0;
+    }
+    uint64      m_ticksTotal;
+};
+
+class CV_EXPORTS NodeData
+{
+public:
+    NodeData(const char* funName = 0, const char* fileName = NULL, int lineNum = 0, void* retAddress = NULL, bool alwaysExpand = false, cv::instr::TYPE instrType = TYPE_GENERAL, cv::instr::IMPL implType = IMPL_PLAIN);
+    NodeData(NodeData &ref);
+    ~NodeData();
+    NodeData& operator=(const NodeData&);
+
+    cv::String          m_funName;
+    cv::instr::TYPE     m_instrType;
+    cv::instr::IMPL     m_implType;
+    const char*         m_fileName;
+    int                 m_lineNum;
+    void*               m_retAddress;
+    bool                m_alwaysExpand;
+    bool                m_funError;
+
+    volatile int         m_counter;
+    volatile uint64      m_ticksTotal;
+    TLSData<NodeDataTls> m_tls;
+    int                  m_threads;
+
+    // No synchronization
+    double getTotalMs()   const { return ((double)m_ticksTotal / cv::getTickFrequency()) * 1000; }
+    double getMeanMs()    const { return (((double)m_ticksTotal/m_counter) / cv::getTickFrequency()) * 1000; }
+};
+bool operator==(const NodeData& lhs, const NodeData& rhs);
+
+typedef Node<NodeData> InstrNode;
+
+CV_EXPORTS InstrNode* getTrace();
+
+#endif // !defined OPENCV_ABI_CHECK
+
+
+CV_EXPORTS bool       useInstrumentation();
+CV_EXPORTS void       setUseInstrumentation(bool flag);
+CV_EXPORTS void       resetTrace();
+
+enum FLAGS
+{
+    FLAGS_NONE              = 0,
+    FLAGS_MAPPING           = 0x01,
+    FLAGS_EXPAND_SAME_NAMES = 0x02,
+};
+
+CV_EXPORTS void       setFlags(FLAGS modeFlags);
+static inline void    setFlags(int modeFlags) { setFlags((FLAGS)modeFlags); }
+CV_EXPORTS FLAGS      getFlags();
+}
+
+namespace utils {
+
+CV_EXPORTS int getThreadID();
+
+} // namespace
+
+} //namespace cv
+
+#ifndef DISABLE_OPENCV_24_COMPATIBILITY
+#include "opencv2/core/core_c.h"
+#endif
+
+#endif //OPENCV_CORE_UTILITY_H
