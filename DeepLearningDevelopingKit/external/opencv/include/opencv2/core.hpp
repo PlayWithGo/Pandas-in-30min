@@ -69,4 +69,68 @@
     @}
     @defgroup core_array Operations on arrays
     @defgroup core_xml XML/YAML Persistence
-    @defgroup core_cluster Clusterin
+    @defgroup core_cluster Clustering
+    @defgroup core_utils Utility and system functions and macros
+    @{
+        @defgroup core_utils_sse SSE utilities
+        @defgroup core_utils_neon NEON utilities
+        @defgroup core_utils_softfloat Softfloat support
+    @}
+    @defgroup core_opengl OpenGL interoperability
+    @defgroup core_ipp Intel IPP Asynchronous C/C++ Converters
+    @defgroup core_optim Optimization Algorithms
+    @defgroup core_directx DirectX interoperability
+    @defgroup core_eigen Eigen support
+    @defgroup core_opencl OpenCL support
+    @defgroup core_va_intel Intel VA-API/OpenCL (CL-VA) interoperability
+    @defgroup core_hal Hardware Acceleration Layer
+    @{
+        @defgroup core_hal_functions Functions
+        @defgroup core_hal_interface Interface
+        @defgroup core_hal_intrin Universal intrinsics
+        @{
+            @defgroup core_hal_intrin_impl Private implementation helpers
+        @}
+    @}
+@}
+ */
+
+namespace cv {
+
+//! @addtogroup core_utils
+//! @{
+
+/*! @brief Class passed to an error.
+
+This class encapsulates all or almost all necessary
+information about the error happened in the program. The exception is
+usually constructed and thrown implicitly via CV_Error and CV_Error_ macros.
+@see error
+ */
+class CV_EXPORTS Exception : public std::exception
+{
+public:
+    /*!
+     Default constructor
+     */
+    Exception();
+    /*!
+     Full constructor. Normally the constructor is not called explicitly.
+     Instead, the macros CV_Error(), CV_Error_() and CV_Assert() are used.
+    */
+    Exception(int _code, const String& _err, const String& _func, const String& _file, int _line);
+    virtual ~Exception() throw();
+
+    /*!
+     \return the error description and the context as a text string.
+    */
+    virtual const char *what() const throw();
+    void formatMessage();
+
+    String msg; ///< the formatted error message
+
+    int code; ///< error code @see CVStatus
+    String err; ///< error description
+    String func; ///< function name. Available only when the compiler supports getting it
+    String file; ///< source file name where the error has occurred
+    int 
