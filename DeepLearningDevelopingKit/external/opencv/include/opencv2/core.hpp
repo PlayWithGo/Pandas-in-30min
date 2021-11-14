@@ -133,4 +133,44 @@ public:
     String err; ///< error description
     String func; ///< function name. Available only when the compiler supports getting it
     String file; ///< source file name where the error has occurred
-    int 
+    int line; ///< line number in the source file where the error has occurred
+};
+
+/*! @brief Signals an error and raises the exception.
+
+By default the function prints information about the error to stderr,
+then it either stops if cv::setBreakOnError() had been called before or raises the exception.
+It is possible to alternate error processing by using #redirectError().
+@param exc the exception raisen.
+@deprecated drop this version
+ */
+CV_EXPORTS void error( const Exception& exc );
+
+enum SortFlags { SORT_EVERY_ROW    = 0, //!< each matrix row is sorted independently
+                 SORT_EVERY_COLUMN = 1, //!< each matrix column is sorted
+                                        //!< independently; this flag and the previous one are
+                                        //!< mutually exclusive.
+                 SORT_ASCENDING    = 0, //!< each matrix row is sorted in the ascending
+                                        //!< order.
+                 SORT_DESCENDING   = 16 //!< each matrix row is sorted in the
+                                        //!< descending order; this flag and the previous one are also
+                                        //!< mutually exclusive.
+               };
+
+//! @} core_utils
+
+//! @addtogroup core
+//! @{
+
+//! Covariation flags
+enum CovarFlags {
+    /** The output covariance matrix is calculated as:
+       \f[\texttt{scale}   \cdot  [  \texttt{vects}  [0]-  \texttt{mean}  , \texttt{vects}  [1]-  \texttt{mean}  ,...]^T  \cdot  [ \texttt{vects}  [0]- \texttt{mean}  , \texttt{vects}  [1]- \texttt{mean}  ,...],\f]
+       The covariance matrix will be nsamples x nsamples. Such an unusual covariance matrix is used
+       for fast PCA of a set of very large vectors (see, for example, the EigenFaces technique for
+       face recognition). Eigenvalues of this "scrambled" matrix match the eigenvalues of the true
+       covariance matrix. The "true" eigenvectors can be easily calculated from the eigenvectors of
+       the "scrambled" covariance matrix. */
+    COVAR_SCRAMBLED = 0,
+    /**The output covariance matrix is calculated as:
+        \f[\t
