@@ -173,4 +173,38 @@ enum CovarFlags {
        the "scrambled" covariance matrix. */
     COVAR_SCRAMBLED = 0,
     /**The output covariance matrix is calculated as:
-        \f[\t
+        \f[\texttt{scale}   \cdot  [  \texttt{vects}  [0]-  \texttt{mean}  , \texttt{vects}  [1]-  \texttt{mean}  ,...]  \cdot  [ \texttt{vects}  [0]- \texttt{mean}  , \texttt{vects}  [1]- \texttt{mean}  ,...]^T,\f]
+        covar will be a square matrix of the same size as the total number of elements in each input
+        vector. One and only one of #COVAR_SCRAMBLED and #COVAR_NORMAL must be specified.*/
+    COVAR_NORMAL    = 1,
+    /** If the flag is specified, the function does not calculate mean from
+        the input vectors but, instead, uses the passed mean vector. This is useful if mean has been
+        pre-calculated or known in advance, or if the covariance matrix is calculated by parts. In
+        this case, mean is not a mean vector of the input sub-set of vectors but rather the mean
+        vector of the whole set.*/
+    COVAR_USE_AVG   = 2,
+    /** If the flag is specified, the covariance matrix is scaled. In the
+        "normal" mode, scale is 1./nsamples . In the "scrambled" mode, scale is the reciprocal of the
+        total number of elements in each input vector. By default (if the flag is not specified), the
+        covariance matrix is not scaled ( scale=1 ).*/
+    COVAR_SCALE     = 4,
+    /** If the flag is
+        specified, all the input vectors are stored as rows of the samples matrix. mean should be a
+        single-row vector in this case.*/
+    COVAR_ROWS      = 8,
+    /** If the flag is
+        specified, all the input vectors are stored as columns of the samples matrix. mean should be a
+        single-column vector in this case.*/
+    COVAR_COLS      = 16
+};
+
+//! k-Means flags
+enum KmeansFlags {
+    /** Select random initial centers in each attempt.*/
+    KMEANS_RANDOM_CENTERS     = 0,
+    /** Use kmeans++ center initialization by Arthur and Vassilvitskii [Arthur2007].*/
+    KMEANS_PP_CENTERS         = 2,
+    /** During the first (and possibly the only) attempt, use the
+        user-supplied labels instead of computing them from the initial centers. For the second and
+        further attempts, use the random or semi-random centers. Use one of KMEANS_\*_CENTERS flag
+        to spec
