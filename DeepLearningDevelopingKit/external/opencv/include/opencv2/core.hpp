@@ -256,4 +256,50 @@ CV_EXPORTS void swap( UMat& a, UMat& b );
 The function computes and returns the coordinate of a donor pixel corresponding to the specified
 extrapolated pixel when using the specified extrapolation border mode. For example, if you use
 cv::BORDER_WRAP mode in the horizontal direction, cv::BORDER_REFLECT_101 in the vertical direction and
-want to compute value of the "virtual" pixel Po
+want to compute value of the "virtual" pixel Point(-5, 100) in a floating-point image img , it
+looks like:
+@code{.cpp}
+    float val = img.at<float>(borderInterpolate(100, img.rows, cv::BORDER_REFLECT_101),
+                              borderInterpolate(-5, img.cols, cv::BORDER_WRAP));
+@endcode
+Normally, the function is not called directly. It is used inside filtering functions and also in
+copyMakeBorder.
+@param p 0-based coordinate of the extrapolated pixel along one of the axes, likely \<0 or \>= len
+@param len Length of the array along the corresponding axis.
+@param borderType Border type, one of the #BorderTypes, except for #BORDER_TRANSPARENT and
+#BORDER_ISOLATED . When borderType==#BORDER_CONSTANT , the function always returns -1, regardless
+of p and len.
+
+@sa copyMakeBorder
+*/
+CV_EXPORTS_W int borderInterpolate(int p, int len, int borderType);
+
+/** @example copyMakeBorder_demo.cpp
+An example using copyMakeBorder function
+ */
+/** @brief Forms a border around an image.
+
+The function copies the source image into the middle of the destination image. The areas to the
+left, to the right, above and below the copied source image will be filled with extrapolated
+pixels. This is not what filtering functions based on it do (they extrapolate pixels on-fly), but
+what other more complex functions, including your own, may do to simplify image boundary handling.
+
+The function supports the mode when src is already in the middle of dst . In this case, the
+function does not copy src itself but simply constructs the border, for example:
+
+@code{.cpp}
+    // let border be the same in all directions
+    int border=2;
+    // constructs a larger image to fit both the image and the border
+    Mat gray_buf(rgb.rows + border*2, rgb.cols + border*2, rgb.depth());
+    // select the middle part of it w/o copying data
+    Mat gray(gray_canvas, Rect(border, border, rgb.cols, rgb.rows));
+    // convert image from RGB to grayscale
+    cvtColor(rgb, gray, COLOR_RGB2GRAY);
+    // form a border in-place
+    copyMakeBorder(gray, gray_buf, border, border,
+                   border, border, BORDER_REPLICATE);
+    // now do some custom filtering ...
+    ...
+@endcode
+@note When th
