@@ -207,4 +207,53 @@ enum KmeansFlags {
     /** During the first (and possibly the only) attempt, use the
         user-supplied labels instead of computing them from the initial centers. For the second and
         further attempts, use the random or semi-random centers. Use one of KMEANS_\*_CENTERS flag
-        to spec
+        to specify the exact method.*/
+    KMEANS_USE_INITIAL_LABELS = 1
+};
+
+//! type of line
+enum LineTypes {
+    FILLED  = -1,
+    LINE_4  = 4, //!< 4-connected line
+    LINE_8  = 8, //!< 8-connected line
+    LINE_AA = 16 //!< antialiased line
+};
+
+//! Only a subset of Hershey fonts
+//! <http://sources.isc.org/utils/misc/hershey-font.txt> are supported
+enum HersheyFonts {
+    FONT_HERSHEY_SIMPLEX        = 0, //!< normal size sans-serif font
+    FONT_HERSHEY_PLAIN          = 1, //!< small size sans-serif font
+    FONT_HERSHEY_DUPLEX         = 2, //!< normal size sans-serif font (more complex than FONT_HERSHEY_SIMPLEX)
+    FONT_HERSHEY_COMPLEX        = 3, //!< normal size serif font
+    FONT_HERSHEY_TRIPLEX        = 4, //!< normal size serif font (more complex than FONT_HERSHEY_COMPLEX)
+    FONT_HERSHEY_COMPLEX_SMALL  = 5, //!< smaller version of FONT_HERSHEY_COMPLEX
+    FONT_HERSHEY_SCRIPT_SIMPLEX = 6, //!< hand-writing style font
+    FONT_HERSHEY_SCRIPT_COMPLEX = 7, //!< more complex variant of FONT_HERSHEY_SCRIPT_SIMPLEX
+    FONT_ITALIC                 = 16 //!< flag for italic font
+};
+
+enum ReduceTypes { REDUCE_SUM = 0, //!< the output is the sum of all rows/columns of the matrix.
+                   REDUCE_AVG = 1, //!< the output is the mean vector of all rows/columns of the matrix.
+                   REDUCE_MAX = 2, //!< the output is the maximum (column/row-wise) of all rows/columns of the matrix.
+                   REDUCE_MIN = 3  //!< the output is the minimum (column/row-wise) of all rows/columns of the matrix.
+                 };
+
+
+/** @brief Swaps two matrices
+*/
+CV_EXPORTS void swap(Mat& a, Mat& b);
+/** @overload */
+CV_EXPORTS void swap( UMat& a, UMat& b );
+
+//! @} core
+
+//! @addtogroup core_array
+//! @{
+
+/** @brief Computes the source location of an extrapolated pixel.
+
+The function computes and returns the coordinate of a donor pixel corresponding to the specified
+extrapolated pixel when using the specified extrapolation border mode. For example, if you use
+cv::BORDER_WRAP mode in the horizontal direction, cv::BORDER_REFLECT_101 in the vertical direction and
+want to compute value of the "virtual" pixel Po
