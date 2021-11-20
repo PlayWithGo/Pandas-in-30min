@@ -343,4 +343,36 @@ The first function in the list above can be replaced with matrix expressions:
     dst = src1 + src2;
     dst += src1; // equivalent to add(dst, src1, dst);
 @endcode
-The input arrays and the 
+The input arrays and the output array can all have the same or different depths. For example, you
+can add a 16-bit unsigned array to a 8-bit signed array and store the sum as a 32-bit
+floating-point array. Depth of the output array is determined by the dtype parameter. In the second
+and third cases above, as well as in the first case, when src1.depth() == src2.depth(), dtype can
+be set to the default -1. In this case, the output array will have the same depth as the input
+array, be it src1, src2 or both.
+@note Saturation is not applied when the output array has the depth CV_32S. You may even get
+result of an incorrect sign in the case of overflow.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array that has the same size and number of channels as the input array(s); the
+depth is defined by dtype or src1/src2.
+@param mask optional operation mask - 8-bit single channel array, that specifies elements of the
+output array to be changed.
+@param dtype optional depth of the output array (see the discussion below).
+@sa subtract, addWeighted, scaleAdd, Mat::convertTo
+*/
+CV_EXPORTS_W void add(InputArray src1, InputArray src2, OutputArray dst,
+                      InputArray mask = noArray(), int dtype = -1);
+
+/** @brief Calculates the per-element difference between two arrays or array and a scalar.
+
+The function subtract calculates:
+- Difference between two arrays, when both input arrays have the same size and the same number of
+channels:
+    \f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1}(I) -  \texttt{src2}(I)) \quad \texttt{if mask}(I) \ne0\f]
+- Difference between an array and a scalar, when src2 is constructed from Scalar or has the same
+number of elements as `src1.channels()`:
+    \f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1}(I) -  \texttt{src2} ) \quad \texttt{if mask}(I) \ne0\f]
+- Difference between a scalar and an array, when src1 is constructed from Scalar or has the same
+number of elements as `src2.channels()`:
+    \f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1} -  \texttt{src2}(I) ) \quad \texttt{if mask}(I) \ne0\f]
+- The reverse
