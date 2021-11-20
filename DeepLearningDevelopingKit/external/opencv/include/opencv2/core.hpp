@@ -302,4 +302,45 @@ function does not copy src itself but simply constructs the border, for example:
     // now do some custom filtering ...
     ...
 @endcode
-@note When th
+@note When the source image is a part (ROI) of a bigger image, the function will try to use the
+pixels outside of the ROI to form a border. To disable this feature and always do extrapolation, as
+if src was not a ROI, use borderType | #BORDER_ISOLATED.
+
+@param src Source image.
+@param dst Destination image of the same type as src and the size Size(src.cols+left+right,
+src.rows+top+bottom) .
+@param top
+@param bottom
+@param left
+@param right Parameter specifying how many pixels in each direction from the source image rectangle
+to extrapolate. For example, top=1, bottom=1, left=1, right=1 mean that 1 pixel-wide border needs
+to be built.
+@param borderType Border type. See borderInterpolate for details.
+@param value Border value if borderType==BORDER_CONSTANT .
+
+@sa  borderInterpolate
+*/
+CV_EXPORTS_W void copyMakeBorder(InputArray src, OutputArray dst,
+                                 int top, int bottom, int left, int right,
+                                 int borderType, const Scalar& value = Scalar() );
+
+/** @brief Calculates the per-element sum of two arrays or an array and a scalar.
+
+The function add calculates:
+- Sum of two arrays when both input arrays have the same size and the same number of channels:
+\f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1}(I) +  \texttt{src2}(I)) \quad \texttt{if mask}(I) \ne0\f]
+- Sum of an array and a scalar when src2 is constructed from Scalar or has the same number of
+elements as `src1.channels()`:
+\f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1}(I) +  \texttt{src2} ) \quad \texttt{if mask}(I) \ne0\f]
+- Sum of a scalar and an array when src1 is constructed from Scalar or has the same number of
+elements as `src2.channels()`:
+\f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1} +  \texttt{src2}(I) ) \quad \texttt{if mask}(I) \ne0\f]
+where `I` is a multi-dimensional index of array elements. In case of multi-channel arrays, each
+channel is processed independently.
+
+The first function in the list above can be replaced with matrix expressions:
+@code{.cpp}
+    dst = src1 + src2;
+    dst += src1; // equivalent to add(dst, src1, dst);
+@endcode
+The input arrays and the 
