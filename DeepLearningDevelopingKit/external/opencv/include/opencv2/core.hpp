@@ -375,4 +375,39 @@ number of elements as `src1.channels()`:
 - Difference between a scalar and an array, when src1 is constructed from Scalar or has the same
 number of elements as `src2.channels()`:
     \f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src1} -  \texttt{src2}(I) ) \quad \texttt{if mask}(I) \ne0\f]
-- The reverse
+- The reverse difference between a scalar and an array in the case of `SubRS`:
+    \f[\texttt{dst}(I) =  \texttt{saturate} ( \texttt{src2} -  \texttt{src1}(I) ) \quad \texttt{if mask}(I) \ne0\f]
+where I is a multi-dimensional index of array elements. In case of multi-channel arrays, each
+channel is processed independently.
+
+The first function in the list above can be replaced with matrix expressions:
+@code{.cpp}
+    dst = src1 - src2;
+    dst -= src1; // equivalent to subtract(dst, src1, dst);
+@endcode
+The input arrays and the output array can all have the same or different depths. For example, you
+can subtract to 8-bit unsigned arrays and store the difference in a 16-bit signed array. Depth of
+the output array is determined by dtype parameter. In the second and third cases above, as well as
+in the first case, when src1.depth() == src2.depth(), dtype can be set to the default -1. In this
+case the output array will have the same depth as the input array, be it src1, src2 or both.
+@note Saturation is not applied when the output array has the depth CV_32S. You may even get
+result of an incorrect sign in the case of overflow.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array of the same size and the same number of channels as the input array.
+@param mask optional operation mask; this is an 8-bit single channel array that specifies elements
+of the output array to be changed.
+@param dtype optional depth of the output array
+@sa  add, addWeighted, scaleAdd, Mat::convertTo
+  */
+CV_EXPORTS_W void subtract(InputArray src1, InputArray src2, OutputArray dst,
+                           InputArray mask = noArray(), int dtype = -1);
+
+
+/** @brief Calculates the per-element scaled product of two arrays.
+
+The function multiply calculates the per-element product of two arrays:
+
+\f[\texttt{dst} (I)= \texttt{saturate} ( \texttt{scale} \cdot \texttt{src1} (I)  \cdot \texttt{src2} (I))\f]
+
+There is also a @ref MatrixExpressions -friendly variant of the firs
