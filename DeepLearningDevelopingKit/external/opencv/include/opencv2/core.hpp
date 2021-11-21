@@ -410,4 +410,51 @@ The function multiply calculates the per-element product of two arrays:
 
 \f[\texttt{dst} (I)= \texttt{saturate} ( \texttt{scale} \cdot \texttt{src1} (I)  \cdot \texttt{src2} (I))\f]
 
-There is also a @ref MatrixExpressions -friendly variant of the firs
+There is also a @ref MatrixExpressions -friendly variant of the first function. See Mat::mul .
+
+For a not-per-element matrix product, see gemm .
+
+@note Saturation is not applied when the output array has the depth
+CV_32S. You may even get result of an incorrect sign in the case of
+overflow.
+@param src1 first input array.
+@param src2 second input array of the same size and the same type as src1.
+@param dst output array of the same size and type as src1.
+@param scale optional scale factor.
+@param dtype optional depth of the output array
+@sa add, subtract, divide, scaleAdd, addWeighted, accumulate, accumulateProduct, accumulateSquare,
+Mat::convertTo
+*/
+CV_EXPORTS_W void multiply(InputArray src1, InputArray src2,
+                           OutputArray dst, double scale = 1, int dtype = -1);
+
+/** @brief Performs per-element division of two arrays or a scalar by an array.
+
+The function cv::divide divides one array by another:
+\f[\texttt{dst(I) = saturate(src1(I)*scale/src2(I))}\f]
+or a scalar by an array when there is no src1 :
+\f[\texttt{dst(I) = saturate(scale/src2(I))}\f]
+
+When src2(I) is zero, dst(I) will also be zero. Different channels of
+multi-channel arrays are processed independently.
+
+@note Saturation is not applied when the output array has the depth CV_32S. You may even get
+result of an incorrect sign in the case of overflow.
+@param src1 first input array.
+@param src2 second input array of the same size and type as src1.
+@param scale scalar factor.
+@param dst output array of the same size and type as src2.
+@param dtype optional depth of the output array; if -1, dst will have depth src2.depth(), but in
+case of an array-by-array division, you can only pass -1 when src1.depth()==src2.depth().
+@sa  multiply, add, subtract
+*/
+CV_EXPORTS_W void divide(InputArray src1, InputArray src2, OutputArray dst,
+                         double scale = 1, int dtype = -1);
+
+/** @overload */
+CV_EXPORTS_W void divide(double scale, InputArray src2,
+                         OutputArray dst, int dtype = -1);
+
+/** @brief Calculates the sum of a scaled array and another array.
+
+The function scaleAdd is one of the classical primitive linear algeb
