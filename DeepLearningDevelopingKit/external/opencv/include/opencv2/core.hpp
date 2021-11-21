@@ -457,4 +457,48 @@ CV_EXPORTS_W void divide(double scale, InputArray src2,
 
 /** @brief Calculates the sum of a scaled array and another array.
 
-The function scaleAdd is one of the classical primitive linear algeb
+The function scaleAdd is one of the classical primitive linear algebra operations, known as DAXPY
+or SAXPY in [BLAS](http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms). It calculates
+the sum of a scaled array and another array:
+\f[\texttt{dst} (I)= \texttt{scale} \cdot \texttt{src1} (I) +  \texttt{src2} (I)\f]
+The function can also be emulated with a matrix expression, for example:
+@code{.cpp}
+    Mat A(3, 3, CV_64F);
+    ...
+    A.row(0) = A.row(1)*2 + A.row(2);
+@endcode
+@param src1 first input array.
+@param alpha scale factor for the first array.
+@param src2 second input array of the same size and type as src1.
+@param dst output array of the same size and type as src1.
+@sa add, addWeighted, subtract, Mat::dot, Mat::convertTo
+*/
+CV_EXPORTS_W void scaleAdd(InputArray src1, double alpha, InputArray src2, OutputArray dst);
+
+/** @example AddingImagesTrackbar.cpp
+
+ */
+/** @brief Calculates the weighted sum of two arrays.
+
+The function addWeighted calculates the weighted sum of two arrays as follows:
+\f[\texttt{dst} (I)= \texttt{saturate} ( \texttt{src1} (I)* \texttt{alpha} +  \texttt{src2} (I)* \texttt{beta} +  \texttt{gamma} )\f]
+where I is a multi-dimensional index of array elements. In case of multi-channel arrays, each
+channel is processed independently.
+The function can be replaced with a matrix expression:
+@code{.cpp}
+    dst = src1*alpha + src2*beta + gamma;
+@endcode
+@note Saturation is not applied when the output array has the depth CV_32S. You may even get
+result of an incorrect sign in the case of overflow.
+@param src1 first input array.
+@param alpha weight of the first array elements.
+@param src2 second input array of the same size and channel number as src1.
+@param beta weight of the second array elements.
+@param gamma scalar added to each sum.
+@param dst output array that has the same size and number of channels as the input arrays.
+@param dtype optional depth of the output array; when both input arrays have the same depth, dtype
+can be set to -1, which will be equivalent to src1.depth().
+@sa  add, subtract, scaleAdd, Mat::convertTo
+*/
+CV_EXPORTS_W void addWeighted(InputArray src1, double alpha, InputArray src2,
+                              double beta, double gamma, Outp
