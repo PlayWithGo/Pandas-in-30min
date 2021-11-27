@@ -501,4 +501,49 @@ can be set to -1, which will be equivalent to src1.depth().
 @sa  add, subtract, scaleAdd, Mat::convertTo
 */
 CV_EXPORTS_W void addWeighted(InputArray src1, double alpha, InputArray src2,
-                              double beta, double gamma, Outp
+                              double beta, double gamma, OutputArray dst, int dtype = -1);
+
+/** @brief Scales, calculates absolute values, and converts the result to 8-bit.
+
+On each element of the input array, the function convertScaleAbs
+performs three operations sequentially: scaling, taking an absolute
+value, conversion to an unsigned 8-bit type:
+\f[\texttt{dst} (I)= \texttt{saturate\_cast<uchar>} (| \texttt{src} (I)* \texttt{alpha} +  \texttt{beta} |)\f]
+In case of multi-channel arrays, the function processes each channel
+independently. When the output is not 8-bit, the operation can be
+emulated by calling the Mat::convertTo method (or by using matrix
+expressions) and then by calculating an absolute value of the result.
+For example:
+@code{.cpp}
+    Mat_<float> A(30,30);
+    randu(A, Scalar(-100), Scalar(100));
+    Mat_<float> B = A*5 + 3;
+    B = abs(B);
+    // Mat_<float> B = abs(A*5+3) will also do the job,
+    // but it will allocate a temporary matrix
+@endcode
+@param src input array.
+@param dst output array.
+@param alpha optional scale factor.
+@param beta optional delta added to the scaled values.
+@sa  Mat::convertTo, cv::abs(const Mat&)
+*/
+CV_EXPORTS_W void convertScaleAbs(InputArray src, OutputArray dst,
+                                  double alpha = 1, double beta = 0);
+
+/** @brief Converts an array to half precision floating number.
+
+This function converts FP32 (single precision floating point) from/to FP16 (half precision floating point).  The input array has to have type of CV_32F or
+CV_16S to represent the bit depth.  If the input array is neither of them, the function will raise an error.
+The format of half precision floating point is defined in IEEE 754-2008.
+
+@param src input array.
+@param dst output array.
+*/
+CV_EXPORTS_W void convertFp16(InputArray src, OutputArray dst);
+
+/** @brief Performs a look-up table transform of an array.
+
+The function LUT fills the output array with values from the look-up table. Indices of the entries
+are taken from the input array. That is, the function processes each element of src as follows:
+\f[\texttt{ds
