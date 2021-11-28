@@ -600,4 +600,39 @@ or
     Point pnt = locations[i];
 @endcode
 @param src single-channel array (type CV_8UC1)
-@par
+@param idx the output array, type of cv::Mat or std::vector<Point>, corresponding to non-zero indices in the input
+*/
+CV_EXPORTS_W void findNonZero( InputArray src, OutputArray idx );
+
+/** @brief Calculates an average (mean) of array elements.
+
+The function cv::mean calculates the mean value M of array elements,
+independently for each channel, and return it:
+\f[\begin{array}{l} N =  \sum _{I: \; \texttt{mask} (I) \ne 0} 1 \\ M_c =  \left ( \sum _{I: \; \texttt{mask} (I) \ne 0}{ \texttt{mtx} (I)_c} \right )/N \end{array}\f]
+When all the mask elements are 0's, the function returns Scalar::all(0)
+@param src input array that should have from 1 to 4 channels so that the result can be stored in
+Scalar_ .
+@param mask optional operation mask.
+@sa  countNonZero, meanStdDev, norm, minMaxLoc
+*/
+CV_EXPORTS_W Scalar mean(InputArray src, InputArray mask = noArray());
+
+/** Calculates a mean and standard deviation of array elements.
+
+The function cv::meanStdDev calculates the mean and the standard deviation M
+of array elements independently for each channel and returns it via the
+output parameters:
+\f[\begin{array}{l} N =  \sum _{I, \texttt{mask} (I)  \ne 0} 1 \\ \texttt{mean} _c =  \frac{\sum_{ I: \; \texttt{mask}(I) \ne 0} \texttt{src} (I)_c}{N} \\ \texttt{stddev} _c =  \sqrt{\frac{\sum_{ I: \; \texttt{mask}(I) \ne 0} \left ( \texttt{src} (I)_c -  \texttt{mean} _c \right )^2}{N}} \end{array}\f]
+When all the mask elements are 0's, the function returns
+mean=stddev=Scalar::all(0).
+@note The calculated standard deviation is only the diagonal of the
+complete normalized covariance matrix. If the full matrix is needed, you
+can reshape the multi-channel array M x N to the single-channel array
+M\*N x mtx.channels() (only possible when the matrix is continuous) and
+then pass the matrix to calcCovarMatrix .
+@param src input array that should have from 1 to 4 channels so that the results can be stored in
+Scalar_ 's.
+@param mean output parameter: calculated mean value.
+@param stddev output parameter: calculated standard deviation.
+@param mask optional operation mask.
+@sa  co
