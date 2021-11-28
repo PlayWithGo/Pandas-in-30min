@@ -546,4 +546,58 @@ CV_EXPORTS_W void convertFp16(InputArray src, OutputArray dst);
 
 The function LUT fills the output array with values from the look-up table. Indices of the entries
 are taken from the input array. That is, the function processes each element of src as follows:
-\f[\texttt{ds
+\f[\texttt{dst} (I)  \leftarrow \texttt{lut(src(I) + d)}\f]
+where
+\f[d =  \fork{0}{if \(\texttt{src}\) has depth \(\texttt{CV_8U}\)}{128}{if \(\texttt{src}\) has depth \(\texttt{CV_8S}\)}\f]
+@param src input array of 8-bit elements.
+@param lut look-up table of 256 elements; in case of multi-channel input array, the table should
+either have a single channel (in this case the same table is used for all channels) or the same
+number of channels as in the input array.
+@param dst output array of the same size and number of channels as src, and the same depth as lut.
+@sa  convertScaleAbs, Mat::convertTo
+*/
+CV_EXPORTS_W void LUT(InputArray src, InputArray lut, OutputArray dst);
+
+/** @brief Calculates the sum of array elements.
+
+The function cv::sum calculates and returns the sum of array elements,
+independently for each channel.
+@param src input array that must have from 1 to 4 channels.
+@sa  countNonZero, mean, meanStdDev, norm, minMaxLoc, reduce
+*/
+CV_EXPORTS_AS(sumElems) Scalar sum(InputArray src);
+
+/** @brief Counts non-zero array elements.
+
+The function returns the number of non-zero elements in src :
+\f[\sum _{I: \; \texttt{src} (I) \ne0 } 1\f]
+@param src single-channel array.
+@sa  mean, meanStdDev, norm, minMaxLoc, calcCovarMatrix
+*/
+CV_EXPORTS_W int countNonZero( InputArray src );
+
+/** @brief Returns the list of locations of non-zero pixels
+
+Given a binary matrix (likely returned from an operation such
+as threshold(), compare(), >, ==, etc, return all of
+the non-zero indices as a cv::Mat or std::vector<cv::Point> (x,y)
+For example:
+@code{.cpp}
+    cv::Mat binaryImage; // input, binary image
+    cv::Mat locations;   // output, locations of non-zero pixels
+    cv::findNonZero(binaryImage, locations);
+
+    // access pixel coordinates
+    Point pnt = locations.at<Point>(i);
+@endcode
+or
+@code{.cpp}
+    cv::Mat binaryImage; // input, binary image
+    vector<Point> locations;   // output, locations of non-zero pixels
+    cv::findNonZero(binaryImage, locations);
+
+    // access pixel coordinates
+    Point pnt = locations[i];
+@endcode
+@param src single-channel array (type CV_8UC1)
+@par
