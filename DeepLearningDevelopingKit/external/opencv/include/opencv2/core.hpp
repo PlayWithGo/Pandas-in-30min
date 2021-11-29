@@ -635,4 +635,45 @@ Scalar_ 's.
 @param mean output parameter: calculated mean value.
 @param stddev output parameter: calculated standard deviation.
 @param mask optional operation mask.
-@sa  co
+@sa  countNonZero, mean, norm, minMaxLoc, calcCovarMatrix
+*/
+CV_EXPORTS_W void meanStdDev(InputArray src, OutputArray mean, OutputArray stddev,
+                             InputArray mask=noArray());
+
+/** @brief Calculates the  absolute norm of an array.
+
+This version of #norm calculates the absolute norm of src1. The type of norm to calculate is specified using #NormTypes.
+
+As example for one array consider the function \f$r(x)= \begin{pmatrix} x \\ 1-x \end{pmatrix}, x \in [-1;1]\f$.
+The \f$ L_{1}, L_{2} \f$ and \f$ L_{\infty} \f$ norm for the sample value \f$r(-1) = \begin{pmatrix} -1 \\ 2 \end{pmatrix}\f$
+is calculated as follows
+\f{align*}
+    \| r(-1) \|_{L_1} &= |-1| + |2| = 3 \\
+    \| r(-1) \|_{L_2} &= \sqrt{(-1)^{2} + (2)^{2}} = \sqrt{5} \\
+    \| r(-1) \|_{L_\infty} &= \max(|-1|,|2|) = 2
+\f}
+and for \f$r(0.5) = \begin{pmatrix} 0.5 \\ 0.5 \end{pmatrix}\f$ the calculation is
+\f{align*}
+    \| r(0.5) \|_{L_1} &= |0.5| + |0.5| = 1 \\
+    \| r(0.5) \|_{L_2} &= \sqrt{(0.5)^{2} + (0.5)^{2}} = \sqrt{0.5} \\
+    \| r(0.5) \|_{L_\infty} &= \max(|0.5|,|0.5|) = 0.5.
+\f}
+The following graphic shows all values for the three norm functions \f$\| r(x) \|_{L_1}, \| r(x) \|_{L_2}\f$ and \f$\| r(x) \|_{L_\infty}\f$.
+It is notable that the \f$ L_{1} \f$ norm forms the upper and the \f$ L_{\infty} \f$ norm forms the lower border for the example function \f$ r(x) \f$.
+![Graphs for the different norm functions from the above example](pics/NormTypes_OneArray_1-2-INF.png)
+
+When the mask parameter is specified and it is not empty, the norm is
+
+If normType is not specified, #NORM_L2 is used.
+calculated only over the region specified by the mask.
+
+Multi-channel input arrays are treated as single-channel arrays, that is,
+the results for all channels are combined.
+
+Hamming norms can only be calculated with CV_8U depth arrays.
+
+@param src1 first input array.
+@param normType type of the norm (see #NormTypes).
+@param mask optional operation mask; it must have the same size as src1 and CV_8UC1 type.
+*/
+CV_EXPORTS_W double norm(InputArray src1, int normType = NORM_L2, InputArray mas
