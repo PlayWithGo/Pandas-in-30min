@@ -676,4 +676,57 @@ Hamming norms can only be calculated with CV_8U depth arrays.
 @param normType type of the norm (see #NormTypes).
 @param mask optional operation mask; it must have the same size as src1 and CV_8UC1 type.
 */
-CV_EXPORTS_W double norm(InputArray src1, int normType = NORM_L2, InputArray mas
+CV_EXPORTS_W double norm(InputArray src1, int normType = NORM_L2, InputArray mask = noArray());
+
+/** @brief Calculates an absolute difference norm or a relative difference norm.
+
+This version of cv::norm calculates the absolute difference norm
+or the relative difference norm of arrays src1 and src2.
+The type of norm to calculate is specified using #NormTypes.
+
+@param src1 first input array.
+@param src2 second input array of the same size and the same type as src1.
+@param normType type of the norm (see #NormTypes).
+@param mask optional operation mask; it must have the same size as src1 and CV_8UC1 type.
+*/
+CV_EXPORTS_W double norm(InputArray src1, InputArray src2,
+                         int normType = NORM_L2, InputArray mask = noArray());
+/** @overload
+@param src first input array.
+@param normType type of the norm (see #NormTypes).
+*/
+CV_EXPORTS double norm( const SparseMat& src, int normType );
+
+/** @brief Computes the Peak Signal-to-Noise Ratio (PSNR) image quality metric.
+
+This function calculates the Peak Signal-to-Noise Ratio (PSNR) image quality metric in decibels (dB), between two input arrays src1 and src2. Arrays must have depth CV_8U.
+
+The PSNR is calculated as follows:
+
+\f[
+\texttt{PSNR} = 10 \cdot \log_{10}{\left( \frac{R^2}{MSE} \right) }
+\f]
+
+where R is the maximum integer value of depth CV_8U (255) and MSE is the mean squared error between the two arrays.
+
+@param src1 first input array.
+@param src2 second input array of the same size as src1.
+
+  */
+CV_EXPORTS_W double PSNR(InputArray src1, InputArray src2);
+
+/** @brief naive nearest neighbor finder
+
+see http://en.wikipedia.org/wiki/Nearest_neighbor_search
+@todo document
+  */
+CV_EXPORTS_W void batchDistance(InputArray src1, InputArray src2,
+                                OutputArray dist, int dtype, OutputArray nidx,
+                                int normType = NORM_L2, int K = 0,
+                                InputArray mask = noArray(), int update = 0,
+                                bool crosscheck = false);
+
+/** @brief Normalizes the norm or value range of an array.
+
+The function cv::normalize normalizes scale and shift the input array elements so that
+\f[\|
