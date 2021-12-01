@@ -774,4 +774,41 @@ Possible usage with some positive example data:
 
 @param src input array.
 @param dst output array of the same size as src .
-@param alpha norm value to normalize to or the lower range boundary in case of the ran
+@param alpha norm value to normalize to or the lower range boundary in case of the range
+normalization.
+@param beta upper range boundary in case of the range normalization; it is not used for the norm
+normalization.
+@param norm_type normalization type (see cv::NormTypes).
+@param dtype when negative, the output array has the same type as src; otherwise, it has the same
+number of channels as src and the depth =CV_MAT_DEPTH(dtype).
+@param mask optional operation mask.
+@sa norm, Mat::convertTo, SparseMat::convertTo
+*/
+CV_EXPORTS_W void normalize( InputArray src, InputOutputArray dst, double alpha = 1, double beta = 0,
+                             int norm_type = NORM_L2, int dtype = -1, InputArray mask = noArray());
+
+/** @overload
+@param src input array.
+@param dst output array of the same size as src .
+@param alpha norm value to normalize to or the lower range boundary in case of the range
+normalization.
+@param normType normalization type (see cv::NormTypes).
+*/
+CV_EXPORTS void normalize( const SparseMat& src, SparseMat& dst, double alpha, int normType );
+
+/** @brief Finds the global minimum and maximum in an array.
+
+The function cv::minMaxLoc finds the minimum and maximum element values and their positions. The
+extremums are searched across the whole array or, if mask is not an empty array, in the specified
+array region.
+
+The function do not work with multi-channel arrays. If you need to find minimum or maximum
+elements across all the channels, use Mat::reshape first to reinterpret the array as
+single-channel. Or you may extract the particular channel using either extractImageCOI , or
+mixChannels , or split .
+@param src input single-channel array.
+@param minVal pointer to the returned minimum value; NULL is used if not required.
+@param maxVal pointer to the returned maximum value; NULL is used if not required.
+@param minLoc pointer to the returned minimum location (in 2D case); NULL is used if not required.
+@param maxLoc pointer to the returned maximum location (in 2D case); NULL is used if not required.
+@param mask optional mask used to select a sub-array.
