@@ -845,4 +845,37 @@ in each dimension are stored there sequentially.
 CV_EXPORTS void minMaxIdx(InputArray src, double* minVal, double* maxVal = 0,
                           int* minIdx = 0, int* maxIdx = 0, InputArray mask = noArray());
 
-/** 
+/** @overload
+@param a input single-channel array.
+@param minVal pointer to the returned minimum value; NULL is used if not required.
+@param maxVal pointer to the returned maximum value; NULL is used if not required.
+@param minIdx pointer to the returned minimum location (in nD case); NULL is used if not required;
+Otherwise, it must point to an array of src.dims elements, the coordinates of the minimum element
+in each dimension are stored there sequentially.
+@param maxIdx pointer to the returned maximum location (in nD case). NULL is used if not required.
+*/
+CV_EXPORTS void minMaxLoc(const SparseMat& a, double* minVal,
+                          double* maxVal, int* minIdx = 0, int* maxIdx = 0);
+
+/** @brief Reduces a matrix to a vector.
+
+The function #reduce reduces the matrix to a vector by treating the matrix rows/columns as a set of
+1D vectors and performing the specified operation on the vectors until a single row/column is
+obtained. For example, the function can be used to compute horizontal and vertical projections of a
+raster image. In case of #REDUCE_MAX and #REDUCE_MIN , the output image should have the same type as the source one.
+In case of #REDUCE_SUM and #REDUCE_AVG , the output may have a larger element bit-depth to preserve accuracy.
+And multi-channel arrays are also supported in these two reduction modes.
+
+The following code demonstrates its usage for a single channel matrix.
+@snippet snippets/core_reduce.cpp example
+
+And the following code demonstrates its usage for a two-channel matrix.
+@snippet snippets/core_reduce.cpp example2
+
+@param src input 2D matrix.
+@param dst output vector. Its size and type is defined by dim and dtype parameters.
+@param dim dimension index along which the matrix is reduced. 0 means that the matrix is reduced to
+a single row. 1 means that the matrix is reduced to a single column.
+@param rtype reduction operation that could be one of #ReduceTypes
+@param dtype when negative, the output vector will have the same type as the input matrix,
+otherwise, its type will be 
