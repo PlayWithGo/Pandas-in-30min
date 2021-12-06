@@ -878,4 +878,48 @@ And the following code demonstrates its usage for a two-channel matrix.
 a single row. 1 means that the matrix is reduced to a single column.
 @param rtype reduction operation that could be one of #ReduceTypes
 @param dtype when negative, the output vector will have the same type as the input matrix,
-otherwise, its type will be 
+otherwise, its type will be CV_MAKE_TYPE(CV_MAT_DEPTH(dtype), src.channels()).
+@sa repeat
+*/
+CV_EXPORTS_W void reduce(InputArray src, OutputArray dst, int dim, int rtype, int dtype = -1);
+
+/** @brief Creates one multi-channel array out of several single-channel ones.
+
+The function cv::merge merges several arrays to make a single multi-channel array. That is, each
+element of the output array will be a concatenation of the elements of the input arrays, where
+elements of i-th input array are treated as mv[i].channels()-element vectors.
+
+The function cv::split does the reverse operation. If you need to shuffle channels in some other
+advanced way, use cv::mixChannels.
+
+The following example shows how to merge 3 single channel matrices into a single 3-channel matrix.
+@snippet snippets/core_merge.cpp example
+
+@param mv input array of matrices to be merged; all the matrices in mv must have the same
+size and the same depth.
+@param count number of input matrices when mv is a plain C array; it must be greater than zero.
+@param dst output array of the same size and the same depth as mv[0]; The number of channels will
+be equal to the parameter count.
+@sa  mixChannels, split, Mat::reshape
+*/
+CV_EXPORTS void merge(const Mat* mv, size_t count, OutputArray dst);
+
+/** @overload
+@param mv input vector of matrices to be merged; all the matrices in mv must have the same
+size and the same depth.
+@param dst output array of the same size and the same depth as mv[0]; The number of channels will
+be the total number of channels in the matrix array.
+  */
+CV_EXPORTS_W void merge(InputArrayOfArrays mv, OutputArray dst);
+
+/** @brief Divides a multi-channel array into several single-channel arrays.
+
+The function cv::split splits a multi-channel array into separate single-channel arrays:
+\f[\texttt{mv} [c](I) =  \texttt{src} (I)_c\f]
+If you need to extract a single channel or do some other sophisticated channel permutation, use
+mixChannels .
+
+The following example demonstrates how to split a 3-channel matrix into 3 single channel matrices.
+@snippet snippets/core_split.cpp example
+
+@param src input multi-channe
