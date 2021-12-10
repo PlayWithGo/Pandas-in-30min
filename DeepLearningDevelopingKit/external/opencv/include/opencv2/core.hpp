@@ -967,4 +967,38 @@ same depth.
 depth must be the same as in `src[0]`.
 @param ndsts number of matrices in `dst`.
 @param fromTo array of index pairs specifying which channels are copied and where; fromTo[k\*2] is
-a 0-based index of the input channel in src, fr
+a 0-based index of the input channel in src, fromTo[k\*2+1] is an index of the output channel in
+dst; the continuous channel numbering is used: the first input image channels are indexed from 0 to
+src[0].channels()-1, the second input image channels are indexed from src[0].channels() to
+src[0].channels() + src[1].channels()-1, and so on, the same scheme is used for the output image
+channels; as a special case, when fromTo[k\*2] is negative, the corresponding output channel is
+filled with zero .
+@param npairs number of index pairs in `fromTo`.
+@sa split, merge, extractChannel, insertChannel, cvtColor
+*/
+CV_EXPORTS void mixChannels(const Mat* src, size_t nsrcs, Mat* dst, size_t ndsts,
+                            const int* fromTo, size_t npairs);
+
+/** @overload
+@param src input array or vector of matrices; all of the matrices must have the same size and the
+same depth.
+@param dst output array or vector of matrices; all the matrices **must be allocated**; their size and
+depth must be the same as in src[0].
+@param fromTo array of index pairs specifying which channels are copied and where; fromTo[k\*2] is
+a 0-based index of the input channel in src, fromTo[k\*2+1] is an index of the output channel in
+dst; the continuous channel numbering is used: the first input image channels are indexed from 0 to
+src[0].channels()-1, the second input image channels are indexed from src[0].channels() to
+src[0].channels() + src[1].channels()-1, and so on, the same scheme is used for the output image
+channels; as a special case, when fromTo[k\*2] is negative, the corresponding output channel is
+filled with zero .
+@param npairs number of index pairs in fromTo.
+*/
+CV_EXPORTS void mixChannels(InputArrayOfArrays src, InputOutputArrayOfArrays dst,
+                            const int* fromTo, size_t npairs);
+
+/** @overload
+@param src input array or vector of matrices; all of the matrices must have the same size and the
+same depth.
+@param dst output array or vector of matrices; all the matrices **must be allocated**; their size and
+depth must be the same as in src[0].
+@param fromTo array of index
