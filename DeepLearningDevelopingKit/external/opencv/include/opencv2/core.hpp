@@ -1046,4 +1046,48 @@ The example scenarios of using the function are the following:
     in video processing on Microsoft Windows\* OS.
 *   Horizontal flipping of the image with the subsequent horizontal
     shift and absolute difference calculation to check for a
-    vertical-axis sym
+    vertical-axis symmetry (flipCode \> 0).
+*   Simultaneous horizontal and vertical flipping of the image with
+    the subsequent shift and absolute difference calculation to check
+    for a central symmetry (flipCode \< 0).
+*   Reversing the order of point arrays (flipCode \> 0 or
+    flipCode == 0).
+@param src input array.
+@param dst output array of the same size and type as src.
+@param flipCode a flag to specify how to flip the array; 0 means
+flipping around the x-axis and positive value (for example, 1) means
+flipping around y-axis. Negative value (for example, -1) means flipping
+around both axes.
+@sa transpose , repeat , completeSymm
+*/
+CV_EXPORTS_W void flip(InputArray src, OutputArray dst, int flipCode);
+
+enum RotateFlags {
+    ROTATE_90_CLOCKWISE = 0, //Rotate 90 degrees clockwise
+    ROTATE_180 = 1, //Rotate 180 degrees clockwise
+    ROTATE_90_COUNTERCLOCKWISE = 2, //Rotate 270 degrees clockwise
+};
+/** @brief Rotates a 2D array in multiples of 90 degrees.
+The function rotate rotates the array in one of three different ways:
+*   Rotate by 90 degrees clockwise (rotateCode = ROTATE_90).
+*   Rotate by 180 degrees clockwise (rotateCode = ROTATE_180).
+*   Rotate by 270 degrees clockwise (rotateCode = ROTATE_270).
+@param src input array.
+@param dst output array of the same type as src.  The size is the same with ROTATE_180,
+and the rows and cols are switched for ROTATE_90 and ROTATE_270.
+@param rotateCode an enum to specify how to rotate the array; see the enum RotateFlags
+@sa transpose , repeat , completeSymm, flip, RotateFlags
+*/
+CV_EXPORTS_W void rotate(InputArray src, OutputArray dst, int rotateCode);
+
+/** @brief Fills the output array with repeated copies of the input array.
+
+The function cv::repeat duplicates the input array one or more times along each of the two axes:
+\f[\texttt{dst} _{ij}= \texttt{src} _{i\mod src.rows, \; j\mod src.cols }\f]
+The second variant of the function is more convenient to use with @ref MatrixExpressions.
+@param src input array to replicate.
+@param ny Flag to specify how many times the `src` is repeated along the
+vertical axis.
+@param nx Flag to specify how many times the `src` is repeated along the
+horizontal axis.
+@param dst output arr
