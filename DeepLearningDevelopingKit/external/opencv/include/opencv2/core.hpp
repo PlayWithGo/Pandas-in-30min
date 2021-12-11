@@ -1001,4 +1001,49 @@ CV_EXPORTS void mixChannels(InputArrayOfArrays src, InputOutputArrayOfArrays dst
 same depth.
 @param dst output array or vector of matrices; all the matrices **must be allocated**; their size and
 depth must be the same as in src[0].
-@param fromTo array of index
+@param fromTo array of index pairs specifying which channels are copied and where; fromTo[k\*2] is
+a 0-based index of the input channel in src, fromTo[k\*2+1] is an index of the output channel in
+dst; the continuous channel numbering is used: the first input image channels are indexed from 0 to
+src[0].channels()-1, the second input image channels are indexed from src[0].channels() to
+src[0].channels() + src[1].channels()-1, and so on, the same scheme is used for the output image
+channels; as a special case, when fromTo[k\*2] is negative, the corresponding output channel is
+filled with zero .
+*/
+CV_EXPORTS_W void mixChannels(InputArrayOfArrays src, InputOutputArrayOfArrays dst,
+                              const std::vector<int>& fromTo);
+
+/** @brief Extracts a single channel from src (coi is 0-based index)
+@param src input array
+@param dst output array
+@param coi index of channel to extract
+@sa mixChannels, split
+*/
+CV_EXPORTS_W void extractChannel(InputArray src, OutputArray dst, int coi);
+
+/** @brief Inserts a single channel to dst (coi is 0-based index)
+@param src input array
+@param dst output array
+@param coi index of channel for insertion
+@sa mixChannels, merge
+*/
+CV_EXPORTS_W void insertChannel(InputArray src, InputOutputArray dst, int coi);
+
+/** @brief Flips a 2D array around vertical, horizontal, or both axes.
+
+The function cv::flip flips the array in one of three different ways (row
+and column indices are 0-based):
+\f[\texttt{dst} _{ij} =
+\left\{
+\begin{array}{l l}
+\texttt{src} _{\texttt{src.rows}-i-1,j} & if\;  \texttt{flipCode} = 0 \\
+\texttt{src} _{i, \texttt{src.cols} -j-1} & if\;  \texttt{flipCode} > 0 \\
+\texttt{src} _{ \texttt{src.rows} -i-1, \texttt{src.cols} -j-1} & if\; \texttt{flipCode} < 0 \\
+\end{array}
+\right.\f]
+The example scenarios of using the function are the following:
+*   Vertical flipping of the image (flipCode == 0) to switch between
+    top-left and bottom-left image origin. This is a typical operation
+    in video processing on Microsoft Windows\* OS.
+*   Horizontal flipping of the image with the subsequent horizontal
+    shift and absolute difference calculation to check for a
+    vertical-axis sym
