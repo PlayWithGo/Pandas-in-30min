@@ -1090,4 +1090,58 @@ The second variant of the function is more convenient to use with @ref MatrixExp
 vertical axis.
 @param nx Flag to specify how many times the `src` is repeated along the
 horizontal axis.
-@param dst output arr
+@param dst output array of the same type as `src`.
+@sa cv::reduce
+*/
+CV_EXPORTS_W void repeat(InputArray src, int ny, int nx, OutputArray dst);
+
+/** @overload
+@param src input array to replicate.
+@param ny Flag to specify how many times the `src` is repeated along the
+vertical axis.
+@param nx Flag to specify how many times the `src` is repeated along the
+horizontal axis.
+  */
+CV_EXPORTS Mat repeat(const Mat& src, int ny, int nx);
+
+/** @brief Applies horizontal concatenation to given matrices.
+
+The function horizontally concatenates two or more cv::Mat matrices (with the same number of rows).
+@code{.cpp}
+    cv::Mat matArray[] = { cv::Mat(4, 1, CV_8UC1, cv::Scalar(1)),
+                           cv::Mat(4, 1, CV_8UC1, cv::Scalar(2)),
+                           cv::Mat(4, 1, CV_8UC1, cv::Scalar(3)),};
+
+    cv::Mat out;
+    cv::hconcat( matArray, 3, out );
+    //out:
+    //[1, 2, 3;
+    // 1, 2, 3;
+    // 1, 2, 3;
+    // 1, 2, 3]
+@endcode
+@param src input array or vector of matrices. all of the matrices must have the same number of rows and the same depth.
+@param nsrc number of matrices in src.
+@param dst output array. It has the same number of rows and depth as the src, and the sum of cols of the src.
+@sa cv::vconcat(const Mat*, size_t, OutputArray), @sa cv::vconcat(InputArrayOfArrays, OutputArray) and @sa cv::vconcat(InputArray, InputArray, OutputArray)
+*/
+CV_EXPORTS void hconcat(const Mat* src, size_t nsrc, OutputArray dst);
+/** @overload
+ @code{.cpp}
+    cv::Mat_<float> A = (cv::Mat_<float>(3, 2) << 1, 4,
+                                                  2, 5,
+                                                  3, 6);
+    cv::Mat_<float> B = (cv::Mat_<float>(3, 2) << 7, 10,
+                                                  8, 11,
+                                                  9, 12);
+
+    cv::Mat C;
+    cv::hconcat(A, B, C);
+    //C:
+    //[1, 4, 7, 10;
+    // 2, 5, 8, 11;
+    // 3, 6, 9, 12]
+ @endcode
+ @param src1 first input array to be considered for horizontal concatenation.
+ @param src2 second input array to be considered for horizontal concatenation.
+ @param ds
