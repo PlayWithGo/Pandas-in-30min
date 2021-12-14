@@ -1144,4 +1144,53 @@ CV_EXPORTS void hconcat(const Mat* src, size_t nsrc, OutputArray dst);
  @endcode
  @param src1 first input array to be considered for horizontal concatenation.
  @param src2 second input array to be considered for horizontal concatenation.
- @param ds
+ @param dst output array. It has the same number of rows and depth as the src1 and src2, and the sum of cols of the src1 and src2.
+ */
+CV_EXPORTS void hconcat(InputArray src1, InputArray src2, OutputArray dst);
+/** @overload
+ @code{.cpp}
+    std::vector<cv::Mat> matrices = { cv::Mat(4, 1, CV_8UC1, cv::Scalar(1)),
+                                      cv::Mat(4, 1, CV_8UC1, cv::Scalar(2)),
+                                      cv::Mat(4, 1, CV_8UC1, cv::Scalar(3)),};
+
+    cv::Mat out;
+    cv::hconcat( matrices, out );
+    //out:
+    //[1, 2, 3;
+    // 1, 2, 3;
+    // 1, 2, 3;
+    // 1, 2, 3]
+ @endcode
+ @param src input array or vector of matrices. all of the matrices must have the same number of rows and the same depth.
+ @param dst output array. It has the same number of rows and depth as the src, and the sum of cols of the src.
+same depth.
+ */
+CV_EXPORTS_W void hconcat(InputArrayOfArrays src, OutputArray dst);
+
+/** @brief Applies vertical concatenation to given matrices.
+
+The function vertically concatenates two or more cv::Mat matrices (with the same number of cols).
+@code{.cpp}
+    cv::Mat matArray[] = { cv::Mat(1, 4, CV_8UC1, cv::Scalar(1)),
+                           cv::Mat(1, 4, CV_8UC1, cv::Scalar(2)),
+                           cv::Mat(1, 4, CV_8UC1, cv::Scalar(3)),};
+
+    cv::Mat out;
+    cv::vconcat( matArray, 3, out );
+    //out:
+    //[1,   1,   1,   1;
+    // 2,   2,   2,   2;
+    // 3,   3,   3,   3]
+@endcode
+@param src input array or vector of matrices. all of the matrices must have the same number of cols and the same depth.
+@param nsrc number of matrices in src.
+@param dst output array. It has the same number of cols and depth as the src, and the sum of rows of the src.
+@sa cv::hconcat(const Mat*, size_t, OutputArray), @sa cv::hconcat(InputArrayOfArrays, OutputArray) and @sa cv::hconcat(InputArray, InputArray, OutputArray)
+*/
+CV_EXPORTS void vconcat(const Mat* src, size_t nsrc, OutputArray dst);
+/** @overload
+ @code{.cpp}
+    cv::Mat_<float> A = (cv::Mat_<float>(3, 2) << 1, 7,
+                                                  2, 8,
+                                                  3, 9);
+  
