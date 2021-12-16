@@ -1193,4 +1193,52 @@ CV_EXPORTS void vconcat(const Mat* src, size_t nsrc, OutputArray dst);
     cv::Mat_<float> A = (cv::Mat_<float>(3, 2) << 1, 7,
                                                   2, 8,
                                                   3, 9);
-  
+    cv::Mat_<float> B = (cv::Mat_<float>(3, 2) << 4, 10,
+                                                  5, 11,
+                                                  6, 12);
+
+    cv::Mat C;
+    cv::vconcat(A, B, C);
+    //C:
+    //[1, 7;
+    // 2, 8;
+    // 3, 9;
+    // 4, 10;
+    // 5, 11;
+    // 6, 12]
+ @endcode
+ @param src1 first input array to be considered for vertical concatenation.
+ @param src2 second input array to be considered for vertical concatenation.
+ @param dst output array. It has the same number of cols and depth as the src1 and src2, and the sum of rows of the src1 and src2.
+ */
+CV_EXPORTS void vconcat(InputArray src1, InputArray src2, OutputArray dst);
+/** @overload
+ @code{.cpp}
+    std::vector<cv::Mat> matrices = { cv::Mat(1, 4, CV_8UC1, cv::Scalar(1)),
+                                      cv::Mat(1, 4, CV_8UC1, cv::Scalar(2)),
+                                      cv::Mat(1, 4, CV_8UC1, cv::Scalar(3)),};
+
+    cv::Mat out;
+    cv::vconcat( matrices, out );
+    //out:
+    //[1,   1,   1,   1;
+    // 2,   2,   2,   2;
+    // 3,   3,   3,   3]
+ @endcode
+ @param src input array or vector of matrices. all of the matrices must have the same number of cols and the same depth
+ @param dst output array. It has the same number of cols and depth as the src, and the sum of rows of the src.
+same depth.
+ */
+CV_EXPORTS_W void vconcat(InputArrayOfArrays src, OutputArray dst);
+
+/** @brief computes bitwise conjunction of the two arrays (dst = src1 & src2)
+Calculates the per-element bit-wise conjunction of two arrays or an
+array and a scalar.
+
+The function cv::bitwise_and calculates the per-element bit-wise logical conjunction for:
+*   Two arrays when src1 and src2 have the same size:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \wedge \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+*   An array and a scalar when src2 is constructed from Scalar or has
+    the same number of elements as `src1.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \wedge \texttt{src2} \quad \texttt{if mask} (I) \ne0\f]
+*   A scalar and an array when src
