@@ -1278,4 +1278,45 @@ independently. In the second and third cases above, the scalar is first
 converted to the array type.
 @param src1 first input array or a scalar.
 @param src2 second input array or a scalar.
-@param dst output array that has the same size 
+@param dst output array that has the same size and type as the input
+arrays.
+@param mask optional operation mask, 8-bit single channel array, that
+specifies elements of the output array to be changed.
+*/
+CV_EXPORTS_W void bitwise_or(InputArray src1, InputArray src2,
+                             OutputArray dst, InputArray mask = noArray());
+
+/** @brief Calculates the per-element bit-wise "exclusive or" operation on two
+arrays or an array and a scalar.
+
+The function cv::bitwise_xor calculates the per-element bit-wise logical "exclusive-or"
+operation for:
+*   Two arrays when src1 and src2 have the same size:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \oplus \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+*   An array and a scalar when src2 is constructed from Scalar or has
+    the same number of elements as `src1.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \oplus \texttt{src2} \quad \texttt{if mask} (I) \ne0\f]
+*   A scalar and an array when src1 is constructed from Scalar or has
+    the same number of elements as `src2.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1}  \oplus \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+In case of floating-point arrays, their machine-specific bit
+representations (usually IEEE754-compliant) are used for the operation.
+In case of multi-channel arrays, each channel is processed
+independently. In the 2nd and 3rd cases above, the scalar is first
+converted to the array type.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array that has the same size and type as the input
+arrays.
+@param mask optional operation mask, 8-bit single channel array, that
+specifies elements of the output array to be changed.
+*/
+CV_EXPORTS_W void bitwise_xor(InputArray src1, InputArray src2,
+                              OutputArray dst, InputArray mask = noArray());
+
+/** @brief  Inverts every bit of an array.
+
+The function cv::bitwise_not calculates per-element bit-wise inversion of the input
+array:
+\f[\texttt{dst} (I) =  \neg \texttt{src} (I)\f]
+In case of a float
