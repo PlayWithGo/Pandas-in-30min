@@ -1241,4 +1241,41 @@ The function cv::bitwise_and calculates the per-element bit-wise logical conjunc
 *   An array and a scalar when src2 is constructed from Scalar or has
     the same number of elements as `src1.channels()`:
     \f[\texttt{dst} (I) =  \texttt{src1} (I)  \wedge \texttt{src2} \quad \texttt{if mask} (I) \ne0\f]
-*   A scalar and an array when src
+*   A scalar and an array when src1 is constructed from Scalar or has
+    the same number of elements as `src2.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1}  \wedge \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+In case of floating-point arrays, their machine-specific bit
+representations (usually IEEE754-compliant) are used for the operation.
+In case of multi-channel arrays, each channel is processed
+independently. In the second and third cases above, the scalar is first
+converted to the array type.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array that has the same size and type as the input
+arrays.
+@param mask optional operation mask, 8-bit single channel array, that
+specifies elements of the output array to be changed.
+*/
+CV_EXPORTS_W void bitwise_and(InputArray src1, InputArray src2,
+                              OutputArray dst, InputArray mask = noArray());
+
+/** @brief Calculates the per-element bit-wise disjunction of two arrays or an
+array and a scalar.
+
+The function cv::bitwise_or calculates the per-element bit-wise logical disjunction for:
+*   Two arrays when src1 and src2 have the same size:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \vee \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+*   An array and a scalar when src2 is constructed from Scalar or has
+    the same number of elements as `src1.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1} (I)  \vee \texttt{src2} \quad \texttt{if mask} (I) \ne0\f]
+*   A scalar and an array when src1 is constructed from Scalar or has
+    the same number of elements as `src2.channels()`:
+    \f[\texttt{dst} (I) =  \texttt{src1}  \vee \texttt{src2} (I) \quad \texttt{if mask} (I) \ne0\f]
+In case of floating-point arrays, their machine-specific bit
+representations (usually IEEE754-compliant) are used for the operation.
+In case of multi-channel arrays, each channel is processed
+independently. In the second and third cases above, the scalar is first
+converted to the array type.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array that has the same size 
