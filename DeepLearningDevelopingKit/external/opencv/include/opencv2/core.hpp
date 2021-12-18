@@ -1319,4 +1319,43 @@ CV_EXPORTS_W void bitwise_xor(InputArray src1, InputArray src2,
 The function cv::bitwise_not calculates per-element bit-wise inversion of the input
 array:
 \f[\texttt{dst} (I) =  \neg \texttt{src} (I)\f]
-In case of a float
+In case of a floating-point input array, its machine-specific bit
+representation (usually IEEE754-compliant) is used for the operation. In
+case of multi-channel arrays, each channel is processed independently.
+@param src input array.
+@param dst output array that has the same size and type as the input
+array.
+@param mask optional operation mask, 8-bit single channel array, that
+specifies elements of the output array to be changed.
+*/
+CV_EXPORTS_W void bitwise_not(InputArray src, OutputArray dst,
+                              InputArray mask = noArray());
+
+/** @brief Calculates the per-element absolute difference between two arrays or between an array and a scalar.
+
+The function cv::absdiff calculates:
+*   Absolute difference between two arrays when they have the same
+    size and type:
+    \f[\texttt{dst}(I) =  \texttt{saturate} (| \texttt{src1}(I) -  \texttt{src2}(I)|)\f]
+*   Absolute difference between an array and a scalar when the second
+    array is constructed from Scalar or has as many elements as the
+    number of channels in `src1`:
+    \f[\texttt{dst}(I) =  \texttt{saturate} (| \texttt{src1}(I) -  \texttt{src2} |)\f]
+*   Absolute difference between a scalar and an array when the first
+    array is constructed from Scalar or has as many elements as the
+    number of channels in `src2`:
+    \f[\texttt{dst}(I) =  \texttt{saturate} (| \texttt{src1} -  \texttt{src2}(I) |)\f]
+    where I is a multi-dimensional index of array elements. In case of
+    multi-channel arrays, each channel is processed independently.
+@note Saturation is not applied when the arrays have the depth CV_32S.
+You may even get a negative value in the case of overflow.
+@param src1 first input array or a scalar.
+@param src2 second input array or a scalar.
+@param dst output array that has the same size and type as input arrays.
+@sa cv::abs(const Mat&)
+*/
+CV_EXPORTS_W void absdiff(InputArray src1, InputArray src2, OutputArray dst);
+
+/** @brief  Checks if array elements lie between the elements of two other arrays.
+
+The function checks the range as follows:
