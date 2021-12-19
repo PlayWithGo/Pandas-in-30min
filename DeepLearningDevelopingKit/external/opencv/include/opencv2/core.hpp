@@ -1399,4 +1399,51 @@ equivalent matrix expressions:
 @endcode
 @param src1 first input array or a scalar; when it is an array, it must have a single channel.
 @param src2 second input array or a scalar; when it is an array, it must have a single channel.
-@param dst output 
+@param dst output array of type ref CV_8U that has the same size and the same number of channels as
+    the input arrays.
+@param cmpop a flag, that specifies correspondence between the arrays (cv::CmpTypes)
+@sa checkRange, min, max, threshold
+*/
+CV_EXPORTS_W void compare(InputArray src1, InputArray src2, OutputArray dst, int cmpop);
+
+/** @brief Calculates per-element minimum of two arrays or an array and a scalar.
+
+The function cv::min calculates the per-element minimum of two arrays:
+\f[\texttt{dst} (I)= \min ( \texttt{src1} (I), \texttt{src2} (I))\f]
+or array and a scalar:
+\f[\texttt{dst} (I)= \min ( \texttt{src1} (I), \texttt{value} )\f]
+@param src1 first input array.
+@param src2 second input array of the same size and type as src1.
+@param dst output array of the same size and type as src1.
+@sa max, compare, inRange, minMaxLoc
+*/
+CV_EXPORTS_W void min(InputArray src1, InputArray src2, OutputArray dst);
+/** @overload
+needed to avoid conflicts with const _Tp& std::min(const _Tp&, const _Tp&, _Compare)
+*/
+CV_EXPORTS void min(const Mat& src1, const Mat& src2, Mat& dst);
+/** @overload
+needed to avoid conflicts with const _Tp& std::min(const _Tp&, const _Tp&, _Compare)
+*/
+CV_EXPORTS void min(const UMat& src1, const UMat& src2, UMat& dst);
+
+/** @brief Calculates per-element maximum of two arrays or an array and a scalar.
+
+The function cv::max calculates the per-element maximum of two arrays:
+\f[\texttt{dst} (I)= \max ( \texttt{src1} (I), \texttt{src2} (I))\f]
+or array and a scalar:
+\f[\texttt{dst} (I)= \max ( \texttt{src1} (I), \texttt{value} )\f]
+@param src1 first input array.
+@param src2 second input array of the same size and type as src1 .
+@param dst output array of the same size and type as src1.
+@sa  min, compare, inRange, minMaxLoc, @ref MatrixExpressions
+*/
+CV_EXPORTS_W void max(InputArray src1, InputArray src2, OutputArray dst);
+/** @overload
+needed to avoid conflicts with const _Tp& std::min(const _Tp&, const _Tp&, _Compare)
+*/
+CV_EXPORTS void max(const Mat& src1, const Mat& src2, Mat& dst);
+/** @overload
+needed to avoid conflicts with const _Tp& std::min(const _Tp&, const _Tp&, _Compare)
+*/
+CV_EXPORTS void ma
