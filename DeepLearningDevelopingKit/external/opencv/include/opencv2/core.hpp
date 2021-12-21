@@ -1446,4 +1446,56 @@ CV_EXPORTS void max(const Mat& src1, const Mat& src2, Mat& dst);
 /** @overload
 needed to avoid conflicts with const _Tp& std::min(const _Tp&, const _Tp&, _Compare)
 */
-CV_EXPORTS void ma
+CV_EXPORTS void max(const UMat& src1, const UMat& src2, UMat& dst);
+
+/** @brief Calculates a square root of array elements.
+
+The function cv::sqrt calculates a square root of each input array element.
+In case of multi-channel arrays, each channel is processed
+independently. The accuracy is approximately the same as of the built-in
+std::sqrt .
+@param src input floating-point array.
+@param dst output array of the same size and type as src.
+*/
+CV_EXPORTS_W void sqrt(InputArray src, OutputArray dst);
+
+/** @brief Raises every array element to a power.
+
+The function cv::pow raises every element of the input array to power :
+\f[\texttt{dst} (I) =  \fork{\texttt{src}(I)^{power}}{if \(\texttt{power}\) is integer}{|\texttt{src}(I)|^{power}}{otherwise}\f]
+
+So, for a non-integer power exponent, the absolute values of input array
+elements are used. However, it is possible to get true values for
+negative values using some extra operations. In the example below,
+computing the 5th root of array src shows:
+@code{.cpp}
+    Mat mask = src < 0;
+    pow(src, 1./5, dst);
+    subtract(Scalar::all(0), dst, dst, mask);
+@endcode
+For some values of power, such as integer values, 0.5 and -0.5,
+specialized faster algorithms are used.
+
+Special values (NaN, Inf) are not handled.
+@param src input array.
+@param power exponent of power.
+@param dst output array of the same size and type as src.
+@sa sqrt, exp, log, cartToPolar, polarToCart
+*/
+CV_EXPORTS_W void pow(InputArray src, double power, OutputArray dst);
+
+/** @brief Calculates the exponent of every array element.
+
+The function cv::exp calculates the exponent of every element of the input
+array:
+\f[\texttt{dst} [I] = e^{ src(I) }\f]
+
+The maximum relative error is about 7e-6 for single-precision input and
+less than 1e-10 for double-precision input. Currently, the function
+converts denormalized values to zeros on output. Special values (NaN,
+Inf) are not handled.
+@param src input array.
+@param dst output array of the same size and type as src.
+@sa log , cartToPolar , polarToCart , phase , pow , sqrt , magnitude
+*/
+CV_EXPORTS_W void exp(InputArray src, OutputArray ds
