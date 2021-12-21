@@ -1498,4 +1498,46 @@ Inf) are not handled.
 @param dst output array of the same size and type as src.
 @sa log , cartToPolar , polarToCart , phase , pow , sqrt , magnitude
 */
-CV_EXPORTS_W void exp(InputArray src, OutputArray ds
+CV_EXPORTS_W void exp(InputArray src, OutputArray dst);
+
+/** @brief Calculates the natural logarithm of every array element.
+
+The function cv::log calculates the natural logarithm of every element of the input array:
+\f[\texttt{dst} (I) =  \log (\texttt{src}(I)) \f]
+
+Output on zero, negative and special (NaN, Inf) values is undefined.
+
+@param src input array.
+@param dst output array of the same size and type as src .
+@sa exp, cartToPolar, polarToCart, phase, pow, sqrt, magnitude
+*/
+CV_EXPORTS_W void log(InputArray src, OutputArray dst);
+
+/** @brief Calculates x and y coordinates of 2D vectors from their magnitude and angle.
+
+The function cv::polarToCart calculates the Cartesian coordinates of each 2D
+vector represented by the corresponding elements of magnitude and angle:
+\f[\begin{array}{l} \texttt{x} (I) =  \texttt{magnitude} (I) \cos ( \texttt{angle} (I)) \\ \texttt{y} (I) =  \texttt{magnitude} (I) \sin ( \texttt{angle} (I)) \\ \end{array}\f]
+
+The relative accuracy of the estimated coordinates is about 1e-6.
+@param magnitude input floating-point array of magnitudes of 2D vectors;
+it can be an empty matrix (=Mat()), in this case, the function assumes
+that all the magnitudes are =1; if it is not empty, it must have the
+same size and type as angle.
+@param angle input floating-point array of angles of 2D vectors.
+@param x output array of x-coordinates of 2D vectors; it has the same
+size and type as angle.
+@param y output array of y-coordinates of 2D vectors; it has the same
+size and type as angle.
+@param angleInDegrees when true, the input angles are measured in
+degrees, otherwise, they are measured in radians.
+@sa cartToPolar, magnitude, phase, exp, log, pow, sqrt
+*/
+CV_EXPORTS_W void polarToCart(InputArray magnitude, InputArray angle,
+                              OutputArray x, OutputArray y, bool angleInDegrees = false);
+
+/** @brief Calculates the magnitude and angle of 2D vectors.
+
+The function cv::cartToPolar calculates either the magnitude, angle, or both
+for every 2D vector (x(I),y(I)):
+\f[\begin{array}{l} \texttt{magnitude} (I)= \sqrt{\texttt{x}(I)^2+\texttt{y}(I)^2}
