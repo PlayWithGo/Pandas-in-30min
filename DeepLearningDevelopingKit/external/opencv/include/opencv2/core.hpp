@@ -1540,4 +1540,43 @@ CV_EXPORTS_W void polarToCart(InputArray magnitude, InputArray angle,
 
 The function cv::cartToPolar calculates either the magnitude, angle, or both
 for every 2D vector (x(I),y(I)):
-\f[\begin{array}{l} \texttt{magnitude} (I)= \sqrt{\texttt{x}(I)^2+\texttt{y}(I)^2}
+\f[\begin{array}{l} \texttt{magnitude} (I)= \sqrt{\texttt{x}(I)^2+\texttt{y}(I)^2} , \\ \texttt{angle} (I)= \texttt{atan2} ( \texttt{y} (I), \texttt{x} (I))[ \cdot180 / \pi ] \end{array}\f]
+
+The angles are calculated with accuracy about 0.3 degrees. For the point
+(0,0), the angle is set to 0.
+@param x array of x-coordinates; this must be a single-precision or
+double-precision floating-point array.
+@param y array of y-coordinates, that must have the same size and same type as x.
+@param magnitude output array of magnitudes of the same size and type as x.
+@param angle output array of angles that has the same size and type as
+x; the angles are measured in radians (from 0 to 2\*Pi) or in degrees (0 to 360 degrees).
+@param angleInDegrees a flag, indicating whether the angles are measured
+in radians (which is by default), or in degrees.
+@sa Sobel, Scharr
+*/
+CV_EXPORTS_W void cartToPolar(InputArray x, InputArray y,
+                              OutputArray magnitude, OutputArray angle,
+                              bool angleInDegrees = false);
+
+/** @brief Calculates the rotation angle of 2D vectors.
+
+The function cv::phase calculates the rotation angle of each 2D vector that
+is formed from the corresponding elements of x and y :
+\f[\texttt{angle} (I) =  \texttt{atan2} ( \texttt{y} (I), \texttt{x} (I))\f]
+
+The angle estimation accuracy is about 0.3 degrees. When x(I)=y(I)=0 ,
+the corresponding angle(I) is set to 0.
+@param x input floating-point array of x-coordinates of 2D vectors.
+@param y input array of y-coordinates of 2D vectors; it must have the
+same size and the same type as x.
+@param angle output array of vector angles; it has the same size and
+same type as x .
+@param angleInDegrees when true, the function calculates the angle in
+degrees, otherwise, they are measured in radians.
+*/
+CV_EXPORTS_W void phase(InputArray x, InputArray y, OutputArray angle,
+                        bool angleInDegrees = false);
+
+/** @brief Calculates the magnitude of 2D vectors.
+
+The function cv::magnitude calculates the magnitude of 2D vec
