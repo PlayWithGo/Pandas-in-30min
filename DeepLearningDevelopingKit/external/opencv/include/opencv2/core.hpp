@@ -1620,4 +1620,47 @@ gemm functions in BLAS level 3. For example,
 corresponds to
 \f[\texttt{dst} =  \texttt{alpha} \cdot \texttt{src1} ^T  \cdot \texttt{src2} +  \texttt{beta} \cdot \texttt{src3} ^T\f]
 
-In cas
+In case of complex (two-channel) data, performed a complex matrix
+multiplication.
+
+The function can be replaced with a matrix expression. For example, the
+above call can be replaced with:
+@code{.cpp}
+    dst = alpha*src1.t()*src2 + beta*src3.t();
+@endcode
+@param src1 first multiplied input matrix that could be real(CV_32FC1,
+CV_64FC1) or complex(CV_32FC2, CV_64FC2).
+@param src2 second multiplied input matrix of the same type as src1.
+@param alpha weight of the matrix product.
+@param src3 third optional delta matrix added to the matrix product; it
+should have the same type as src1 and src2.
+@param beta weight of src3.
+@param dst output matrix; it has the proper size and the same type as
+input matrices.
+@param flags operation flags (cv::GemmFlags)
+@sa mulTransposed , transform
+*/
+CV_EXPORTS_W void gemm(InputArray src1, InputArray src2, double alpha,
+                       InputArray src3, double beta, OutputArray dst, int flags = 0);
+
+/** @brief Calculates the product of a matrix and its transposition.
+
+The function cv::mulTransposed calculates the product of src and its
+transposition:
+\f[\texttt{dst} = \texttt{scale} ( \texttt{src} - \texttt{delta} )^T ( \texttt{src} - \texttt{delta} )\f]
+if aTa=true , and
+\f[\texttt{dst} = \texttt{scale} ( \texttt{src} - \texttt{delta} ) ( \texttt{src} - \texttt{delta} )^T\f]
+otherwise. The function is used to calculate the covariance matrix. With
+zero delta, it can be used as a faster substitute for general matrix
+product A\*B when B=A'
+@param src input single-channel matrix. Note that unlike gemm, the
+function can multiply not only floating-point matrices.
+@param dst output square matrix.
+@param aTa Flag specifying the multiplication ordering. See the
+description below.
+@param delta Optional delta matrix subtracted from src before the
+multiplication. When the matrix is empty ( delta=noArray() ), it is
+assumed to be zero, that is, nothing is subtracted. If it has the same
+size as src , it is simply subtracted. Otherwise, it is "repeated" (see
+repeat ) to cover the full src and then subtracted. Type of the delta
+matrix, when it is not empty, must be the same
