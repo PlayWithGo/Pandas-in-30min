@@ -1579,4 +1579,45 @@ CV_EXPORTS_W void phase(InputArray x, InputArray y, OutputArray angle,
 
 /** @brief Calculates the magnitude of 2D vectors.
 
-The function cv::magnitude calculates the magnitude of 2D vec
+The function cv::magnitude calculates the magnitude of 2D vectors formed
+from the corresponding elements of x and y arrays:
+\f[\texttt{dst} (I) =  \sqrt{\texttt{x}(I)^2 + \texttt{y}(I)^2}\f]
+@param x floating-point array of x-coordinates of the vectors.
+@param y floating-point array of y-coordinates of the vectors; it must
+have the same size as x.
+@param magnitude output array of the same size and type as x.
+@sa cartToPolar, polarToCart, phase, sqrt
+*/
+CV_EXPORTS_W void magnitude(InputArray x, InputArray y, OutputArray magnitude);
+
+/** @brief Checks every element of an input array for invalid values.
+
+The function cv::checkRange checks that every array element is neither NaN nor infinite. When minVal \>
+-DBL_MAX and maxVal \< DBL_MAX, the function also checks that each value is between minVal and
+maxVal. In case of multi-channel arrays, each channel is processed independently. If some values
+are out of range, position of the first outlier is stored in pos (when pos != NULL). Then, the
+function either returns false (when quiet=true) or throws an exception.
+@param a input array.
+@param quiet a flag, indicating whether the functions quietly return false when the array elements
+are out of range or they throw an exception.
+@param pos optional output parameter, when not NULL, must be a pointer to array of src.dims
+elements.
+@param minVal inclusive lower boundary of valid values range.
+@param maxVal exclusive upper boundary of valid values range.
+*/
+CV_EXPORTS_W bool checkRange(InputArray a, bool quiet = true, CV_OUT Point* pos = 0,
+                            double minVal = -DBL_MAX, double maxVal = DBL_MAX);
+
+/** @brief converts NaN's to the given number
+*/
+CV_EXPORTS_W void patchNaNs(InputOutputArray a, double val = 0);
+
+/** @brief Performs generalized matrix multiplication.
+
+The function cv::gemm performs generalized matrix multiplication similar to the
+gemm functions in BLAS level 3. For example,
+`gemm(src1, src2, alpha, src3, beta, dst, GEMM_1_T + GEMM_3_T)`
+corresponds to
+\f[\texttt{dst} =  \texttt{alpha} \cdot \texttt{src1} ^T  \cdot \texttt{src2} +  \texttt{beta} \cdot \texttt{src3} ^T\f]
+
+In cas
