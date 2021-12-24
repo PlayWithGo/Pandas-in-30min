@@ -1663,4 +1663,49 @@ multiplication. When the matrix is empty ( delta=noArray() ), it is
 assumed to be zero, that is, nothing is subtracted. If it has the same
 size as src , it is simply subtracted. Otherwise, it is "repeated" (see
 repeat ) to cover the full src and then subtracted. Type of the delta
-matrix, when it is not empty, must be the same
+matrix, when it is not empty, must be the same as the type of created
+output matrix. See the dtype parameter description below.
+@param scale Optional scale factor for the matrix product.
+@param dtype Optional type of the output matrix. When it is negative,
+the output matrix will have the same type as src . Otherwise, it will be
+type=CV_MAT_DEPTH(dtype) that should be either CV_32F or CV_64F .
+@sa calcCovarMatrix, gemm, repeat, reduce
+*/
+CV_EXPORTS_W void mulTransposed( InputArray src, OutputArray dst, bool aTa,
+                                 InputArray delta = noArray(),
+                                 double scale = 1, int dtype = -1 );
+
+/** @brief Transposes a matrix.
+
+The function cv::transpose transposes the matrix src :
+\f[\texttt{dst} (i,j) =  \texttt{src} (j,i)\f]
+@note No complex conjugation is done in case of a complex matrix. It
+should be done separately if needed.
+@param src input array.
+@param dst output array of the same type as src.
+*/
+CV_EXPORTS_W void transpose(InputArray src, OutputArray dst);
+
+/** @brief Performs the matrix transformation of every array element.
+
+The function cv::transform performs the matrix transformation of every
+element of the array src and stores the results in dst :
+\f[\texttt{dst} (I) =  \texttt{m} \cdot \texttt{src} (I)\f]
+(when m.cols=src.channels() ), or
+\f[\texttt{dst} (I) =  \texttt{m} \cdot [ \texttt{src} (I); 1]\f]
+(when m.cols=src.channels()+1 )
+
+Every element of the N -channel array src is interpreted as N -element
+vector that is transformed using the M x N or M x (N+1) matrix m to
+M-element vector - the corresponding element of the output array dst .
+
+The function may be used for geometrical transformation of
+N -dimensional points, arbitrary linear color space transformation (such
+as various kinds of RGB to YUV transforms), shuffling the image
+channels, and so forth.
+@param src input array that must have as many channels (1 to 4) as
+m.cols or m.cols-1.
+@param dst output array of the same size and depth as src; it has as
+many channels as m.rows.
+@param m transformation 2x2 or 2x3 floating-point matrix.
+@sa perspectiveTransform, getAffineTransform, estimateAffine2D, warpAffine, warpPer
