@@ -1708,4 +1708,53 @@ m.cols or m.cols-1.
 @param dst output array of the same size and depth as src; it has as
 many channels as m.rows.
 @param m transformation 2x2 or 2x3 floating-point matrix.
-@sa perspectiveTransform, getAffineTransform, estimateAffine2D, warpAffine, warpPer
+@sa perspectiveTransform, getAffineTransform, estimateAffine2D, warpAffine, warpPerspective
+*/
+CV_EXPORTS_W void transform(InputArray src, OutputArray dst, InputArray m );
+
+/** @brief Performs the perspective matrix transformation of vectors.
+
+The function cv::perspectiveTransform transforms every element of src by
+treating it as a 2D or 3D vector, in the following way:
+\f[(x, y, z)  \rightarrow (x'/w, y'/w, z'/w)\f]
+where
+\f[(x', y', z', w') =  \texttt{mat} \cdot \begin{bmatrix} x & y & z & 1  \end{bmatrix}\f]
+and
+\f[w =  \fork{w'}{if \(w' \ne 0\)}{\infty}{otherwise}\f]
+
+Here a 3D vector transformation is shown. In case of a 2D vector
+transformation, the z component is omitted.
+
+@note The function transforms a sparse set of 2D or 3D vectors. If you
+want to transform an image using perspective transformation, use
+warpPerspective . If you have an inverse problem, that is, you want to
+compute the most probable perspective transformation out of several
+pairs of corresponding points, you can use getPerspectiveTransform or
+findHomography .
+@param src input two-channel or three-channel floating-point array; each
+element is a 2D/3D vector to be transformed.
+@param dst output array of the same size and type as src.
+@param m 3x3 or 4x4 floating-point transformation matrix.
+@sa  transform, warpPerspective, getPerspectiveTransform, findHomography
+*/
+CV_EXPORTS_W void perspectiveTransform(InputArray src, OutputArray dst, InputArray m );
+
+/** @brief Copies the lower or the upper half of a square matrix to its another half.
+
+The function cv::completeSymm copies the lower or the upper half of a square matrix to
+its another half. The matrix diagonal remains unchanged:
+ - \f$\texttt{m}_{ij}=\texttt{m}_{ji}\f$ for \f$i > j\f$ if
+    lowerToUpper=false
+ - \f$\texttt{m}_{ij}=\texttt{m}_{ji}\f$ for \f$i < j\f$ if
+    lowerToUpper=true
+
+@param m input-output floating-point square matrix.
+@param lowerToUpper operation flag; if true, the lower half is copied to
+the upper half. Otherwise, the upper half is copied to the lower half.
+@sa flip, transpose
+*/
+CV_EXPORTS_W void completeSymm(InputOutputArray m, bool lowerToUpper = false);
+
+/** @brief Initializes a scaled identity matrix.
+
+The func
