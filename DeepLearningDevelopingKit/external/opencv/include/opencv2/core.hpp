@@ -1757,4 +1757,55 @@ CV_EXPORTS_W void completeSymm(InputOutputArray m, bool lowerToUpper = false);
 
 /** @brief Initializes a scaled identity matrix.
 
-The func
+The function cv::setIdentity initializes a scaled identity matrix:
+\f[\texttt{mtx} (i,j)= \fork{\texttt{value}}{ if \(i=j\)}{0}{otherwise}\f]
+
+The function can also be emulated using the matrix initializers and the
+matrix expressions:
+@code
+    Mat A = Mat::eye(4, 3, CV_32F)*5;
+    // A will be set to [[5, 0, 0], [0, 5, 0], [0, 0, 5], [0, 0, 0]]
+@endcode
+@param mtx matrix to initialize (not necessarily square).
+@param s value to assign to diagonal elements.
+@sa Mat::zeros, Mat::ones, Mat::setTo, Mat::operator=
+*/
+CV_EXPORTS_W void setIdentity(InputOutputArray mtx, const Scalar& s = Scalar(1));
+
+/** @brief Returns the determinant of a square floating-point matrix.
+
+The function cv::determinant calculates and returns the determinant of the
+specified matrix. For small matrices ( mtx.cols=mtx.rows\<=3 ), the
+direct method is used. For larger matrices, the function uses LU
+factorization with partial pivoting.
+
+For symmetric positively-determined matrices, it is also possible to use
+eigen decomposition to calculate the determinant.
+@param mtx input matrix that must have CV_32FC1 or CV_64FC1 type and
+square size.
+@sa trace, invert, solve, eigen, @ref MatrixExpressions
+*/
+CV_EXPORTS_W double determinant(InputArray mtx);
+
+/** @brief Returns the trace of a matrix.
+
+The function cv::trace returns the sum of the diagonal elements of the
+matrix mtx .
+\f[\mathrm{tr} ( \texttt{mtx} ) =  \sum _i  \texttt{mtx} (i,i)\f]
+@param mtx input matrix.
+*/
+CV_EXPORTS_W Scalar trace(InputArray mtx);
+
+/** @brief Finds the inverse or pseudo-inverse of a matrix.
+
+The function cv::invert inverts the matrix src and stores the result in dst
+. When the matrix src is singular or non-square, the function calculates
+the pseudo-inverse matrix (the dst matrix) so that norm(src\*dst - I) is
+minimal, where I is an identity matrix.
+
+In case of the #DECOMP_LU method, the function returns non-zero value if
+the inverse has been successfully calculated and 0 if src is singular.
+
+In case of the #DECOMP_SVD method, the function returns the inverse
+condition number of src (the ratio of the smallest singular value to the
+largest singular value) and 0 if s
