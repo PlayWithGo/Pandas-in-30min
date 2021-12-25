@@ -1808,4 +1808,50 @@ the inverse has been successfully calculated and 0 if src is singular.
 
 In case of the #DECOMP_SVD method, the function returns the inverse
 condition number of src (the ratio of the smallest singular value to the
-largest singular value) and 0 if s
+largest singular value) and 0 if src is singular. The SVD method
+calculates a pseudo-inverse matrix if src is singular.
+
+Similarly to #DECOMP_LU, the method #DECOMP_CHOLESKY works only with
+non-singular square matrices that should also be symmetrical and
+positively defined. In this case, the function stores the inverted
+matrix in dst and returns non-zero. Otherwise, it returns 0.
+
+@param src input floating-point M x N matrix.
+@param dst output matrix of N x M size and the same type as src.
+@param flags inversion method (cv::DecompTypes)
+@sa solve, SVD
+*/
+CV_EXPORTS_W double invert(InputArray src, OutputArray dst, int flags = DECOMP_LU);
+
+/** @brief Solves one or more linear systems or least-squares problems.
+
+The function cv::solve solves a linear system or least-squares problem (the
+latter is possible with SVD or QR methods, or by specifying the flag
+#DECOMP_NORMAL ):
+\f[\texttt{dst} =  \arg \min _X \| \texttt{src1} \cdot \texttt{X} -  \texttt{src2} \|\f]
+
+If #DECOMP_LU or #DECOMP_CHOLESKY method is used, the function returns 1
+if src1 (or \f$\texttt{src1}^T\texttt{src1}\f$ ) is non-singular. Otherwise,
+it returns 0. In the latter case, dst is not valid. Other methods find a
+pseudo-solution in case of a singular left-hand side part.
+
+@note If you want to find a unity-norm solution of an under-defined
+singular system \f$\texttt{src1}\cdot\texttt{dst}=0\f$ , the function solve
+will not do the work. Use SVD::solveZ instead.
+
+@param src1 input matrix on the left-hand side of the system.
+@param src2 input matrix on the right-hand side of the system.
+@param dst output solution.
+@param flags solution (matrix inversion) method (#DecompTypes)
+@sa invert, SVD, eigen
+*/
+CV_EXPORTS_W bool solve(InputArray src1, InputArray src2,
+                        OutputArray dst, int flags = DECOMP_LU);
+
+/** @brief Sorts each row or each column of a matrix.
+
+The function cv::sort sorts each matrix row or each matrix column in
+ascending or descending order. So you should pass two operation flags to
+get desired behaviour. If you want to sort matrix rows or columns
+lexicographically, you can use STL std::sort generic function with the
+proper comparison predic
