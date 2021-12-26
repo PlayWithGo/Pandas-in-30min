@@ -1901,4 +1901,48 @@ CV_EXPORTS_W int solveCubic(InputArray coeffs, OutputArray roots);
 /** @brief Finds the real or complex roots of a polynomial equation.
 
 The function cv::solvePoly finds real and complex roots of a polynomial equation:
-\f[\texttt{coeffs} [n] x^{n} +  \texttt{coeffs} [n-1] x^{n-1} + ... +  \texttt{coeffs} [1] x +  \texttt{coeffs} [0]
+\f[\texttt{coeffs} [n] x^{n} +  \texttt{coeffs} [n-1] x^{n-1} + ... +  \texttt{coeffs} [1] x +  \texttt{coeffs} [0] = 0\f]
+@param coeffs array of polynomial coefficients.
+@param roots output (complex) array of roots.
+@param maxIters maximum number of iterations the algorithm does.
+*/
+CV_EXPORTS_W double solvePoly(InputArray coeffs, OutputArray roots, int maxIters = 300);
+
+/** @brief Calculates eigenvalues and eigenvectors of a symmetric matrix.
+
+The function cv::eigen calculates just eigenvalues, or eigenvalues and eigenvectors of the symmetric
+matrix src:
+@code
+    src*eigenvectors.row(i).t() = eigenvalues.at<srcType>(i)*eigenvectors.row(i).t()
+@endcode
+
+@note Use cv::eigenNonSymmetric for calculation of real eigenvalues and eigenvectors of non-symmetric matrix.
+
+@param src input matrix that must have CV_32FC1 or CV_64FC1 type, square size and be symmetrical
+(src ^T^ == src).
+@param eigenvalues output vector of eigenvalues of the same type as src; the eigenvalues are stored
+in the descending order.
+@param eigenvectors output matrix of eigenvectors; it has the same size and type as src; the
+eigenvectors are stored as subsequent matrix rows, in the same order as the corresponding
+eigenvalues.
+@sa eigenNonSymmetric, completeSymm , PCA
+*/
+CV_EXPORTS_W bool eigen(InputArray src, OutputArray eigenvalues,
+                        OutputArray eigenvectors = noArray());
+
+/** @brief Calculates eigenvalues and eigenvectors of a non-symmetric matrix (real eigenvalues only).
+
+@note Assumes real eigenvalues.
+
+The function calculates eigenvalues and eigenvectors (optional) of the square matrix src:
+@code
+    src*eigenvectors.row(i).t() = eigenvalues.at<srcType>(i)*eigenvectors.row(i).t()
+@endcode
+
+@param src input matrix (CV_32FC1 or CV_64FC1 type).
+@param eigenvalues output vector of eigenvalues (type is the same type as src).
+@param eigenvectors output matrix of eigenvectors (type is the same type as src). The eigenvectors are stored as subsequent matrix rows, in the same order as the corresponding eigenvalues.
+@sa eigen
+*/
+CV_EXPORTS_W void eigenNonSymmetric(InputArray src, OutputArray eigenvalues,
+                                    Outpu
