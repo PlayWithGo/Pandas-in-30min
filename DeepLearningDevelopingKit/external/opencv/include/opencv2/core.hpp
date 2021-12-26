@@ -1854,4 +1854,51 @@ The function cv::sort sorts each matrix row or each matrix column in
 ascending or descending order. So you should pass two operation flags to
 get desired behaviour. If you want to sort matrix rows or columns
 lexicographically, you can use STL std::sort generic function with the
-proper comparison predic
+proper comparison predicate.
+
+@param src input single-channel array.
+@param dst output array of the same size and type as src.
+@param flags operation flags, a combination of #SortFlags
+@sa sortIdx, randShuffle
+*/
+CV_EXPORTS_W void sort(InputArray src, OutputArray dst, int flags);
+
+/** @brief Sorts each row or each column of a matrix.
+
+The function cv::sortIdx sorts each matrix row or each matrix column in the
+ascending or descending order. So you should pass two operation flags to
+get desired behaviour. Instead of reordering the elements themselves, it
+stores the indices of sorted elements in the output array. For example:
+@code
+    Mat A = Mat::eye(3,3,CV_32F), B;
+    sortIdx(A, B, SORT_EVERY_ROW + SORT_ASCENDING);
+    // B will probably contain
+    // (because of equal elements in A some permutations are possible):
+    // [[1, 2, 0], [0, 2, 1], [0, 1, 2]]
+@endcode
+@param src input single-channel array.
+@param dst output integer array of the same size as src.
+@param flags operation flags that could be a combination of cv::SortFlags
+@sa sort, randShuffle
+*/
+CV_EXPORTS_W void sortIdx(InputArray src, OutputArray dst, int flags);
+
+/** @brief Finds the real roots of a cubic equation.
+
+The function solveCubic finds the real roots of a cubic equation:
+-   if coeffs is a 4-element vector:
+\f[\texttt{coeffs} [0] x^3 +  \texttt{coeffs} [1] x^2 +  \texttt{coeffs} [2] x +  \texttt{coeffs} [3] = 0\f]
+-   if coeffs is a 3-element vector:
+\f[x^3 +  \texttt{coeffs} [0] x^2 +  \texttt{coeffs} [1] x +  \texttt{coeffs} [2] = 0\f]
+
+The roots are stored in the roots array.
+@param coeffs equation coefficients, an array of 3 or 4 elements.
+@param roots output array of real roots that has 1 or 3 elements.
+@return number of real roots. It can be 0, 1 or 2.
+*/
+CV_EXPORTS_W int solveCubic(InputArray coeffs, OutputArray roots);
+
+/** @brief Finds the real or complex roots of a polynomial equation.
+
+The function cv::solvePoly finds real and complex roots of a polynomial equation:
+\f[\texttt{coeffs} [n] x^{n} +  \texttt{coeffs} [n-1] x^{n-1} + ... +  \texttt{coeffs} [1] x +  \texttt{coeffs} [0]
