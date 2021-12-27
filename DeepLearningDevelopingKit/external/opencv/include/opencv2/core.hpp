@@ -1945,4 +1945,49 @@ The function calculates eigenvalues and eigenvectors (optional) of the square ma
 @sa eigen
 */
 CV_EXPORTS_W void eigenNonSymmetric(InputArray src, OutputArray eigenvalues,
-                                    Outpu
+                                    OutputArray eigenvectors);
+
+/** @brief Calculates the covariance matrix of a set of vectors.
+
+The function cv::calcCovarMatrix calculates the covariance matrix and, optionally, the mean vector of
+the set of input vectors.
+@param samples samples stored as separate matrices
+@param nsamples number of samples
+@param covar output covariance matrix of the type ctype and square size.
+@param mean input or output (depending on the flags) array as the average value of the input vectors.
+@param flags operation flags as a combination of #CovarFlags
+@param ctype type of the matrixl; it equals 'CV_64F' by default.
+@sa PCA, mulTransposed, Mahalanobis
+@todo InputArrayOfArrays
+*/
+CV_EXPORTS void calcCovarMatrix( const Mat* samples, int nsamples, Mat& covar, Mat& mean,
+                                 int flags, int ctype = CV_64F);
+
+/** @overload
+@note use #COVAR_ROWS or #COVAR_COLS flag
+@param samples samples stored as rows/columns of a single matrix.
+@param covar output covariance matrix of the type ctype and square size.
+@param mean input or output (depending on the flags) array as the average value of the input vectors.
+@param flags operation flags as a combination of #CovarFlags
+@param ctype type of the matrixl; it equals 'CV_64F' by default.
+*/
+CV_EXPORTS_W void calcCovarMatrix( InputArray samples, OutputArray covar,
+                                   InputOutputArray mean, int flags, int ctype = CV_64F);
+
+/** wrap PCA::operator() */
+CV_EXPORTS_W void PCACompute(InputArray data, InputOutputArray mean,
+                             OutputArray eigenvectors, int maxComponents = 0);
+
+/** wrap PCA::operator() */
+CV_EXPORTS_W void PCACompute(InputArray data, InputOutputArray mean,
+                             OutputArray eigenvectors, double retainedVariance);
+
+/** wrap PCA::project */
+CV_EXPORTS_W void PCAProject(InputArray data, InputArray mean,
+                             InputArray eigenvectors, OutputArray result);
+
+/** wrap PCA::backProject */
+CV_EXPORTS_W void PCABackProject(InputArray data, InputArray mean,
+                                 InputArray eigenvectors, OutputArray result);
+
+/** wra
