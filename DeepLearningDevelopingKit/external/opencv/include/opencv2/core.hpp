@@ -1990,4 +1990,39 @@ CV_EXPORTS_W void PCAProject(InputArray data, InputArray mean,
 CV_EXPORTS_W void PCABackProject(InputArray data, InputArray mean,
                                  InputArray eigenvectors, OutputArray result);
 
-/** wra
+/** wrap SVD::compute */
+CV_EXPORTS_W void SVDecomp( InputArray src, OutputArray w, OutputArray u, OutputArray vt, int flags = 0 );
+
+/** wrap SVD::backSubst */
+CV_EXPORTS_W void SVBackSubst( InputArray w, InputArray u, InputArray vt,
+                               InputArray rhs, OutputArray dst );
+
+/** @brief Calculates the Mahalanobis distance between two vectors.
+
+The function cv::Mahalanobis calculates and returns the weighted distance between two vectors:
+\f[d( \texttt{vec1} , \texttt{vec2} )= \sqrt{\sum_{i,j}{\texttt{icovar(i,j)}\cdot(\texttt{vec1}(I)-\texttt{vec2}(I))\cdot(\texttt{vec1(j)}-\texttt{vec2(j)})} }\f]
+The covariance matrix may be calculated using the #calcCovarMatrix function and then inverted using
+the invert function (preferably using the #DECOMP_SVD method, as the most accurate).
+@param v1 first 1D input vector.
+@param v2 second 1D input vector.
+@param icovar inverse covariance matrix.
+*/
+CV_EXPORTS_W double Mahalanobis(InputArray v1, InputArray v2, InputArray icovar);
+
+/** @brief Performs a forward or inverse Discrete Fourier transform of a 1D or 2D floating-point array.
+
+The function cv::dft performs one of the following:
+-   Forward the Fourier transform of a 1D vector of N elements:
+    \f[Y = F^{(N)}  \cdot X,\f]
+    where \f$F^{(N)}_{jk}=\exp(-2\pi i j k/N)\f$ and \f$i=\sqrt{-1}\f$
+-   Inverse the Fourier transform of a 1D vector of N elements:
+    \f[\begin{array}{l} X'=  \left (F^{(N)} \right )^{-1}  \cdot Y =  \left (F^{(N)} \right )^*  \cdot y  \\ X = (1/N)  \cdot X, \end{array}\f]
+    where \f$F^*=\left(\textrm{Re}(F^{(N)})-\textrm{Im}(F^{(N)})\right)^T\f$
+-   Forward the 2D Fourier transform of a M x N matrix:
+    \f[Y = F^{(M)}  \cdot X  \cdot F^{(N)}\f]
+-   Inverse the 2D Fourier transform of a M x N matrix:
+    \f[\begin{array}{l} X'=  \left (F^{(M)} \right )^*  \cdot Y  \cdot \left (F^{(N)} \right )^* \\ X =  \frac{1}{M \cdot N} \cdot X' \end{array}\f]
+
+In case of real (single-channel) data, the output spectrum of the forward Fourier transform or input
+spectrum of the inverse Fourier transform can be represented in a packed format called *CCS*
+(
