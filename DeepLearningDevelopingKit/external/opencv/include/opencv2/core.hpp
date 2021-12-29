@@ -2025,4 +2025,24 @@ The function cv::dft performs one of the following:
 
 In case of real (single-channel) data, the output spectrum of the forward Fourier transform or input
 spectrum of the inverse Fourier transform can be represented in a packed format called *CCS*
-(
+(complex-conjugate-symmetrical). It was borrowed from IPL (Intel\* Image Processing Library). Here
+is how 2D *CCS* spectrum looks:
+\f[\begin{bmatrix} Re Y_{0,0} & Re Y_{0,1} & Im Y_{0,1} & Re Y_{0,2} & Im Y_{0,2} &  \cdots & Re Y_{0,N/2-1} & Im Y_{0,N/2-1} & Re Y_{0,N/2}  \\ Re Y_{1,0} & Re Y_{1,1} & Im Y_{1,1} & Re Y_{1,2} & Im Y_{1,2} &  \cdots & Re Y_{1,N/2-1} & Im Y_{1,N/2-1} & Re Y_{1,N/2}  \\ Im Y_{1,0} & Re Y_{2,1} & Im Y_{2,1} & Re Y_{2,2} & Im Y_{2,2} &  \cdots & Re Y_{2,N/2-1} & Im Y_{2,N/2-1} & Im Y_{1,N/2}  \\ \hdotsfor{9} \\ Re Y_{M/2-1,0} &  Re Y_{M-3,1}  & Im Y_{M-3,1} &  \hdotsfor{3} & Re Y_{M-3,N/2-1} & Im Y_{M-3,N/2-1}& Re Y_{M/2-1,N/2}  \\ Im Y_{M/2-1,0} &  Re Y_{M-2,1}  & Im Y_{M-2,1} &  \hdotsfor{3} & Re Y_{M-2,N/2-1} & Im Y_{M-2,N/2-1}& Im Y_{M/2-1,N/2}  \\ Re Y_{M/2,0}  &  Re Y_{M-1,1} &  Im Y_{M-1,1} &  \hdotsfor{3} & Re Y_{M-1,N/2-1} & Im Y_{M-1,N/2-1}& Re Y_{M/2,N/2} \end{bmatrix}\f]
+
+In case of 1D transform of a real vector, the output looks like the first row of the matrix above.
+
+So, the function chooses an operation mode depending on the flags and size of the input array:
+-   If #DFT_ROWS is set or the input array has a single row or single column, the function
+    performs a 1D forward or inverse transform of each row of a matrix when #DFT_ROWS is set.
+    Otherwise, it performs a 2D transform.
+-   If the input array is real and #DFT_INVERSE is not set, the function performs a forward 1D or
+    2D transform:
+    -   When #DFT_COMPLEX_OUTPUT is set, the output is a complex matrix of the same size as
+        input.
+    -   When #DFT_COMPLEX_OUTPUT is not set, the output is a real matrix of the same size as
+        input. In case of 2D transform, it uses the packed format as shown above. In case of a
+        single 1D transform, it looks like the first row of the matrix above. In case of
+        multiple 1D transforms (when using the #DFT_ROWS flag), each row of the output matrix
+        looks like the first row of the matrix above.
+-   If the input array is complex and either #DFT_INVERSE or #DFT_REAL_OUTPUT are not set, the
+  
