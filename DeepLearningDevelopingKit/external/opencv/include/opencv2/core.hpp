@@ -2045,4 +2045,45 @@ So, the function chooses an operation mode depending on the flags and size of th
         multiple 1D transforms (when using the #DFT_ROWS flag), each row of the output matrix
         looks like the first row of the matrix above.
 -   If the input array is complex and either #DFT_INVERSE or #DFT_REAL_OUTPUT are not set, the
-  
+    output is a complex array of the same size as input. The function performs a forward or
+    inverse 1D or 2D transform of the whole input array or each row of the input array
+    independently, depending on the flags DFT_INVERSE and DFT_ROWS.
+-   When #DFT_INVERSE is set and the input array is real, or it is complex but #DFT_REAL_OUTPUT
+    is set, the output is a real array of the same size as input. The function performs a 1D or 2D
+    inverse transformation of the whole input array or each individual row, depending on the flags
+    #DFT_INVERSE and #DFT_ROWS.
+
+If #DFT_SCALE is set, the scaling is done after the transformation.
+
+Unlike dct , the function supports arrays of arbitrary size. But only those arrays are processed
+efficiently, whose sizes can be factorized in a product of small prime numbers (2, 3, and 5 in the
+current implementation). Such an efficient DFT size can be calculated using the getOptimalDFTSize
+method.
+
+The sample below illustrates how to calculate a DFT-based convolution of two 2D real arrays:
+@code
+    void convolveDFT(InputArray A, InputArray B, OutputArray C)
+    {
+        // reallocate the output array if needed
+        C.create(abs(A.rows - B.rows)+1, abs(A.cols - B.cols)+1, A.type());
+        Size dftSize;
+        // calculate the size of DFT transform
+        dftSize.width = getOptimalDFTSize(A.cols + B.cols - 1);
+        dftSize.height = getOptimalDFTSize(A.rows + B.rows - 1);
+
+        // allocate temporary buffers and initialize them with 0's
+        Mat tempA(dftSize, A.type(), Scalar::all(0));
+        Mat tempB(dftSize, B.type(), Scalar::all(0));
+
+        // copy A and B to the top-left corners of tempA and tempB, respectively
+        Mat roiA(tempA, Rect(0,0,A.cols,A.rows));
+        A.copyTo(roiA);
+        Mat roiB(tempB, Rect(0,0,B.cols,B.rows));
+        B.copyTo(roiB);
+
+        // now transform the padded A & B in-place;
+        // use "nonzeroRows" hint for faster processing
+        dft(tempA, tempA, 0, A.rows);
+        dft(tempB, tempB, 0, B.rows);
+
+        // multiply the spect
