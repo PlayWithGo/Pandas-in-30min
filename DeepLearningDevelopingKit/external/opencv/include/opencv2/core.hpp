@@ -2086,4 +2086,38 @@ The sample below illustrates how to calculate a DFT-based convolution of two 2D 
         dft(tempA, tempA, 0, A.rows);
         dft(tempB, tempB, 0, B.rows);
 
-        // multiply the spect
+        // multiply the spectrums;
+        // the function handles packed spectrum representations well
+        mulSpectrums(tempA, tempB, tempA);
+
+        // transform the product back from the frequency domain.
+        // Even though all the result rows will be non-zero,
+        // you need only the first C.rows of them, and thus you
+        // pass nonzeroRows == C.rows
+        dft(tempA, tempA, DFT_INVERSE + DFT_SCALE, C.rows);
+
+        // now copy the result back to C.
+        tempA(Rect(0, 0, C.cols, C.rows)).copyTo(C);
+
+        // all the temporary buffers will be deallocated automatically
+    }
+@endcode
+To optimize this sample, consider the following approaches:
+-   Since nonzeroRows != 0 is passed to the forward transform calls and since A and B are copied to
+    the top-left corners of tempA and tempB, respectively, it is not necessary to clear the whole
+    tempA and tempB. It is only necessary to clear the tempA.cols - A.cols ( tempB.cols - B.cols)
+    rightmost columns of the matrices.
+-   This DFT-based convolution does not have to be applied to the whole big arrays, especially if B
+    is significantly smaller than A or vice versa. Instead, you can calculate convolution by parts.
+    To do this, you need to split the output array C into multiple tiles. For each tile, estimate
+    which parts of A and B are required to calculate convolution in this tile. If the tiles in C are
+    too small, the speed will decrease a lot because of repeated work. In the ultimate case, when
+    each tile in C is a single pixel, the algorithm becomes equivalent to the naive convolution
+    algorithm. If the tiles are too big, the temporary arrays tempA and tempB become too big and
+    there is also a slowdown because of bad cache locality. So, there is an optimal tile size
+    somewhere in the middle.
+-   If different tiles in C can be calculated in parallel and, thus, the convolution is done by
+    parts, the loop can be threaded.
+
+All of the above improvements have been implemented in #matchTemplate and #filter2D . Therefore, by
+using them, you can get the performance even better than
