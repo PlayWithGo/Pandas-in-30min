@@ -2155,4 +2155,40 @@ dft or idft explicitly to make these transforms mutually inverse.
 @param nonzeroRows number of dst rows to process; the rest of the rows have undefined content (see
 the convolution sample in dft description.
 */
-CV_EXPORTS_
+CV_EXPORTS_W void idft(InputArray src, OutputArray dst, int flags = 0, int nonzeroRows = 0);
+
+/** @brief Performs a forward or inverse discrete Cosine transform of 1D or 2D array.
+
+The function cv::dct performs a forward or inverse discrete Cosine transform (DCT) of a 1D or 2D
+floating-point array:
+-   Forward Cosine transform of a 1D vector of N elements:
+    \f[Y = C^{(N)}  \cdot X\f]
+    where
+    \f[C^{(N)}_{jk}= \sqrt{\alpha_j/N} \cos \left ( \frac{\pi(2k+1)j}{2N} \right )\f]
+    and
+    \f$\alpha_0=1\f$, \f$\alpha_j=2\f$ for *j \> 0*.
+-   Inverse Cosine transform of a 1D vector of N elements:
+    \f[X =  \left (C^{(N)} \right )^{-1}  \cdot Y =  \left (C^{(N)} \right )^T  \cdot Y\f]
+    (since \f$C^{(N)}\f$ is an orthogonal matrix, \f$C^{(N)} \cdot \left(C^{(N)}\right)^T = I\f$ )
+-   Forward 2D Cosine transform of M x N matrix:
+    \f[Y = C^{(N)}  \cdot X  \cdot \left (C^{(N)} \right )^T\f]
+-   Inverse 2D Cosine transform of M x N matrix:
+    \f[X =  \left (C^{(N)} \right )^T  \cdot X  \cdot C^{(N)}\f]
+
+The function chooses the mode of operation by looking at the flags and size of the input array:
+-   If (flags & #DCT_INVERSE) == 0 , the function does a forward 1D or 2D transform. Otherwise, it
+    is an inverse 1D or 2D transform.
+-   If (flags & #DCT_ROWS) != 0 , the function performs a 1D transform of each row.
+-   If the array is a single column or a single row, the function performs a 1D transform.
+-   If none of the above is true, the function performs a 2D transform.
+
+@note Currently dct supports even-size arrays (2, 4, 6 ...). For data analysis and approximation, you
+can pad the array when necessary.
+Also, the function performance depends very much, and not monotonically, on the array size (see
+getOptimalDFTSize ). In the current implementation DCT of a vector of size N is calculated via DFT
+of a vector of size N/2 . Thus, the optimal DCT size N1 \>= N can be calculated as:
+@code
+    size_t getOptimalDCTSize(size_t N) { return 2*getOptimalDFTSize((N+1)/2); }
+    N1 = getOptimalDCTSize(N);
+@endcode
+@pa
