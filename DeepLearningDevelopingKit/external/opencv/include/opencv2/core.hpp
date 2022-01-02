@@ -2120,4 +2120,39 @@ To optimize this sample, consider the following approaches:
     parts, the loop can be threaded.
 
 All of the above improvements have been implemented in #matchTemplate and #filter2D . Therefore, by
-using them, you can get the performance even better than
+using them, you can get the performance even better than with the above theoretically optimal
+implementation. Though, those two functions actually calculate cross-correlation, not convolution,
+so you need to "flip" the second convolution operand B vertically and horizontally using flip .
+@note
+-   An example using the discrete fourier transform can be found at
+    opencv_source_code/samples/cpp/dft.cpp
+-   (Python) An example using the dft functionality to perform Wiener deconvolution can be found
+    at opencv_source/samples/python/deconvolution.py
+-   (Python) An example rearranging the quadrants of a Fourier image can be found at
+    opencv_source/samples/python/dft.py
+@param src input array that could be real or complex.
+@param dst output array whose size and type depends on the flags .
+@param flags transformation flags, representing a combination of the #DftFlags
+@param nonzeroRows when the parameter is not zero, the function assumes that only the first
+nonzeroRows rows of the input array (#DFT_INVERSE is not set) or only the first nonzeroRows of the
+output array (#DFT_INVERSE is set) contain non-zeros, thus, the function can handle the rest of the
+rows more efficiently and save some time; this technique is very useful for calculating array
+cross-correlation or convolution using DFT.
+@sa dct , getOptimalDFTSize , mulSpectrums, filter2D , matchTemplate , flip , cartToPolar ,
+magnitude , phase
+*/
+CV_EXPORTS_W void dft(InputArray src, OutputArray dst, int flags = 0, int nonzeroRows = 0);
+
+/** @brief Calculates the inverse Discrete Fourier Transform of a 1D or 2D array.
+
+idft(src, dst, flags) is equivalent to dft(src, dst, flags | #DFT_INVERSE) .
+@note None of dft and idft scales the result by default. So, you should pass #DFT_SCALE to one of
+dft or idft explicitly to make these transforms mutually inverse.
+@sa dft, dct, idct, mulSpectrums, getOptimalDFTSize
+@param src input floating-point real or complex array.
+@param dst output array whose size and type depend on the flags.
+@param flags operation flags (see dft and #DftFlags).
+@param nonzeroRows number of dst rows to process; the rest of the rows have undefined content (see
+the convolution sample in dft description.
+*/
+CV_EXPORTS_
