@@ -2230,4 +2230,44 @@ CV_EXPORTS_W void mulSpectrums(InputArray a, InputArray b, OutputArray c,
 
 /** @brief Returns the optimal DFT size for a given vector size.
 
-DFT performance is not a monotonic func
+DFT performance is not a monotonic function of a vector size. Therefore, when you calculate
+convolution of two arrays or perform the spectral analysis of an array, it usually makes sense to
+pad the input data with zeros to get a bit larger array that can be transformed much faster than the
+original one. Arrays whose size is a power-of-two (2, 4, 8, 16, 32, ...) are the fastest to process.
+Though, the arrays whose size is a product of 2's, 3's, and 5's (for example, 300 = 5\*5\*3\*2\*2)
+are also processed quite efficiently.
+
+The function cv::getOptimalDFTSize returns the minimum number N that is greater than or equal to vecsize
+so that the DFT of a vector of size N can be processed efficiently. In the current implementation N
+= 2 ^p^ \* 3 ^q^ \* 5 ^r^ for some integer p, q, r.
+
+The function returns a negative number if vecsize is too large (very close to INT_MAX ).
+
+While the function cannot be used directly to estimate the optimal vector size for DCT transform
+(since the current DCT implementation supports only even-size vectors), it can be easily processed
+as getOptimalDFTSize((vecsize+1)/2)\*2.
+@param vecsize vector size.
+@sa dft , dct , idft , idct , mulSpectrums
+*/
+CV_EXPORTS_W int getOptimalDFTSize(int vecsize);
+
+/** @brief Returns the default random number generator.
+
+The function cv::theRNG returns the default random number generator. For each thread, there is a
+separate random number generator, so you can use the function safely in multi-thread environments.
+If you just need to get a single random number using this generator or initialize an array, you can
+use randu or randn instead. But if you are going to generate many random numbers inside a loop, it
+is much faster to use this function to retrieve the generator and then use RNG::operator _Tp() .
+@sa RNG, randu, randn
+*/
+CV_EXPORTS RNG& theRNG();
+
+/** @brief Sets state of default random number generator.
+
+The function cv::setRNGSeed sets state of default random number generator to custom value.
+@param seed new state for default random number generator
+@sa RNG, randu, randn
+*/
+CV_EXPORTS_W void setRNGSeed(int seed);
+
+/** @brief Gen
