@@ -2191,4 +2191,43 @@ of a vector of size N/2 . Thus, the optimal DCT size N1 \>= N can be calculated 
     size_t getOptimalDCTSize(size_t N) { return 2*getOptimalDFTSize((N+1)/2); }
     N1 = getOptimalDCTSize(N);
 @endcode
-@pa
+@param src input floating-point array.
+@param dst output array of the same size and type as src .
+@param flags transformation flags as a combination of cv::DftFlags (DCT_*)
+@sa dft , getOptimalDFTSize , idct
+*/
+CV_EXPORTS_W void dct(InputArray src, OutputArray dst, int flags = 0);
+
+/** @brief Calculates the inverse Discrete Cosine Transform of a 1D or 2D array.
+
+idct(src, dst, flags) is equivalent to dct(src, dst, flags | DCT_INVERSE).
+@param src input floating-point single-channel array.
+@param dst output array of the same size and type as src.
+@param flags operation flags.
+@sa  dct, dft, idft, getOptimalDFTSize
+*/
+CV_EXPORTS_W void idct(InputArray src, OutputArray dst, int flags = 0);
+
+/** @brief Performs the per-element multiplication of two Fourier spectrums.
+
+The function cv::mulSpectrums performs the per-element multiplication of the two CCS-packed or complex
+matrices that are results of a real or complex Fourier transform.
+
+The function, together with dft and idft , may be used to calculate convolution (pass conjB=false )
+or correlation (pass conjB=true ) of two arrays rapidly. When the arrays are complex, they are
+simply multiplied (per element) with an optional conjugation of the second-array elements. When the
+arrays are real, they are assumed to be CCS-packed (see dft for details).
+@param a first input array.
+@param b second input array of the same size and type as src1 .
+@param c output array of the same size and type as src1 .
+@param flags operation flags; currently, the only supported flag is cv::DFT_ROWS, which indicates that
+each row of src1 and src2 is an independent 1D Fourier spectrum. If you do not want to use this flag, then simply add a `0` as value.
+@param conjB optional flag that conjugates the second input array before the multiplication (true)
+or not (false).
+*/
+CV_EXPORTS_W void mulSpectrums(InputArray a, InputArray b, OutputArray c,
+                               int flags, bool conjB = false);
+
+/** @brief Returns the optimal DFT size for a given vector size.
+
+DFT performance is not a monotonic func
