@@ -2270,4 +2270,45 @@ The function cv::setRNGSeed sets state of default random number generator to cus
 */
 CV_EXPORTS_W void setRNGSeed(int seed);
 
-/** @brief Gen
+/** @brief Generates a single uniformly-distributed random number or an array of random numbers.
+
+Non-template variant of the function fills the matrix dst with uniformly-distributed
+random numbers from the specified range:
+\f[\texttt{low} _c  \leq \texttt{dst} (I)_c <  \texttt{high} _c\f]
+@param dst output array of random numbers; the array must be pre-allocated.
+@param low inclusive lower boundary of the generated random numbers.
+@param high exclusive upper boundary of the generated random numbers.
+@sa RNG, randn, theRNG
+*/
+CV_EXPORTS_W void randu(InputOutputArray dst, InputArray low, InputArray high);
+
+/** @brief Fills the array with normally distributed random numbers.
+
+The function cv::randn fills the matrix dst with normally distributed random numbers with the specified
+mean vector and the standard deviation matrix. The generated random numbers are clipped to fit the
+value range of the output array data type.
+@param dst output array of random numbers; the array must be pre-allocated and have 1 to 4 channels.
+@param mean mean value (expectation) of the generated random numbers.
+@param stddev standard deviation of the generated random numbers; it can be either a vector (in
+which case a diagonal standard deviation matrix is assumed) or a square matrix.
+@sa RNG, randu
+*/
+CV_EXPORTS_W void randn(InputOutputArray dst, InputArray mean, InputArray stddev);
+
+/** @brief Shuffles the array elements randomly.
+
+The function cv::randShuffle shuffles the specified 1D array by randomly choosing pairs of elements and
+swapping them. The number of such swap operations will be dst.rows\*dst.cols\*iterFactor .
+@param dst input/output numerical 1D array.
+@param iterFactor scale factor that determines the number of random swap operations (see the details
+below).
+@param rng optional random number generator used for shuffling; if it is zero, theRNG () is used
+instead.
+@sa RNG, sort
+*/
+CV_EXPORTS_W void randShuffle(InputOutputArray dst, double iterFactor = 1., RNG* rng = 0);
+
+/** @brief Principal Component Analysis
+
+The class is used to calculate a special basis for a set of vectors. The
+basis will consist of eigenvectors of the cov
