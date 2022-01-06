@@ -2404,4 +2404,48 @@ public:
     @param mean optional mean value; if the matrix is empty (noArray()),
     the mean is computed from the data.
     @param flags operation flags; currently the parameter is only used to
-    specify the da
+    specify the data layout (PCA::Flags)
+    @param retainedVariance Percentage of variance that PCA should retain.
+    Using this parameter will let the PCA decided how many components to
+    retain but it will always keep at least 2.
+    */
+    PCA(InputArray data, InputArray mean, int flags, double retainedVariance);
+
+    /** @brief performs %PCA
+
+    The operator performs %PCA of the supplied dataset. It is safe to reuse
+    the same PCA structure for multiple datasets. That is, if the structure
+    has been previously used with another dataset, the existing internal
+    data is reclaimed and the new @ref eigenvalues, @ref eigenvectors and @ref
+    mean are allocated and computed.
+
+    The computed @ref eigenvalues are sorted from the largest to the smallest and
+    the corresponding @ref eigenvectors are stored as eigenvectors rows.
+
+    @param data input samples stored as the matrix rows or as the matrix
+    columns.
+    @param mean optional mean value; if the matrix is empty (noArray()),
+    the mean is computed from the data.
+    @param flags operation flags; currently the parameter is only used to
+    specify the data layout. (Flags)
+    @param maxComponents maximum number of components that PCA should
+    retain; by default, all the components are retained.
+    */
+    PCA& operator()(InputArray data, InputArray mean, int flags, int maxComponents = 0);
+
+    /** @overload
+    @param data input samples stored as the matrix rows or as the matrix
+    columns.
+    @param mean optional mean value; if the matrix is empty (noArray()),
+    the mean is computed from the data.
+    @param flags operation flags; currently the parameter is only used to
+    specify the data layout. (PCA::Flags)
+    @param retainedVariance Percentage of variance that %PCA should retain.
+    Using this parameter will let the %PCA decided how many components to
+    retain but it will always keep at least 2.
+     */
+    PCA& operator()(InputArray data, InputArray mean, int flags, double retainedVariance);
+
+    /** @brief Projects vector(s) to the principal component subspace.
+
+    The methods p
