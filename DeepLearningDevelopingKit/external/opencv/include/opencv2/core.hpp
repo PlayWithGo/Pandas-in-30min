@@ -2349,4 +2349,59 @@ PCA compressPCA(const Mat& pcaset, int maxComponents,
                                 // the matrix columns)
             maxComponents // specify, how many principal components to retain
             );
-    // if there is no test data, just retur
+    // if there is no test data, just return the computed basis, ready-to-use
+    if( !testset.data )
+        return pca;
+    CV_Assert( testset.cols == pcaset.cols );
+
+    compressed.create(testset.rows, maxComponents, testset.type());
+
+    Mat reconstructed;
+    for( int i = 0; i < testset.rows; i++ )
+    {
+        Mat vec = testset.row(i), coeffs = compressed.row(i), reconstructed;
+        // compress the vector, the result will be stored
+        // in the i-th row of the output matrix
+        pca.project(vec, coeffs);
+        // and then reconstruct it
+        pca.backProject(coeffs, reconstructed);
+        // and measure the error
+        printf("%d. diff = %g\n", i, norm(vec, reconstructed, NORM_L2));
+    }
+    return pca;
+}
+@endcode
+@sa calcCovarMatrix, mulTransposed, SVD, dft, dct
+*/
+class CV_EXPORTS PCA
+{
+public:
+    enum Flags { DATA_AS_ROW = 0, //!< indicates that the input samples are stored as matrix rows
+                 DATA_AS_COL = 1, //!< indicates that the input samples are stored as matrix columns
+                 USE_AVG     = 2  //!
+               };
+
+    /** @brief default constructor
+
+    The default constructor initializes an empty %PCA structure. The other
+    constructors initialize the structure and call PCA::operator()().
+    */
+    PCA();
+
+    /** @overload
+    @param data input samples stored as matrix rows or matrix columns.
+    @param mean optional mean value; if the matrix is empty (@c noArray()),
+    the mean is computed from the data.
+    @param flags operation flags; currently the parameter is only used to
+    specify the data layout (PCA::Flags)
+    @param maxComponents maximum number of components that %PCA should
+    retain; by default, all the components are retained.
+    */
+    PCA(InputArray data, InputArray mean, int flags, int maxComponents = 0);
+
+    /** @overload
+    @param data input samples stored as matrix rows or matrix columns.
+    @param mean optional mean value; if the matrix is empty (noArray()),
+    the mean is computed from the data.
+    @param flags operation flags; currently the parameter is only used to
+    specify the da
