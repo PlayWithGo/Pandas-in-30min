@@ -2448,4 +2448,41 @@ public:
 
     /** @brief Projects vector(s) to the principal component subspace.
 
-    The methods p
+    The methods project one or more vectors to the principal component
+    subspace, where each vector projection is represented by coefficients in
+    the principal component basis. The first form of the method returns the
+    matrix that the second form writes to the result. So the first form can
+    be used as a part of expression while the second form can be more
+    efficient in a processing loop.
+    @param vec input vector(s); must have the same dimensionality and the
+    same layout as the input data used at %PCA phase, that is, if
+    DATA_AS_ROW are specified, then `vec.cols==data.cols`
+    (vector dimensionality) and `vec.rows` is the number of vectors to
+    project, and the same is true for the PCA::DATA_AS_COL case.
+    */
+    Mat project(InputArray vec) const;
+
+    /** @overload
+    @param vec input vector(s); must have the same dimensionality and the
+    same layout as the input data used at PCA phase, that is, if
+    DATA_AS_ROW are specified, then `vec.cols==data.cols`
+    (vector dimensionality) and `vec.rows` is the number of vectors to
+    project, and the same is true for the PCA::DATA_AS_COL case.
+    @param result output vectors; in case of PCA::DATA_AS_COL, the
+    output matrix has as many columns as the number of input vectors, this
+    means that `result.cols==vec.cols` and the number of rows match the
+    number of principal components (for example, `maxComponents` parameter
+    passed to the constructor).
+     */
+    void project(InputArray vec, OutputArray result) const;
+
+    /** @brief Reconstructs vectors from their PC projections.
+
+    The methods are inverse operations to PCA::project. They take PC
+    coordinates of projected vectors and reconstruct the original vectors.
+    Unless all the principal components have been retained, the
+    reconstructed vectors are different from the originals. But typically,
+    the difference is small if the number of components is large enough (but
+    still much smaller than the original vector dimensionality). As a
+    result, PCA is used.
+    @param vec coordinates of the vectors in the principal component
