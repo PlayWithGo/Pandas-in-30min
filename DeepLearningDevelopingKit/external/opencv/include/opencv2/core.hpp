@@ -2486,3 +2486,70 @@ public:
     still much smaller than the original vector dimensionality). As a
     result, PCA is used.
     @param vec coordinates of the vectors in the principal component
+    subspace, the layout and size are the same as of PCA::project output
+    vectors.
+     */
+    Mat backProject(InputArray vec) const;
+
+    /** @overload
+    @param vec coordinates of the vectors in the principal component
+    subspace, the layout and size are the same as of PCA::project output
+    vectors.
+    @param result reconstructed vectors; the layout and size are the same as
+    of PCA::project input vectors.
+     */
+    void backProject(InputArray vec, OutputArray result) const;
+
+    /** @brief write PCA objects
+
+    Writes @ref eigenvalues @ref eigenvectors and @ref mean to specified FileStorage
+     */
+    void write(FileStorage& fs) const;
+
+    /** @brief load PCA objects
+
+    Loads @ref eigenvalues @ref eigenvectors and @ref mean from specified FileNode
+     */
+    void read(const FileNode& fn);
+
+    Mat eigenvectors; //!< eigenvectors of the covariation matrix
+    Mat eigenvalues; //!< eigenvalues of the covariation matrix
+    Mat mean; //!< mean value subtracted before the projection and added after the back projection
+};
+
+/** @example pca.cpp
+  An example using %PCA for dimensionality reduction while maintaining an amount of variance
+ */
+
+/**
+   @brief Linear Discriminant Analysis
+   @todo document this class
+ */
+class CV_EXPORTS LDA
+{
+public:
+    /** @brief constructor
+    Initializes a LDA with num_components (default 0).
+    */
+    explicit LDA(int num_components = 0);
+
+    /** Initializes and performs a Discriminant Analysis with Fisher's
+     Optimization Criterion on given data in src and corresponding labels
+     in labels. If 0 (or less) number of components are given, they are
+     automatically determined for given data in computation.
+    */
+    LDA(InputArrayOfArrays src, InputArray labels, int num_components = 0);
+
+    /** Serializes this object to a given filename.
+      */
+    void save(const String& filename) const;
+
+    /** Deserializes this object from a given filename.
+      */
+    void load(const String& filename);
+
+    /** Serializes this object to a given cv::FileStorage.
+      */
+    void save(FileStorage& fs) const;
+
+    /** Deser
