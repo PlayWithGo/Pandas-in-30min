@@ -2552,4 +2552,66 @@ public:
       */
     void save(FileStorage& fs) const;
 
-    /** Deser
+    /** Deserializes this object from a given cv::FileStorage.
+      */
+    void load(const FileStorage& node);
+
+    /** destructor
+      */
+    ~LDA();
+
+    /** Compute the discriminants for data in src (row aligned) and labels.
+      */
+    void compute(InputArrayOfArrays src, InputArray labels);
+
+    /** Projects samples into the LDA subspace.
+        src may be one or more row aligned samples.
+      */
+    Mat project(InputArray src);
+
+    /** Reconstructs projections from the LDA subspace.
+        src may be one or more row aligned projections.
+      */
+    Mat reconstruct(InputArray src);
+
+    /** Returns the eigenvectors of this LDA.
+      */
+    Mat eigenvectors() const { return _eigenvectors; }
+
+    /** Returns the eigenvalues of this LDA.
+      */
+    Mat eigenvalues() const { return _eigenvalues; }
+
+    static Mat subspaceProject(InputArray W, InputArray mean, InputArray src);
+    static Mat subspaceReconstruct(InputArray W, InputArray mean, InputArray src);
+
+protected:
+    bool _dataAsRow; // unused, but needed for 3.0 ABI compatibility.
+    int _num_components;
+    Mat _eigenvectors;
+    Mat _eigenvalues;
+    void lda(InputArrayOfArrays src, InputArray labels);
+};
+
+/** @brief Singular Value Decomposition
+
+Class for computing Singular Value Decomposition of a floating-point
+matrix. The Singular Value Decomposition is used to solve least-square
+problems, under-determined linear systems, invert matrices, compute
+condition numbers, and so on.
+
+If you want to compute a condition number of a matrix or an absolute value of
+its determinant, you do not need `u` and `vt`. You can pass
+flags=SVD::NO_UV|... . Another flag SVD::FULL_UV indicates that full-size u
+and vt must be computed, which is not necessary most of the time.
+
+@sa invert, solve, eigen, determinant
+*/
+class CV_EXPORTS SVD
+{
+public:
+    enum Flags {
+        /** allow the algorithm to modify the decomposed matrix; it can save space and speed up
+            processing. currently ignored. */
+        MODIFY_A = 1,
+        /** indicates that only a vector of singular values `w` is to be p
