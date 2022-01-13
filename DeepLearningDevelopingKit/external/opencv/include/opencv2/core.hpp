@@ -2614,4 +2614,56 @@ public:
         /** allow the algorithm to modify the decomposed matrix; it can save space and speed up
             processing. currently ignored. */
         MODIFY_A = 1,
-        /** indicates that only a vector of singular values `w` is to be p
+        /** indicates that only a vector of singular values `w` is to be processed, while u and vt
+            will be set to empty matrices */
+        NO_UV    = 2,
+        /** when the matrix is not square, by default the algorithm produces u and vt matrices of
+            sufficiently large size for the further A reconstruction; if, however, FULL_UV flag is
+            specified, u and vt will be full-size square orthogonal matrices.*/
+        FULL_UV  = 4
+    };
+
+    /** @brief the default constructor
+
+    initializes an empty SVD structure
+      */
+    SVD();
+
+    /** @overload
+    initializes an empty SVD structure and then calls SVD::operator()
+    @param src decomposed matrix. The depth has to be CV_32F or CV_64F.
+    @param flags operation flags (SVD::Flags)
+      */
+    SVD( InputArray src, int flags = 0 );
+
+    /** @brief the operator that performs SVD. The previously allocated u, w and vt are released.
+
+    The operator performs the singular value decomposition of the supplied
+    matrix. The u,`vt` , and the vector of singular values w are stored in
+    the structure. The same SVD structure can be reused many times with
+    different matrices. Each time, if needed, the previous u,`vt` , and w
+    are reclaimed and the new matrices are created, which is all handled by
+    Mat::create.
+    @param src decomposed matrix. The depth has to be CV_32F or CV_64F.
+    @param flags operation flags (SVD::Flags)
+      */
+    SVD& operator ()( InputArray src, int flags = 0 );
+
+    /** @brief decomposes matrix and stores the results to user-provided matrices
+
+    The methods/functions perform SVD of matrix. Unlike SVD::SVD constructor
+    and SVD::operator(), they store the results to the user-provided
+    matrices:
+
+    @code{.cpp}
+    Mat A, w, u, vt;
+    SVD::compute(A, w, u, vt);
+    @endcode
+
+    @param src decomposed matrix. The depth has to be CV_32F or CV_64F.
+    @param w calculated singular values
+    @param u calculated left singular vectors
+    @param vt transposed matrix of right singular vectors
+    @param flags operation flags - see SVD::Flags.
+      */
+    static void compute( In
