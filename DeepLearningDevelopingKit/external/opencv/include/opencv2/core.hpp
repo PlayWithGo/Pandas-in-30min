@@ -2666,4 +2666,53 @@ public:
     @param vt transposed matrix of right singular vectors
     @param flags operation flags - see SVD::Flags.
       */
-    static void compute( In
+    static void compute( InputArray src, OutputArray w,
+                         OutputArray u, OutputArray vt, int flags = 0 );
+
+    /** @overload
+    computes singular values of a matrix
+    @param src decomposed matrix. The depth has to be CV_32F or CV_64F.
+    @param w calculated singular values
+    @param flags operation flags - see SVD::Flags.
+      */
+    static void compute( InputArray src, OutputArray w, int flags = 0 );
+
+    /** @brief performs back substitution
+      */
+    static void backSubst( InputArray w, InputArray u,
+                           InputArray vt, InputArray rhs,
+                           OutputArray dst );
+
+    /** @brief solves an under-determined singular linear system
+
+    The method finds a unit-length solution x of a singular linear system
+    A\*x = 0. Depending on the rank of A, there can be no solutions, a
+    single solution or an infinite number of solutions. In general, the
+    algorithm solves the following problem:
+    \f[dst =  \arg \min _{x:  \| x \| =1}  \| src  \cdot x  \|\f]
+    @param src left-hand-side matrix.
+    @param dst found solution.
+      */
+    static void solveZ( InputArray src, OutputArray dst );
+
+    /** @brief performs a singular value back substitution.
+
+    The method calculates a back substitution for the specified right-hand
+    side:
+
+    \f[\texttt{x} =  \texttt{vt} ^T  \cdot diag( \texttt{w} )^{-1}  \cdot \texttt{u} ^T  \cdot \texttt{rhs} \sim \texttt{A} ^{-1}  \cdot \texttt{rhs}\f]
+
+    Using this technique you can either get a very accurate solution of the
+    convenient linear system, or the best (in the least-squares terms)
+    pseudo-solution of an overdetermined linear system.
+
+    @param rhs right-hand side of a linear system (u\*w\*v')\*dst = rhs to
+    be solved, where A has been previously decomposed.
+
+    @param dst found solution of the system.
+
+    @note Explicit SVD with the further back substitution only makes sense
+    if you need to solve many linear systems with the same left-hand side
+    (for example, src ). If all you need is to solve a single system
+    (possibly with multiple rhs immediately available), simply call solve
+    add pass #DECOMP_SVD t
