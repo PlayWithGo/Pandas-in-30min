@@ -2715,4 +2715,59 @@ public:
     if you need to solve many linear systems with the same left-hand side
     (for example, src ). If all you need is to solve a single system
     (possibly with multiple rhs immediately available), simply call solve
-    add pass #DECOMP_SVD t
+    add pass #DECOMP_SVD there. It does absolutely the same thing.
+      */
+    void backSubst( InputArray rhs, OutputArray dst ) const;
+
+    /** @todo document */
+    template<typename _Tp, int m, int n, int nm> static
+    void compute( const Matx<_Tp, m, n>& a, Matx<_Tp, nm, 1>& w, Matx<_Tp, m, nm>& u, Matx<_Tp, n, nm>& vt );
+
+    /** @todo document */
+    template<typename _Tp, int m, int n, int nm> static
+    void compute( const Matx<_Tp, m, n>& a, Matx<_Tp, nm, 1>& w );
+
+    /** @todo document */
+    template<typename _Tp, int m, int n, int nm, int nb> static
+    void backSubst( const Matx<_Tp, nm, 1>& w, const Matx<_Tp, m, nm>& u, const Matx<_Tp, n, nm>& vt, const Matx<_Tp, m, nb>& rhs, Matx<_Tp, n, nb>& dst );
+
+    Mat u, w, vt;
+};
+
+/** @brief Random Number Generator
+
+Random number generator. It encapsulates the state (currently, a 64-bit
+integer) and has methods to return scalar random values and to fill
+arrays with random values. Currently it supports uniform and Gaussian
+(normal) distributions. The generator uses Multiply-With-Carry
+algorithm, introduced by G. Marsaglia (
+<http://en.wikipedia.org/wiki/Multiply-with-carry> ).
+Gaussian-distribution random numbers are generated using the Ziggurat
+algorithm ( <http://en.wikipedia.org/wiki/Ziggurat_algorithm> ),
+introduced by G. Marsaglia and W. W. Tsang.
+*/
+class CV_EXPORTS RNG
+{
+public:
+    enum { UNIFORM = 0,
+           NORMAL  = 1
+         };
+
+    /** @brief constructor
+
+    These are the RNG constructors. The first form sets the state to some
+    pre-defined value, equal to 2\*\*32-1 in the current implementation. The
+    second form sets the state to the specified value. If you passed state=0
+    , the constructor uses the above default value instead to avoid the
+    singular random number sequence, consisting of all zeros.
+    */
+    RNG();
+    /** @overload
+    @param state 64-bit value used to initialize the RNG.
+    */
+    RNG(uint64 state);
+    /**The method updates the state using the MWC algorithm and returns the
+    next 32-bit random number.*/
+    unsigned next();
+
+    /**Each of the methods updates the state using the MWC algor
