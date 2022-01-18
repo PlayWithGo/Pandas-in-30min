@@ -2770,4 +2770,67 @@ public:
     next 32-bit random number.*/
     unsigned next();
 
-    /**Each of the methods updates the state using the MWC algor
+    /**Each of the methods updates the state using the MWC algorithm and
+    returns the next random number of the specified type. In case of integer
+    types, the returned number is from the available value range for the
+    specified type. In case of floating-point types, the returned value is
+    from [0,1) range.
+    */
+    operator uchar();
+    /** @overload */
+    operator schar();
+    /** @overload */
+    operator ushort();
+    /** @overload */
+    operator short();
+    /** @overload */
+    operator unsigned();
+    /** @overload */
+    operator int();
+    /** @overload */
+    operator float();
+    /** @overload */
+    operator double();
+
+    /** @brief returns a random integer sampled uniformly from [0, N).
+
+    The methods transform the state using the MWC algorithm and return the
+    next random number. The first form is equivalent to RNG::next . The
+    second form returns the random number modulo N , which means that the
+    result is in the range [0, N) .
+    */
+    unsigned operator ()();
+    /** @overload
+    @param N upper non-inclusive boundary of the returned random number.
+    */
+    unsigned operator ()(unsigned N);
+
+    /** @brief returns uniformly distributed integer random number from [a,b) range
+
+    The methods transform the state using the MWC algorithm and return the
+    next uniformly-distributed random number of the specified type, deduced
+    from the input parameter type, from the range [a, b) . There is a nuance
+    illustrated by the following sample:
+
+    @code{.cpp}
+    RNG rng;
+
+    // always produces 0
+    double a = rng.uniform(0, 1);
+
+    // produces double from [0, 1)
+    double a1 = rng.uniform((double)0, (double)1);
+
+    // produces float from [0, 1)
+    float b = rng.uniform(0.f, 1.f);
+
+    // produces double from [0, 1)
+    double c = rng.uniform(0., 1.);
+
+    // may cause compiler error because of ambiguity:
+    //  RNG::uniform(0, (int)0.999999)? or RNG::uniform((double)0, 0.99999)?
+    double d = rng.uniform(0, 0.999999);
+    @endcode
+
+    The compiler does not take into account the type of the variable to
+    which you assign the r
