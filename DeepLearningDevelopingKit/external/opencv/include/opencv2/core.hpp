@@ -2872,4 +2872,69 @@ public:
     is significantly smaller than [-DBL_MAX, DBL_MAX).
 
     Each of the methods fills the matrix with the random values from the
-    specified dis
+    specified distribution. As the new numbers are generated, the RNG state
+    is updated accordingly. In case of multiple-channel images, every
+    channel is filled independently, which means that RNG cannot generate
+    samples from the multi-dimensional Gaussian distribution with
+    non-diagonal covariance matrix directly. To do that, the method
+    generates samples from multi-dimensional standard Gaussian distribution
+    with zero mean and identity covariation matrix, and then transforms them
+    using transform to get samples from the specified Gaussian distribution.
+    */
+    void fill( InputOutputArray mat, int distType, InputArray a, InputArray b, bool saturateRange = false );
+
+    /** @brief Returns the next random number sampled from the Gaussian distribution
+    @param sigma standard deviation of the distribution.
+
+    The method transforms the state using the MWC algorithm and returns the
+    next random number from the Gaussian distribution N(0,sigma) . That is,
+    the mean value of the returned random numbers is zero and the standard
+    deviation is the specified sigma .
+    */
+    double gaussian(double sigma);
+
+    uint64 state;
+
+    bool operator ==(const RNG& other) const;
+};
+
+/** @brief Mersenne Twister random number generator
+
+Inspired by http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/CODES/mt19937ar.c
+@todo document
+ */
+class CV_EXPORTS RNG_MT19937
+{
+public:
+    RNG_MT19937();
+    RNG_MT19937(unsigned s);
+    void seed(unsigned s);
+
+    unsigned next();
+
+    operator int();
+    operator unsigned();
+    operator float();
+    operator double();
+
+    unsigned operator ()(unsigned N);
+    unsigned operator ()();
+
+    /** @brief returns uniformly distributed integer random number from [a,b) range
+
+*/
+    int uniform(int a, int b);
+    /** @brief returns uniformly distributed floating-point random number from [a,b) range
+
+*/
+    float uniform(float a, float b);
+    /** @brief returns uniformly distributed double-precision floating-point random number from [a,b) range
+
+*/
+    double uniform(double a, double b);
+
+private:
+    enum PeriodParameters {N = 624, M = 397};
+    unsigned state[N];
+    int mti;
+};
