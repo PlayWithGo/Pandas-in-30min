@@ -2978,4 +2978,78 @@ function parameter).
 after every attempt. The best (minimum) value is chosen and the corresponding labels and the
 compactness value are returned by the function. Basically, you can use only the core of the
 function, set the number of attempts to 1, initialize labels each time using a custom algorithm,
-pass th
+pass them with the ( flags = #KMEANS_USE_INITIAL_LABELS ) flag, and then choose the best
+(most-compact) clustering.
+*/
+CV_EXPORTS_W double kmeans( InputArray data, int K, InputOutputArray bestLabels,
+                            TermCriteria criteria, int attempts,
+                            int flags, OutputArray centers = noArray() );
+
+//! @} core_cluster
+
+//! @addtogroup core_basic
+//! @{
+
+/////////////////////////////// Formatted output of cv::Mat ///////////////////////////
+
+/** @todo document */
+class CV_EXPORTS Formatted
+{
+public:
+    virtual const char* next() = 0;
+    virtual void reset() = 0;
+    virtual ~Formatted();
+};
+
+/** @todo document */
+class CV_EXPORTS Formatter
+{
+public:
+    enum { FMT_DEFAULT = 0,
+           FMT_MATLAB  = 1,
+           FMT_CSV     = 2,
+           FMT_PYTHON  = 3,
+           FMT_NUMPY   = 4,
+           FMT_C       = 5
+         };
+
+    virtual ~Formatter();
+
+    virtual Ptr<Formatted> format(const Mat& mtx) const = 0;
+
+    virtual void set32fPrecision(int p = 8) = 0;
+    virtual void set64fPrecision(int p = 16) = 0;
+    virtual void setMultiline(bool ml = true) = 0;
+
+    static Ptr<Formatter> get(int fmt = FMT_DEFAULT);
+
+};
+
+static inline
+String& operator << (String& out, Ptr<Formatted> fmtd)
+{
+    fmtd->reset();
+    for(const char* str = fmtd->next(); str; str = fmtd->next())
+        out += cv::String(str);
+    return out;
+}
+
+static inline
+String& operator << (String& out, const Mat& mtx)
+{
+    return out << Formatter::get()->format(mtx);
+}
+
+//////////////////////////////////////// Algorithm ////////////////////////////////////
+
+class CV_EXPORTS Algorithm;
+
+template<typename _Tp> struct ParamType {};
+
+
+/** @brief This is a base class for all more or less complex algorithms in OpenCV
+
+especially for classes of algorithms, for which there can be multiple implementations. The examples
+are stereo correspondence (for which there are algorithms like block matching, semi-global block
+matching, graph-cut etc.), background subtraction (which can be done using mixture-of-gaussians
+models, codebook-based algorithm etc.), opti
