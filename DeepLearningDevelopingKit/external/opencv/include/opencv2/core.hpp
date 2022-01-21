@@ -3052,4 +3052,60 @@ template<typename _Tp> struct ParamType {};
 especially for classes of algorithms, for which there can be multiple implementations. The examples
 are stereo correspondence (for which there are algorithms like block matching, semi-global block
 matching, graph-cut etc.), background subtraction (which can be done using mixture-of-gaussians
-models, codebook-based algorithm etc.), opti
+models, codebook-based algorithm etc.), optical flow (block matching, Lucas-Kanade, Horn-Schunck
+etc.).
+
+Here is example of SimpleBlobDetector use in your application via Algorithm interface:
+@snippet snippets/core_various.cpp Algorithm
+ */
+class CV_EXPORTS_W Algorithm
+{
+public:
+    Algorithm();
+    virtual ~Algorithm();
+
+    /** @brief Clears the algorithm state
+    */
+    CV_WRAP virtual void clear() {}
+
+    /** @brief Stores algorithm parameters in a file storage
+    */
+    virtual void write(FileStorage& fs) const { (void)fs; }
+
+    /** @brief simplified API for language bindings
+     * @overload
+     */
+    CV_WRAP void write(const Ptr<FileStorage>& fs, const String& name = String()) const;
+
+    /** @brief Reads algorithm parameters from a file storage
+    */
+    CV_WRAP virtual void read(const FileNode& fn) { (void)fn; }
+
+    /** @brief Returns true if the Algorithm is empty (e.g. in the very beginning or after unsuccessful read
+     */
+    CV_WRAP virtual bool empty() const { return false; }
+
+    /** @brief Reads algorithm from the file node
+
+     This is static template method of Algorithm. It's usage is following (in the case of SVM):
+     @code
+     cv::FileStorage fsRead("example.xml", FileStorage::READ);
+     Ptr<SVM> svm = Algorithm::read<SVM>(fsRead.root());
+     @endcode
+     In order to make this method work, the derived class must overwrite Algorithm::read(const
+     FileNode& fn) and also have static create() method without parameters
+     (or with all the optional parameters)
+     */
+    template<typename _Tp> static Ptr<_Tp> read(const FileNode& fn)
+    {
+        Ptr<_Tp> obj = _Tp::create();
+        obj->read(fn);
+        return !obj->empty() ? obj : Ptr<_Tp>();
+    }
+
+    /** @brief Loads algorithm from the file
+
+     @param filename Name of the file to read.
+     @param objname The optional name of the node to read (if empty, the first top-level node will be used)
+
+     This is static template method of Algorithm. It's usage is following (in the case of SVM):
