@@ -101,4 +101,117 @@
 /* Intel Perceptual Computing SDK library */
 /* #undef HAVE_INTELPERC */
 
-/* Intel Integrated Performan
+/* Intel Integrated Performance Primitives */
+#define HAVE_IPP
+#define HAVE_IPP_ICV
+#define HAVE_IPP_IW
+
+/* Intel IPP Async */
+/* #undef HAVE_IPP_A */
+
+/* JPEG-2000 codec */
+#define HAVE_JASPER
+
+/* IJG JPEG codec */
+#define HAVE_JPEG
+
+/* libpng/png.h needs to be included */
+/* #undef HAVE_LIBPNG_PNG_H */
+
+/* GDCM DICOM codec */
+/* #undef HAVE_GDCM */
+
+/* V4L/V4L2 capturing support via libv4l */
+/* #undef HAVE_LIBV4L */
+
+/* Microsoft Media Foundation Capture library */
+/* #undef HAVE_MSMF */
+
+/* NVidia Video Decoding API*/
+/* #undef HAVE_NVCUVID */
+
+/* NVidia Video Encoding API*/
+/* #undef HAVE_NVCUVENC */
+
+/* OpenCL Support */
+#define HAVE_OPENCL
+/* #undef HAVE_OPENCL_STATIC */
+/* #undef HAVE_OPENCL_SVM */
+
+/* OpenEXR codec */
+#define HAVE_OPENEXR
+
+/* OpenGL support*/
+/* #undef HAVE_OPENGL */
+
+/* OpenNI library */
+/* #undef HAVE_OPENNI */
+
+/* OpenNI library */
+/* #undef HAVE_OPENNI2 */
+
+/* PNG codec */
+#define HAVE_PNG
+
+/* Posix threads (pthreads) */
+/* #undef HAVE_PTHREAD */
+
+/* parallel_for with pthreads */
+/* #undef HAVE_PTHREADS_PF */
+
+/* Qt support */
+/* #undef HAVE_QT */
+
+/* Qt OpenGL support */
+/* #undef HAVE_QT_OPENGL */
+
+/* QuickTime video libraries */
+/* #undef HAVE_QUICKTIME */
+
+/* QTKit video libraries */
+/* #undef HAVE_QTKIT */
+
+/* Intel Threading Building Blocks */
+/* #undef HAVE_TBB */
+
+/* TIFF codec */
+#define HAVE_TIFF
+
+/* Unicap video capture library */
+/* #undef HAVE_UNICAP */
+
+/* Video for Windows support */
+#define HAVE_VFW
+
+/* V4L2 capturing support in videoio.h */
+/* #undef HAVE_VIDEOIO */
+
+/* Win32 UI */
+#define HAVE_WIN32UI
+
+/* XIMEA camera support */
+/* #undef HAVE_XIMEA */
+
+/* Xine video library */
+/* #undef HAVE_XINE */
+
+/* Define if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+/* #undef WORDS_BIGENDIAN */
+
+/* gPhoto2 library */
+/* #undef HAVE_GPHOTO2 */
+
+/* VA library (libva) */
+/* #undef HAVE_VA */
+
+/* Intel VA-API/OpenCL */
+/* #undef HAVE_VA_INTEL */
+
+/* Intel Media SDK */
+/* #undef HAVE_MFX */
+
+/* Lapack */
+/* #undef HAVE_LAPACK */
+
+/* Library was compil
