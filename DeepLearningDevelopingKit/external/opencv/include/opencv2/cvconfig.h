@@ -214,4 +214,35 @@
 /* Lapack */
 /* #undef HAVE_LAPACK */
 
-/* Library was compil
+/* Library was compiled with functions instrumentation */
+/* #undef ENABLE_INSTRUMENTATION */
+
+/* OpenVX */
+/* #undef HAVE_OPENVX */
+
+#if defined(HAVE_XINE)         || \
+    defined(HAVE_GSTREAMER)    || \
+    defined(HAVE_QUICKTIME)    || \
+    defined(HAVE_QTKIT)        || \
+    defined(HAVE_AVFOUNDATION) || \
+    /*defined(HAVE_OPENNI)     || too specialized */ \
+    defined(HAVE_FFMPEG)       || \
+    defined(HAVE_MSMF)
+#define HAVE_VIDEO_INPUT
+#endif
+
+#if /*defined(HAVE_XINE)       || */\
+    defined(HAVE_GSTREAMER)    || \
+    defined(HAVE_QUICKTIME)    || \
+    defined(HAVE_QTKIT)        || \
+    defined(HAVE_AVFOUNDATION) || \
+    defined(HAVE_FFMPEG)       || \
+    defined(HAVE_MSMF)
+#define HAVE_VIDEO_OUTPUT
+#endif
+
+/* OpenCV trace utilities */
+#define OPENCV_TRACE
+
+
+#endif // OPENCV_CVCONFIG_H_INCLUDED
