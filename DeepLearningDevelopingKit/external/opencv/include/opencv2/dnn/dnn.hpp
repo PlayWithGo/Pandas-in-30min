@@ -528,3 +528,268 @@ CV__DNN_EXPERIMENTAL_NS_BEGIN
         void getLayerShapes(const std::vector<MatShape>& netInputShapes,
                                     const int layerId,
                                     CV_OUT std::vector<MatShape>& inLayerShapes,
+                                    CV_OUT std::vector<MatShape>& outLayerShapes) const; // FIXIT: CV_WRAP
+
+        /** @brief Computes FLOP for whole loaded model with specified input shapes.
+         * @param netInputShapes vector of shapes for all net inputs.
+         * @returns computed FLOP.
+         */
+        CV_WRAP int64 getFLOPS(const std::vector<MatShape>& netInputShapes) const;
+        /** @overload */
+        CV_WRAP int64 getFLOPS(const MatShape& netInputShape) const;
+        /** @overload */
+        CV_WRAP int64 getFLOPS(const int layerId,
+                               const std::vector<MatShape>& netInputShapes) const;
+        /** @overload */
+        CV_WRAP int64 getFLOPS(const int layerId,
+                               const MatShape& netInputShape) const;
+
+        /** @brief Returns list of types for layer used in model.
+         * @param layersTypes output parameter for returning types.
+         */
+        CV_WRAP void getLayerTypes(CV_OUT std::vector<String>& layersTypes) const;
+
+        /** @brief Returns count of layers of specified type.
+         * @param layerType type.
+         * @returns count of layers
+         */
+        CV_WRAP int getLayersCount(const String& layerType) const;
+
+        /** @brief Computes bytes number which are requered to store
+         * all weights and intermediate blobs for model.
+         * @param netInputShapes vector of shapes for all net inputs.
+         * @param weights output parameter to store resulting bytes for weights.
+         * @param blobs output parameter to store resulting bytes for intermediate blobs.
+         */
+        void getMemoryConsumption(const std::vector<MatShape>& netInputShapes,
+                                          CV_OUT size_t& weights, CV_OUT size_t& blobs) const; // FIXIT: CV_WRAP
+        /** @overload */
+        CV_WRAP void getMemoryConsumption(const MatShape& netInputShape,
+                                          CV_OUT size_t& weights, CV_OUT size_t& blobs) const;
+        /** @overload */
+        CV_WRAP void getMemoryConsumption(const int layerId,
+                                          const std::vector<MatShape>& netInputShapes,
+                                          CV_OUT size_t& weights, CV_OUT size_t& blobs) const;
+        /** @overload */
+        CV_WRAP void getMemoryConsumption(const int layerId,
+                                          const MatShape& netInputShape,
+                                          CV_OUT size_t& weights, CV_OUT size_t& blobs) const;
+
+        /** @brief Computes bytes number which are requered to store
+         * all weights and intermediate blobs for each layer.
+         * @param netInputShapes vector of shapes for all net inputs.
+         * @param layerIds output vector to save layer IDs.
+         * @param weights output parameter to store resulting bytes for weights.
+         * @param blobs output parameter to store resulting bytes for intermediate blobs.
+         */
+        void getMemoryConsumption(const std::vector<MatShape>& netInputShapes,
+                                          CV_OUT std::vector<int>& layerIds,
+                                          CV_OUT std::vector<size_t>& weights,
+                                          CV_OUT std::vector<size_t>& blobs) const; // FIXIT: CV_WRAP
+        /** @overload */
+        void getMemoryConsumption(const MatShape& netInputShape,
+                                          CV_OUT std::vector<int>& layerIds,
+                                          CV_OUT std::vector<size_t>& weights,
+                                          CV_OUT std::vector<size_t>& blobs) const; // FIXIT: CV_WRAP
+
+        /** @brief Enables or disables layer fusion in the network.
+         * @param fusion true to enable the fusion, false to disable. The fusion is enabled by default.
+         */
+        CV_WRAP void enableFusion(bool fusion);
+
+        /** @brief Returns overall time for inference and timings (in ticks) for layers.
+         * Indexes in returned vector correspond to layers ids. Some layers can be fused with others,
+         * in this case zero ticks count will be return for that skipped layers.
+         * @param timings vector for tick timings for all layers.
+         * @return overall ticks for model inference.
+         */
+        CV_WRAP int64 getPerfProfile(CV_OUT std::vector<double>& timings);
+
+    private:
+        struct Impl;
+        Ptr<Impl> impl;
+    };
+
+    /** @brief Reads a network model stored in <a href="https://pjreddie.com/darknet/">Darknet</a> model files.
+    *  @param cfgFile      path to the .cfg file with text description of the network architecture.
+    *  @param darknetModel path to the .weights file with learned network.
+    *  @returns Network object that ready to do forward, throw an exception in failure cases.
+    *  @returns Net object.
+    */
+    CV_EXPORTS_W Net readNetFromDarknet(const String &cfgFile, const String &darknetModel = String());
+
+    /** @brief Reads a network model stored in <a href="http://caffe.berkeleyvision.org">Caffe</a> framework's format.
+      * @param prototxt   path to the .prototxt file with text description of the network architecture.
+      * @param caffeModel path to the .caffemodel file with learned network.
+      * @returns Net object.
+      */
+    CV_EXPORTS_W Net readNetFromCaffe(const String &prototxt, const String &caffeModel = String());
+
+    /** @brief Reads a network model stored in Caffe model in memory.
+      * @details This is an overloaded member function, provided for convenience.
+      * It differs from the above function only in what argument(s) it accepts.
+      * @param bufferProto buffer containing the content of the .prototxt file
+      * @param lenProto length of bufferProto
+      * @param bufferModel buffer containing the content of the .caffemodel file
+      * @param lenModel length of bufferModel
+      * @returns Net object.
+      */
+    CV_EXPORTS Net readNetFromCaffe(const char *bufferProto, size_t lenProto,
+                                    const char *bufferModel = NULL, size_t lenModel = 0);
+
+    /** @brief Reads a network model stored in <a href="https://www.tensorflow.org/">TensorFlow</a> framework's format.
+      * @param model  path to the .pb file with binary protobuf description of the network architecture
+      * @param config path to the .pbtxt file that contains text graph definition in protobuf format.
+      *               Resulting Net object is built by text graph using weights from a binary one that
+      *               let us make it more flexible.
+      * @returns Net object.
+      */
+    CV_EXPORTS_W Net readNetFromTensorflow(const String &model, const String &config = String());
+
+    /** @brief Reads a network model stored in <a href="https://www.tensorflow.org/">TensorFlow</a> framework's format.
+      * @details This is an overloaded member function, provided for convenience.
+      * It differs from the above function only in what argument(s) it accepts.
+      * @param bufferModel buffer containing the content of the pb file
+      * @param lenModel length of bufferModel
+      * @param bufferConfig buffer containing the content of the pbtxt file
+      * @param lenConfig length of bufferConfig
+      */
+    CV_EXPORTS Net readNetFromTensorflow(const char *bufferModel, size_t lenModel,
+                                         const char *bufferConfig = NULL, size_t lenConfig = 0);
+
+    /**
+     *  @brief Reads a network model stored in <a href="http://torch.ch">Torch7</a> framework's format.
+     *  @param model    path to the file, dumped from Torch by using torch.save() function.
+     *  @param isBinary specifies whether the network was serialized in ascii mode or binary.
+     *  @returns Net object.
+     *
+     *  @note Ascii mode of Torch serializer is more preferable, because binary mode extensively use `long` type of C language,
+     *  which has various bit-length on different systems.
+     *
+     * The loading file must contain serialized <a href="https://github.com/torch/nn/blob/master/doc/module.md">nn.Module</a> object
+     * with importing network. Try to eliminate a custom objects from serialazing data to avoid importing errors.
+     *
+     * List of supported layers (i.e. object instances derived from Torch nn.Module class):
+     * - nn.Sequential
+     * - nn.Parallel
+     * - nn.Concat
+     * - nn.Linear
+     * - nn.SpatialConvolution
+     * - nn.SpatialMaxPooling, nn.SpatialAveragePooling
+     * - nn.ReLU, nn.TanH, nn.Sigmoid
+     * - nn.Reshape
+     * - nn.SoftMax, nn.LogSoftMax
+     *
+     * Also some equivalents of these classes from cunn, cudnn, and fbcunn may be successfully imported.
+     */
+     CV_EXPORTS_W Net readNetFromTorch(const String &model, bool isBinary = true);
+
+    /** @brief Loads blob which was serialized as torch.Tensor object of Torch7 framework.
+     *  @warning This function has the same limitations as readNetFromTorch().
+     */
+    CV_EXPORTS_W Mat readTorchBlob(const String &filename, bool isBinary = true);
+    /** @brief Creates 4-dimensional blob from image. Optionally resizes and crops @p image from center,
+     *  subtract @p mean values, scales values by @p scalefactor, swap Blue and Red channels.
+     *  @param image input image (with 1-, 3- or 4-channels).
+     *  @param size spatial size for output image
+     *  @param mean scalar with mean values which are subtracted from channels. Values are intended
+     *  to be in (mean-R, mean-G, mean-B) order if @p image has BGR ordering and @p swapRB is true.
+     *  @param scalefactor multiplier for @p image values.
+     *  @param swapRB flag which indicates that swap first and last channels
+     *  in 3-channel image is necessary.
+     *  @param crop flag which indicates whether image will be cropped after resize or not
+     *  @details if @p crop is true, input image is resized so one side after resize is equal to corresponding
+     *  dimension in @p size and another one is equal or larger. Then, crop from the center is performed.
+     *  If @p crop is false, direct resize without cropping and preserving aspect ratio is performed.
+     *  @returns 4-dimansional Mat with NCHW dimensions order.
+     */
+    CV_EXPORTS_W Mat blobFromImage(InputArray image, double scalefactor=1.0, const Size& size = Size(),
+                                   const Scalar& mean = Scalar(), bool swapRB=true, bool crop=true);
+
+    /** @brief Creates 4-dimensional blob from image.
+     *  @details This is an overloaded member function, provided for convenience.
+     *           It differs from the above function only in what argument(s) it accepts.
+     */
+    CV_EXPORTS void blobFromImage(InputArray image, OutputArray blob, double scalefactor=1.0,
+                                  const Size& size = Size(), const Scalar& mean = Scalar(),
+                                  bool swapRB=true, bool crop=true);
+
+
+    /** @brief Creates 4-dimensional blob from series of images. Optionally resizes and
+     *  crops @p images from center, subtract @p mean values, scales values by @p scalefactor,
+     *  swap Blue and Red channels.
+     *  @param images input images (all with 1-, 3- or 4-channels).
+     *  @param size spatial size for output image
+     *  @param mean scalar with mean values which are subtracted from channels. Values are intended
+     *  to be in (mean-R, mean-G, mean-B) order if @p image has BGR ordering and @p swapRB is true.
+     *  @param scalefactor multiplier for @p images values.
+     *  @param swapRB flag which indicates that swap first and last channels
+     *  in 3-channel image is necessary.
+     *  @param crop flag which indicates whether image will be cropped after resize or not
+     *  @details if @p crop is true, input image is resized so one side after resize is equal to corresponding
+     *  dimension in @p size and another one is equal or larger. Then, crop from the center is performed.
+     *  If @p crop is false, direct resize without cropping and preserving aspect ratio is performed.
+     *  @returns 4-dimansional Mat with NCHW dimensions order.
+     */
+    CV_EXPORTS_W Mat blobFromImages(InputArrayOfArrays images, double scalefactor=1.0,
+                                    Size size = Size(), const Scalar& mean = Scalar(), bool swapRB=true, bool crop=true);
+
+    /** @brief Creates 4-dimensional blob from series of images.
+     *  @details This is an overloaded member function, provided for convenience.
+     *           It differs from the above function only in what argument(s) it accepts.
+     */
+    CV_EXPORTS void blobFromImages(InputArrayOfArrays images, OutputArray blob,
+                                   double scalefactor=1.0, Size size = Size(),
+                                   const Scalar& mean = Scalar(), bool swapRB=true, bool crop=true);
+
+    /** @brief Parse a 4D blob and output the images it contains as 2D arrays through a simpler data structure
+     *  (std::vector<cv::Mat>).
+     *  @param[in] blob_ 4 dimensional array (images, channels, height, width) in floating point precision (CV_32F) from
+     *  which you would like to extract the images.
+     *  @param[out] images_ array of 2D Mat containing the images extracted from the blob in floating point precision
+     *  (CV_32F). They are non normalized neither mean added. The number of returned images equals the first dimension
+     *  of the blob (batch size). Every image has a number of channels equals to the second dimension of the blob (depth).
+     */
+    CV_EXPORTS_W void imagesFromBlob(const cv::Mat& blob_, OutputArrayOfArrays images_);
+
+    /** @brief Convert all weights of Caffe network to half precision floating point.
+     * @param src Path to origin model from Caffe framework contains single
+     *            precision floating point weights (usually has `.caffemodel` extension).
+     * @param dst Path to destination model with updated weights.
+     * @param layersTypes Set of layers types which parameters will be converted.
+     *                    By default, converts only Convolutional and Fully-Connected layers'
+     *                    weights.
+     *
+     * @note Shrinked model has no origin float32 weights so it can't be used
+     *       in origin Caffe framework anymore. However the structure of data
+     *       is taken from NVidia's Caffe fork: https://github.com/NVIDIA/caffe.
+     *       So the resulting model may be used there.
+     */
+    CV_EXPORTS_W void shrinkCaffeModel(const String& src, const String& dst,
+                                       const std::vector<String>& layersTypes = std::vector<String>());
+
+    /** @brief Performs non maximum suppression given boxes and corresponding scores.
+
+     * @param bboxes a set of bounding boxes to apply NMS.
+     * @param scores a set of corresponding confidences.
+     * @param score_threshold a threshold used to filter boxes by score.
+     * @param nms_threshold a threshold used in non maximum suppression.
+     * @param indices the kept indices of bboxes after NMS.
+     * @param eta a coefficient in adaptive threshold formula: \f$nms\_threshold_{i+1}=eta\cdot nms\_threshold_i\f$.
+     * @param top_k if `>0`, keep at most @p top_k picked indices.
+     */
+    CV_EXPORTS_W void NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
+                               const float score_threshold, const float nms_threshold,
+                               CV_OUT std::vector<int>& indices,
+                               const float eta = 1.f, const int top_k = 0);
+
+
+//! @}
+CV__DNN_EXPERIMENTAL_NS_END
+}
+}
+
+#include <opencv2/dnn/layer.hpp>
+#include <opencv2/dnn/dnn.inl.hpp>
+
+#endif  /* OPENCV_DNN_DNN_HPP */
