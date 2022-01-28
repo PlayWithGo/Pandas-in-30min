@@ -123,4 +123,114 @@ inline int DictValue::getIntValue(int idx) const
 template<>
 inline unsigned DictValue::get<unsigned>(int idx) const
 {
-    return (unsigned)get<int64>(i
+    return (unsigned)get<int64>(idx);
+}
+
+template<>
+inline bool DictValue::get<bool>(int idx) const
+{
+    return (get<int64>(idx) != 0);
+}
+
+template<>
+inline double DictValue::get<double>(int idx) const
+{
+    CV_Assert((idx == -1 && size() == 1) || (idx >= 0 && idx < size()));
+    idx = (idx == -1) ? 0 : idx;
+
+    if (type == Param::REAL)
+    {
+        return (*pd)[idx];
+    }
+    else if (type == Param::INT)
+    {
+        return (double)(*pi)[idx];
+    }
+    else
+    {
+        CV_Assert(isReal() || isInt());
+        return 0;
+    }
+}
+
+inline double DictValue::getRealValue(int idx) const
+{
+    return get<double>(idx);
+}
+
+template<>
+inline float DictValue::get<float>(int idx) const
+{
+    return (float)get<double>(idx);
+}
+
+template<>
+inline String DictValue::get<String>(int idx) const
+{
+    CV_Assert(isString());
+    CV_Assert((idx == -1 && ps->size() == 1) || (idx >= 0 && idx < (int)ps->size()));
+    return (*ps)[(idx == -1) ? 0 : idx];
+}
+
+
+inline String DictValue::getStringValue(int idx) const
+{
+    return get<String>(idx);
+}
+
+inline void DictValue::release()
+{
+    switch (type)
+    {
+    case Param::INT:
+        delete pi;
+        break;
+    case Param::STRING:
+        delete ps;
+        break;
+    case Param::REAL:
+        delete pd;
+        break;
+    }
+}
+
+inline DictValue::~DictValue()
+{
+    release();
+}
+
+inline DictValue & DictValue::operator=(const DictValue &r)
+{
+    if (&r == this)
+        return *this;
+
+    if (r.type == Param::INT)
+    {
+        AutoBuffer<int64, 1> *tmp = new AutoBuffer<int64, 1>(*r.pi);
+        release();
+        pi = tmp;
+    }
+    else if (r.type == Param::STRING)
+    {
+        AutoBuffer<String, 1> *tmp = new AutoBuffer<String, 1>(*r.ps);
+        release();
+        ps = tmp;
+    }
+    else if (r.type == Param::REAL)
+    {
+        AutoBuffer<double, 1> *tmp = new AutoBuffer<double, 1>(*r.pd);
+        release();
+        pd = tmp;
+    }
+
+    type = r.type;
+
+    return *this;
+}
+
+inline DictValue::DictValue(const DictValue &r)
+{
+    type = r.type;
+
+    if (r.type == Param::INT)
+        pi 
