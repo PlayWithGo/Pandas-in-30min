@@ -233,4 +233,93 @@ inline DictValue::DictValue(const DictValue &r)
     type = r.type;
 
     if (r.type == Param::INT)
-        pi 
+        pi = new AutoBuffer<int64, 1>(*r.pi);
+    else if (r.type == Param::STRING)
+        ps = new AutoBuffer<String, 1>(*r.ps);
+    else if (r.type == Param::REAL)
+        pd = new AutoBuffer<double, 1>(*r.pd);
+}
+
+inline bool DictValue::isString() const
+{
+    return (type == Param::STRING);
+}
+
+inline bool DictValue::isInt() const
+{
+    return (type == Param::INT);
+}
+
+inline bool DictValue::isReal() const
+{
+    return (type == Param::REAL || type == Param::INT);
+}
+
+inline int DictValue::size() const
+{
+    switch (type)
+    {
+    case Param::INT:
+        return (int)pi->size();
+        break;
+    case Param::STRING:
+        return (int)ps->size();
+        break;
+    case Param::REAL:
+        return (int)pd->size();
+        break;
+    default:
+        CV_Error(Error::StsInternal, "");
+        return -1;
+    }
+}
+
+inline std::ostream &operator<<(std::ostream &stream, const DictValue &dictv)
+{
+    int i;
+
+    if (dictv.isInt())
+    {
+        for (i = 0; i < dictv.size() - 1; i++)
+            stream << dictv.get<int64>(i) << ", ";
+        stream << dictv.get<int64>(i);
+    }
+    else if (dictv.isReal())
+    {
+        for (i = 0; i < dictv.size() - 1; i++)
+            stream << dictv.get<double>(i) << ", ";
+        stream << dictv.get<double>(i);
+    }
+    else if (dictv.isString())
+    {
+        for (i = 0; i < dictv.size() - 1; i++)
+            stream << "\"" << dictv.get<String>(i) << "\", ";
+        stream << dictv.get<String>(i);
+    }
+
+    return stream;
+}
+
+/////////////////////////////////////////////////////////////////
+
+inline bool Dict::has(const String &key) const
+{
+    return dict.count(key) != 0;
+}
+
+inline DictValue *Dict::ptr(const String &key)
+{
+    _Dict::iterator i = dict.find(key);
+    return (i == dict.end()) ? NULL : &i->second;
+}
+
+inline const DictValue *Dict::ptr(const String &key) const
+{
+    _Dict::const_iterator i = dict.find(key);
+    return (i == dict.end()) ? NULL : &i->second;
+}
+
+inline const DictValue &Dict::get(const String &key) const
+{
+    _Dict::const_iterator i = dict.find(key);
+    if (i == dict.end(
