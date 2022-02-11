@@ -322,4 +322,52 @@ inline const DictValue *Dict::ptr(const String &key) const
 inline const DictValue &Dict::get(const String &key) const
 {
     _Dict::const_iterator i = dict.find(key);
-    if (i == dict.end(
+    if (i == dict.end())
+        CV_Error(Error::StsObjectNotFound, "Required argument \"" + key + "\" not found into dictionary");
+    return i->second;
+}
+
+template <typename T>
+inline T Dict::get(const String &key) const
+{
+    return this->get(key).get<T>();
+}
+
+template <typename T>
+inline T Dict::get(const String &key, const T &defaultValue) const
+{
+    _Dict::const_iterator i = dict.find(key);
+
+    if (i != dict.end())
+        return i->second.get<T>();
+    else
+        return defaultValue;
+}
+
+template<typename T>
+inline const T &Dict::set(const String &key, const T &value)
+{
+    _Dict::iterator i = dict.find(key);
+
+    if (i != dict.end())
+        i->second = DictValue(value);
+    else
+        dict.insert(std::make_pair(key, DictValue(value)));
+
+    return value;
+}
+
+inline std::ostream &operator<<(std::ostream &stream, const Dict &dict)
+{
+    Dict::_Dict::const_iterator it;
+    for (it = dict.dict.begin(); it != dict.dict.end(); it++)
+        stream << it->first << " : " << it->second << "\n";
+
+    return stream;
+}
+
+CV__DNN_EXPERIMENTAL_NS_END
+}
+}
+
+#endif
