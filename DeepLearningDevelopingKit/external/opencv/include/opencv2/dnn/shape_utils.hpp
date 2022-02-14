@@ -139,4 +139,68 @@ static inline MatShape shape(const UMat& mat)
 
 namespace {inline bool is_neg(int i) { return i < 0; }}
 
-s
+static inline MatShape shape(int a0, int a1=-1, int a2=-1, int a3=-1)
+{
+    int dims[] = {a0, a1, a2, a3};
+    MatShape s = shape(dims);
+    s.erase(std::remove_if(s.begin(), s.end(), is_neg), s.end());
+    return s;
+}
+
+static inline int total(const MatShape& shape, int start = -1, int end = -1)
+{
+    if (start == -1) start = 0;
+    if (end == -1) end = (int)shape.size();
+
+    if (shape.empty())
+        return 0;
+
+    int elems = 1;
+    CV_Assert(start <= (int)shape.size() && end <= (int)shape.size() &&
+              start <= end);
+    for(int i = start; i < end; i++)
+    {
+        elems *= shape[i];
+    }
+    return elems;
+}
+
+static inline MatShape concat(const MatShape& a, const MatShape& b)
+{
+    MatShape c = a;
+    c.insert(c.end(), b.begin(), b.end());
+
+    return c;
+}
+
+inline void print(const MatShape& shape, const String& name = "")
+{
+    printf("%s: [", name.c_str());
+    size_t i, n = shape.size();
+    for( i = 0; i < n; i++ )
+        printf(" %d", shape[i]);
+    printf(" ]\n");
+}
+
+inline int clamp(int ax, int dims)
+{
+    return ax < 0 ? ax + dims : ax;
+}
+
+inline int clamp(int ax, const MatShape& shape)
+{
+    return clamp(ax, (int)shape.size());
+}
+
+inline Range clamp(const Range& r, int axisSize)
+{
+    Range clamped(std::max(r.start, 0),
+                  r.end > 0 ? std::min(r.end, axisSize) : axisSize + r.end + 1);
+    CV_Assert(clamped.start < clamped.end, clamped.end <= axisSize);
+    return clamped;
+}
+
+CV__DNN_EXPERIMENTAL_NS_END
+}
+}
+#endif
