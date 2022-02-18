@@ -42,4 +42,68 @@ namespace cvflann
  * Allocates (using C's malloc) a generic type T.
  *
  * Params:
- *     count = number
+ *     count = number of instances to allocate.
+ * Returns: pointer (of type T*) to memory buffer
+ */
+template <typename T>
+T* allocate(size_t count = 1)
+{
+    T* mem = (T*) ::malloc(sizeof(T)*count);
+    return mem;
+}
+
+
+/**
+ * Pooled storage allocator
+ *
+ * The following routines allow for the efficient allocation of storage in
+ * small chunks from a specified pool.  Rather than allowing each structure
+ * to be freed individually, an entire pool of storage is freed at once.
+ * This method has two advantages over just using malloc() and free().  First,
+ * it is far more efficient for allocating small objects, as there is
+ * no overhead for remembering all the information needed to free each
+ * object or consolidating fragmented memory.  Second, the decision about
+ * how long to keep an object is made at the time of allocation, and there
+ * is no need to track down all the objects to free them.
+ *
+ */
+
+const size_t     WORDSIZE=16;
+const  size_t     BLOCKSIZE=8192;
+
+class PooledAllocator
+{
+    /* We maintain memory alignment to word boundaries by requiring that all
+        allocations be in multiples of the machine wordsize.  */
+    /* Size of machine word in bytes.  Must be power of 2. */
+    /* Minimum number of bytes requested at a time from	the system.  Must be multiple of WORDSIZE. */
+
+
+    int     remaining;  /* Number of bytes left in current block of storage. */
+    void*   base;     /* Pointer to base of current block of storage. */
+    void*   loc;      /* Current location in block to next allocate memory. */
+    int     blocksize;
+
+
+public:
+    int     usedMemory;
+    int     wastedMemory;
+
+    /**
+        Default constructor. Initializes a new pool.
+     */
+    PooledAllocator(int blockSize = BLOCKSIZE)
+    {
+        blocksize = blockSize;
+        remaining = 0;
+        base = NULL;
+        loc = NULL;
+
+        usedMemory = 0;
+        wastedMemory = 0;
+    }
+
+    /**
+     * Destructor. Frees all the memory allocated in this pool.
+     */
+    ~PooledAllocator()
