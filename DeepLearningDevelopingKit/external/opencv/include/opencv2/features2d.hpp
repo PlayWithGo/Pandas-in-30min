@@ -1323,3 +1323,103 @@ public:
 
     @see cv::kmeans
     */
+    CV_WRAP BOWKMeansTrainer( int clusterCount, const TermCriteria& termcrit=TermCriteria(),
+                      int attempts=3, int flags=KMEANS_PP_CENTERS );
+    virtual ~BOWKMeansTrainer();
+
+    // Returns trained vocabulary (i.e. cluster centers).
+    CV_WRAP virtual Mat cluster() const;
+    CV_WRAP virtual Mat cluster( const Mat& descriptors ) const;
+
+protected:
+
+    int clusterCount;
+    TermCriteria termcrit;
+    int attempts;
+    int flags;
+};
+
+/** @brief Class to compute an image descriptor using the *bag of visual words*.
+
+Such a computation consists of the following steps:
+
+1.  Compute descriptors for a given image and its keypoints set.
+2.  Find the nearest visual words from the vocabulary for each keypoint descriptor.
+3.  Compute the bag-of-words image descriptor as is a normalized histogram of vocabulary words
+encountered in the image. The i-th bin of the histogram is a frequency of i-th word of the
+vocabulary in the given image.
+ */
+class CV_EXPORTS_W BOWImgDescriptorExtractor
+{
+public:
+    /** @brief The constructor.
+
+    @param dextractor Descriptor extractor that is used to compute descriptors for an input image and
+    its keypoints.
+    @param dmatcher Descriptor matcher that is used to find the nearest word of the trained vocabulary
+    for each keypoint descriptor of the image.
+     */
+    CV_WRAP BOWImgDescriptorExtractor( const Ptr<DescriptorExtractor>& dextractor,
+                               const Ptr<DescriptorMatcher>& dmatcher );
+    /** @overload */
+    BOWImgDescriptorExtractor( const Ptr<DescriptorMatcher>& dmatcher );
+    virtual ~BOWImgDescriptorExtractor();
+
+    /** @brief Sets a visual vocabulary.
+
+    @param vocabulary Vocabulary (can be trained using the inheritor of BOWTrainer ). Each row of the
+    vocabulary is a visual word (cluster center).
+     */
+    CV_WRAP void setVocabulary( const Mat& vocabulary );
+
+    /** @brief Returns the set vocabulary.
+    */
+    CV_WRAP const Mat& getVocabulary() const;
+
+    /** @brief Computes an image descriptor using the set visual vocabulary.
+
+    @param image Image, for which the descriptor is computed.
+    @param keypoints Keypoints detected in the input image.
+    @param imgDescriptor Computed output image descriptor.
+    @param pointIdxsOfClusters Indices of keypoints that belong to the cluster. This means that
+    pointIdxsOfClusters[i] are keypoint indices that belong to the i -th cluster (word of vocabulary)
+    returned if it is non-zero.
+    @param descriptors Descriptors of the image keypoints that are returned if they are non-zero.
+     */
+    void compute( InputArray image, std::vector<KeyPoint>& keypoints, OutputArray imgDescriptor,
+                  std::vector<std::vector<int> >* pointIdxsOfClusters=0, Mat* descriptors=0 );
+    /** @overload
+    @param keypointDescriptors Computed descriptors to match with vocabulary.
+    @param imgDescriptor Computed output image descriptor.
+    @param pointIdxsOfClusters Indices of keypoints that belong to the cluster. This means that
+    pointIdxsOfClusters[i] are keypoint indices that belong to the i -th cluster (word of vocabulary)
+    returned if it is non-zero.
+    */
+    void compute( InputArray keypointDescriptors, OutputArray imgDescriptor,
+                  std::vector<std::vector<int> >* pointIdxsOfClusters=0 );
+    // compute() is not constant because DescriptorMatcher::match is not constant
+
+    CV_WRAP_AS(compute) void compute2( const Mat& image, std::vector<KeyPoint>& keypoints, CV_OUT Mat& imgDescriptor )
+    { compute(image,keypoints,imgDescriptor); }
+
+    /** @brief Returns an image descriptor size if the vocabulary is set. Otherwise, it returns 0.
+    */
+    CV_WRAP int descriptorSize() const;
+
+    /** @brief Returns an image descriptor type.
+     */
+    CV_WRAP int descriptorType() const;
+
+protected:
+    Mat vocabulary;
+    Ptr<DescriptorExtractor> dextractor;
+    Ptr<DescriptorMatcher> dmatcher;
+};
+
+//! @} features2d_category
+
+//! @} features2d
+
+} /* namespace cv */
+
+#endif
