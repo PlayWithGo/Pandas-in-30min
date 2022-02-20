@@ -177,4 +177,16 @@ public:
      */
     template <typename T>
     T* allocate(size_t count = 1)
- 
+    {
+        T* mem = (T*) this->allocateMemory((int)(sizeof(T)*count));
+        return mem;
+    }
+
+private:
+    PooledAllocator(const PooledAllocator &); // copy disabled
+    PooledAllocator& operator=(const PooledAllocator &); // assign disabled
+};
+
+}
+
+#endif //OPENCV_FLANN_ALLOCATOR_H_
