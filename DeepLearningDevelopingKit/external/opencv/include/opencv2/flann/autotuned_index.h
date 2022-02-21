@@ -87,4 +87,68 @@ public:
     }
 
     AutotunedIndex(const AutotunedIndex&);
-    AutotunedI
+    AutotunedIndex& operator=(const AutotunedIndex&);
+
+    virtual ~AutotunedIndex()
+    {
+        if (bestIndex_ != NULL) {
+            delete bestIndex_;
+            bestIndex_ = NULL;
+        }
+    }
+
+    /**
+     *          Method responsible with building the index.
+     */
+    virtual void buildIndex()
+    {
+        std::ostringstream stream;
+        bestParams_ = estimateBuildParams();
+        print_params(bestParams_, stream);
+        Logger::info("----------------------------------------------------\n");
+        Logger::info("Autotuned parameters:\n");
+        Logger::info("%s", stream.str().c_str());
+        Logger::info("----------------------------------------------------\n");
+
+        bestIndex_ = create_index_by_type(dataset_, bestParams_, distance_);
+        bestIndex_->buildIndex();
+        speedup_ = estimateSearchParams(bestSearchParams_);
+        stream.str(std::string());
+        print_params(bestSearchParams_, stream);
+        Logger::info("----------------------------------------------------\n");
+        Logger::info("Search parameters:\n");
+        Logger::info("%s", stream.str().c_str());
+        Logger::info("----------------------------------------------------\n");
+    }
+
+    /**
+     *  Saves the index to a stream
+     */
+    virtual void saveIndex(FILE* stream)
+    {
+        save_value(stream, (int)bestIndex_->getType());
+        bestIndex_->saveIndex(stream);
+        save_value(stream, get_param<int>(bestSearchParams_, "checks"));
+    }
+
+    /**
+     *  Loads the index from a stream
+     */
+    virtual void loadIndex(FILE* stream)
+    {
+        int index_type;
+
+        load_value(stream, index_type);
+        IndexParams params;
+        params["algorithm"] = (flann_algorithm_t)index_type;
+        bestIndex_ = create_index_by_type<Distance>(dataset_, params, distance_);
+        bestIndex_->loadIndex(stream);
+        int checks;
+        load_value(stream, checks);
+        bestSearchParams_["checks"] = checks;
+    }
+
+    /**
+     *      Method that searches for nearest-neighbors
+     */
+    virtual void findNeighbors(ResultSet<Distanc
