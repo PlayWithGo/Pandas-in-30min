@@ -239,4 +239,59 @@ private:
         float buildTime = (float)t.value;
 
         // measure search time
-        float searchTime = test_index_precision(kmeans, sampledDataset_, testDataset_, gt_matches_, target_precision_, checks, distance_, n
+        float searchTime = test_index_precision(kmeans, sampledDataset_, testDataset_, gt_matches_, target_precision_, checks, distance_, nn);
+
+        float datasetMemory = float(sampledDataset_.rows * sampledDataset_.cols * sizeof(float));
+        cost.memoryCost = (kmeans.usedMemory() + datasetMemory) / datasetMemory;
+        cost.searchTimeCost = searchTime;
+        cost.buildTimeCost = buildTime;
+        Logger::info("KMeansTree buildTime=%g, searchTime=%g, build_weight=%g\n", buildTime, searchTime, build_weight_);
+    }
+
+
+    void evaluate_kdtree(CostData& cost)
+    {
+        StartStopTimer t;
+        int checks;
+        const int nn = 1;
+
+        Logger::info("KDTree using params: trees=%d\n", get_param<int>(cost.params,"trees"));
+        KDTreeIndex<Distance> kdtree(sampledDataset_, cost.params, distance_);
+
+        t.start();
+        kdtree.buildIndex();
+        t.stop();
+        float buildTime = (float)t.value;
+
+        //measure search time
+        float searchTime = test_index_precision(kdtree, sampledDataset_, testDataset_, gt_matches_, target_precision_, checks, distance_, nn);
+
+        float datasetMemory = float(sampledDataset_.rows * sampledDataset_.cols * sizeof(float));
+        cost.memoryCost = (kdtree.usedMemory() + datasetMemory) / datasetMemory;
+        cost.searchTimeCost = searchTime;
+        cost.buildTimeCost = buildTime;
+        Logger::info("KDTree buildTime=%g, searchTime=%g\n", buildTime, searchTime);
+    }
+
+
+    //    struct KMeansSimpleDownhillFunctor {
+    //
+    //        Autotune& autotuner;
+    //        KMeansSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {}
+    //
+    //        float operator()(int* params) {
+    //
+    //            float maxFloat = numeric_limits<float>::max();
+    //
+    //            if (params[0]<2) return maxFloat;
+    //            if (params[1]<0) return maxFloat;
+    //
+    //            CostData c;
+    //            c.params["algorithm"] = KMEANS;
+    //            c.params["centers-init"] = CENTERS_RANDOM;
+    //            c.params["branching"] = params[0];
+    //            c.params["max-iterations"] = params[1];
+    //
+    //            autotuner.evaluate_kmeans(c);
+    //
+    //   
