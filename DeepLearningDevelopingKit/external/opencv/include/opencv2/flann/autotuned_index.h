@@ -294,4 +294,61 @@ private:
     //
     //            autotuner.evaluate_kmeans(c);
     //
-    //   
+    //            return c.timeCost;
+    //
+    //        }
+    //    };
+    //
+    //    struct KDTreeSimpleDownhillFunctor {
+    //
+    //        Autotune& autotuner;
+    //        KDTreeSimpleDownhillFunctor(Autotune& autotuner_) : autotuner(autotuner_) {}
+    //
+    //        float operator()(int* params) {
+    //            float maxFloat = numeric_limits<float>::max();
+    //
+    //            if (params[0]<1) return maxFloat;
+    //
+    //            CostData c;
+    //            c.params["algorithm"] = KDTREE;
+    //            c.params["trees"] = params[0];
+    //
+    //            autotuner.evaluate_kdtree(c);
+    //
+    //            return c.timeCost;
+    //
+    //        }
+    //    };
+
+
+
+    void optimizeKMeans(std::vector<CostData>& costs)
+    {
+        Logger::info("KMEANS, Step 1: Exploring parameter space\n");
+
+        // explore kmeans parameters space using combinations of the parameters below
+        int maxIterations[] = { 1, 5, 10, 15 };
+        int branchingFactors[] = { 16, 32, 64, 128, 256 };
+
+        int kmeansParamSpaceSize = FLANN_ARRAY_LEN(maxIterations) * FLANN_ARRAY_LEN(branchingFactors);
+        costs.reserve(costs.size() + kmeansParamSpaceSize);
+
+        // evaluate kmeans for all parameter combinations
+        for (size_t i = 0; i < FLANN_ARRAY_LEN(maxIterations); ++i) {
+            for (size_t j = 0; j < FLANN_ARRAY_LEN(branchingFactors); ++j) {
+                CostData cost;
+                cost.params["algorithm"] = FLANN_INDEX_KMEANS;
+                cost.params["centers_init"] = FLANN_CENTERS_RANDOM;
+                cost.params["iterations"] = maxIterations[i];
+                cost.params["branching"] = branchingFactors[j];
+
+                evaluate_kmeans(cost);
+                costs.push_back(cost);
+            }
+        }
+
+        //         Logger::info("KMEANS, Step 2: simplex-downhill optimization\n");
+        //
+        //         const int n = 2;
+        //         // choose initial simplex points as the best parameters so far
+        //         int kmeansNMPoint
