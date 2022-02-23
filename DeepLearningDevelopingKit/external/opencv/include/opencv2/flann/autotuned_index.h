@@ -351,4 +351,52 @@ private:
         //
         //         const int n = 2;
         //         // choose initial simplex points as the best parameters so far
-        //         int kmeansNMPoint
+        //         int kmeansNMPoints[n*(n+1)];
+        //         float kmeansVals[n+1];
+        //         for (int i=0;i<n+1;++i) {
+        //             kmeansNMPoints[i*n] = (int)kmeansCosts[i].params["branching"];
+        //             kmeansNMPoints[i*n+1] = (int)kmeansCosts[i].params["max-iterations"];
+        //             kmeansVals[i] = kmeansCosts[i].timeCost;
+        //         }
+        //         KMeansSimpleDownhillFunctor kmeans_cost_func(*this);
+        //         // run optimization
+        //         optimizeSimplexDownhill(kmeansNMPoints,n,kmeans_cost_func,kmeansVals);
+        //         // store results
+        //         for (int i=0;i<n+1;++i) {
+        //             kmeansCosts[i].params["branching"] = kmeansNMPoints[i*2];
+        //             kmeansCosts[i].params["max-iterations"] = kmeansNMPoints[i*2+1];
+        //             kmeansCosts[i].timeCost = kmeansVals[i];
+        //         }
+    }
+
+
+    void optimizeKDTree(std::vector<CostData>& costs)
+    {
+        Logger::info("KD-TREE, Step 1: Exploring parameter space\n");
+
+        // explore kd-tree parameters space using the parameters below
+        int testTrees[] = { 1, 4, 8, 16, 32 };
+
+        // evaluate kdtree for all parameter combinations
+        for (size_t i = 0; i < FLANN_ARRAY_LEN(testTrees); ++i) {
+            CostData cost;
+            cost.params["algorithm"] = FLANN_INDEX_KDTREE;
+            cost.params["trees"] = testTrees[i];
+
+            evaluate_kdtree(cost);
+            costs.push_back(cost);
+        }
+
+        //         Logger::info("KD-TREE, Step 2: simplex-downhill optimization\n");
+        //
+        //         const int n = 1;
+        //         // choose initial simplex points as the best parameters so far
+        //         int kdtreeNMPoints[n*(n+1)];
+        //         float kdtreeVals[n+1];
+        //         for (int i=0;i<n+1;++i) {
+        //             kdtreeNMPoints[i] = (int)kdtreeCosts[i].params["trees"];
+        //             kdtreeVals[i] = kdtreeCosts[i].timeCost;
+        //         }
+        //         KDTreeSimpleDownhillFunctor kdtree_cost_func(*this);
+        //         // run optimization
+        //         optimizeSimp
