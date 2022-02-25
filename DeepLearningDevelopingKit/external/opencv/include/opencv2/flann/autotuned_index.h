@@ -399,4 +399,50 @@ private:
         //         }
         //         KDTreeSimpleDownhillFunctor kdtree_cost_func(*this);
         //         // run optimization
-        //         optimizeSimp
+        //         optimizeSimplexDownhill(kdtreeNMPoints,n,kdtree_cost_func,kdtreeVals);
+        //         // store results
+        //         for (int i=0;i<n+1;++i) {
+        //             kdtreeCosts[i].params["trees"] = kdtreeNMPoints[i];
+        //             kdtreeCosts[i].timeCost = kdtreeVals[i];
+        //         }
+    }
+
+    /**
+     *  Chooses the best nearest-neighbor algorithm and estimates the optimal
+     *  parameters to use when building the index (for a given precision).
+     *  Returns a dictionary with the optimal parameters.
+     */
+    IndexParams estimateBuildParams()
+    {
+        std::vector<CostData> costs;
+
+        int sampleSize = int(sample_fraction_ * dataset_.rows);
+        int testSampleSize = std::min(sampleSize / 10, 1000);
+
+        Logger::info("Entering autotuning, dataset size: %d, sampleSize: %d, testSampleSize: %d, target precision: %g\n", dataset_.rows, sampleSize, testSampleSize, target_precision_);
+
+        // For a very small dataset, it makes no sense to build any fancy index, just
+        // use linear search
+        if (testSampleSize < 10) {
+            Logger::info("Choosing linear, dataset too small\n");
+            return LinearIndexParams();
+        }
+
+        // We use a fraction of the original dataset to speedup the autotune algorithm
+        sampledDataset_ = random_sample(dataset_, sampleSize);
+        // We use a cross-validation approach, first we sample a testset from the dataset
+        testDataset_ = random_sample(sampledDataset_, testSampleSize, true);
+
+        // We compute the ground truth using linear search
+        Logger::info("Computing ground truth... \n");
+        gt_matches_ = Matrix<int>(new int[testDataset_.rows], testDataset_.rows, 1);
+        StartStopTimer t;
+        t.start();
+        compute_ground_truth<Distance>(sampledDataset_, testDataset_, gt_matches_, 0, distance_);
+        t.stop();
+
+        CostData linear_cost;
+        linear_cost.searchTimeCost = (float)t.value;
+        linear_cost.buildTimeCost = 0;
+        linear_cost.memoryCost = 0;
+        linear_cost.params["algorithm"] = FLANN_INDEX_LINEAR
