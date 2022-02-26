@@ -507,4 +507,60 @@ private:
 
             // we need to compute the ground truth first
             Matrix<int> gt_matches(new int[testDataset.rows], testDataset.rows, 1);
-            StartStopTimer 
+            StartStopTimer t;
+            t.start();
+            compute_ground_truth<Distance>(dataset_, testDataset, gt_matches, 1, distance_);
+            t.stop();
+            float linear = (float)t.value;
+
+            int checks;
+            Logger::info("Estimating number of checks\n");
+
+            float searchTime;
+            float cb_index;
+            if (bestIndex_->getType() == FLANN_INDEX_KMEANS) {
+                Logger::info("KMeans algorithm, estimating cluster border factor\n");
+                KMeansIndex<Distance>* kmeans = (KMeansIndex<Distance>*)bestIndex_;
+                float bestSearchTime = -1;
+                float best_cb_index = -1;
+                int best_checks = -1;
+                for (cb_index = 0; cb_index < 1.1f; cb_index += 0.2f) {
+                    kmeans->set_cb_index(cb_index);
+                    searchTime = test_index_precision(*kmeans, dataset_, testDataset, gt_matches, target_precision_, checks, distance_, nn, 1);
+                    if ((searchTime < bestSearchTime) || (bestSearchTime == -1)) {
+                        bestSearchTime = searchTime;
+                        best_cb_index = cb_index;
+                        best_checks = checks;
+                    }
+                }
+                searchTime = bestSearchTime;
+                cb_index = best_cb_index;
+                checks = best_checks;
+
+                kmeans->set_cb_index(best_cb_index);
+                Logger::info("Optimum cb_index: %g\n", cb_index);
+                bestParams_["cb_index"] = cb_index;
+            }
+            else {
+                searchTime = test_index_precision(*bestIndex_, dataset_, testDataset, gt_matches, target_precision_, checks, distance_, nn, 1);
+            }
+
+            Logger::info("Required number of checks: %d \n", checks);
+            searchParams["checks"] = checks;
+
+            speedup = linear / searchTime;
+
+            delete[] gt_matches.data;
+            delete[] testDataset.data;
+        }
+
+        return speedup;
+    }
+
+private:
+    NNIndex<Distance>* bestIndex_;
+
+    IndexParams bestParams_;
+    SearchParams bestSearchParams_;
+
+    Matrix<ElementType> sampledD
