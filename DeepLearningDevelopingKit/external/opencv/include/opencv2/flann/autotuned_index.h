@@ -445,4 +445,66 @@ private:
         linear_cost.searchTimeCost = (float)t.value;
         linear_cost.buildTimeCost = 0;
         linear_cost.memoryCost = 0;
-        linear_cost.params["algorithm"] = FLANN_INDEX_LINEAR
+        linear_cost.params["algorithm"] = FLANN_INDEX_LINEAR;
+
+        costs.push_back(linear_cost);
+
+        // Start parameter autotune process
+        Logger::info("Autotuning parameters...\n");
+
+        optimizeKMeans(costs);
+        optimizeKDTree(costs);
+
+        float bestTimeCost = costs[0].searchTimeCost;
+        for (size_t i = 0; i < costs.size(); ++i) {
+            float timeCost = costs[i].buildTimeCost * build_weight_ + costs[i].searchTimeCost;
+            if (timeCost < bestTimeCost) {
+                bestTimeCost = timeCost;
+            }
+        }
+
+        float bestCost = costs[0].searchTimeCost / bestTimeCost;
+        IndexParams bestParams = costs[0].params;
+        if (bestTimeCost > 0) {
+            for (size_t i = 0; i < costs.size(); ++i) {
+                float crtCost = (costs[i].buildTimeCost * build_weight_ + costs[i].searchTimeCost) / bestTimeCost +
+                                memory_weight_ * costs[i].memoryCost;
+                if (crtCost < bestCost) {
+                    bestCost = crtCost;
+                    bestParams = costs[i].params;
+                }
+            }
+        }
+
+        delete[] gt_matches_.data;
+        delete[] testDataset_.data;
+        delete[] sampledDataset_.data;
+
+        return bestParams;
+    }
+
+
+
+    /**
+     *  Estimates the search time parameters needed to get the desired precision.
+     *  Precondition: the index is built
+     *  Postcondition: the searchParams will have the optimum params set, also the speedup obtained over linear search.
+     */
+    float estimateSearchParams(SearchParams& searchParams)
+    {
+        const int nn = 1;
+        const size_t SAMPLE_COUNT = 1000;
+
+        assert(bestIndex_ != NULL); // must have a valid index
+
+        float speedup = 0;
+
+        int samples = (int)std::min(dataset_.rows / 10, SAMPLE_COUNT);
+        if (samples > 0) {
+            Matrix<ElementType> testDataset = random_sample(dataset_, samples);
+
+            Logger::info("Computing ground truth\n");
+
+            // we need to compute the ground truth first
+            Matrix<int> gt_matches(new int[testDataset.rows], testDataset.rows, 1);
+            StartStopTimer 
