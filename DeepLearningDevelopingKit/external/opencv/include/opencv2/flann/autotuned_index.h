@@ -563,4 +563,29 @@ private:
     IndexParams bestParams_;
     SearchParams bestSearchParams_;
 
-    Matrix<ElementType> sampledD
+    Matrix<ElementType> sampledDataset_;
+    Matrix<ElementType> testDataset_;
+    Matrix<int> gt_matches_;
+
+    float speedup_;
+
+    /**
+     * The dataset used by this index
+     */
+    const Matrix<ElementType> dataset_;
+
+    /**
+     * Index parameters
+     */
+    float target_precision_;
+    float build_weight_;
+    float memory_weight_;
+    float sample_fraction_;
+
+    Distance distance_;
+
+
+};
+}
+
+#endif /* OPENCV_FLANN_AUTOTUNED_INDEX_H_ */
