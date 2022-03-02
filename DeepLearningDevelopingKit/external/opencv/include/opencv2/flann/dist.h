@@ -265,4 +265,73 @@ struct MinkowskiDistance
 
     int order;
 
-    MinkowskiDistance(int order_
+    MinkowskiDistance(int order_) : order(order_) {}
+
+    /**
+     *  Compute the Minkowsky (L_p) distance between two vectors.
+     *
+     *	This is highly optimised, with loop unrolling, as it is one
+     *	of the most expensive inner loops.
+     *
+     *	The computation of squared root at the end is omitted for
+     *	efficiency.
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+    {
+        ResultType result = ResultType();
+        ResultType diff0, diff1, diff2, diff3;
+        Iterator1 last = a + size;
+        Iterator1 lastgroup = last - 3;
+
+        /* Process 4 items with each loop for efficiency. */
+        while (a < lastgroup) {
+            diff0 = (ResultType)abs(a[0] - b[0]);
+            diff1 = (ResultType)abs(a[1] - b[1]);
+            diff2 = (ResultType)abs(a[2] - b[2]);
+            diff3 = (ResultType)abs(a[3] - b[3]);
+            result += pow(diff0,order) + pow(diff1,order) + pow(diff2,order) + pow(diff3,order);
+            a += 4;
+            b += 4;
+
+            if ((worst_dist>0)&&(result>worst_dist)) {
+                return result;
+            }
+        }
+        /* Process last 0-3 pixels.  Not needed for standard vector lengths. */
+        while (a < last) {
+            diff0 = (ResultType)abs(*a++ - *b++);
+            result += pow(diff0,order);
+        }
+        return result;
+    }
+
+    /**
+     * Partial distance, used by the kd-tree.
+     */
+    template <typename U, typename V>
+    inline ResultType accum_dist(const U& a, const V& b, int) const
+    {
+        return pow(static_cast<ResultType>(abs(a-b)),order);
+    }
+};
+
+
+
+template<class T>
+struct MaxDistance
+{
+    typedef False is_kdtree_distance;
+    typedef True is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef typename Accumulator<T>::Type ResultType;
+
+    /**
+     *  Compute the max distance (L_infinity) between two vectors.
+     *
+     *  This distance is not a valid kdtree distance, it's not dimensionwise additive.
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+    
