@@ -392,4 +392,52 @@ struct HammingLUT
         {
             0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
             1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-            1, 2, 2, 3, 2, 3, 3, 4, 2,
+            1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+            2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+            1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+            2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+            2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+            3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+        };
+        ResultType result = 0;
+        for (size_t i = 0; i < size; i++) {
+            result += popCountTable[a[i] ^ b[i]];
+        }
+        return result;
+    }
+};
+
+/**
+ * Hamming distance functor (pop count between two binary vectors, i.e. xor them and count the number of bits set)
+ * That code was taken from brief.cpp in OpenCV
+ */
+template<class T>
+struct Hamming
+{
+    typedef False is_kdtree_distance;
+    typedef False is_vector_space_distance;
+
+
+    typedef T ElementType;
+    typedef int ResultType;
+
+    template<typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType /*worst_dist*/ = -1) const
+    {
+        ResultType result = 0;
+#ifdef __ARM_NEON__
+        {
+            uint32x4_t bits = vmovq_n_u32(0);
+            for (size_t i = 0; i < size; i += 16) {
+                uint8x16_t A_vec = vld1q_u8 (a + i);
+                uint8x16_t B_vec = vld1q_u8 (b + i);
+                uint8x16_t AxorB = veorq_u8 (A_vec, B_vec);
+                uint8x16_t bitsSet = vcntq_u8 (AxorB);
+                uint16x8_t bitSet8 = vpaddlq_u8 (bitsSet);
+                uint32x4_t bitSet4 = vpaddlq_u16 (bitSet8);
+                bits = vaddq_u32(bits, bitSet4);
+            }
+            uint64x2_t bitSet2 = vpaddlq_u32 (bits);
+            result = vgetq_lane_s32 (vreinterpretq_s32_u64(bitSet2),0);
+            result += vgetq_lane_s32 (vreinterpretq_s32_u64(bitSet2),2);
+     
