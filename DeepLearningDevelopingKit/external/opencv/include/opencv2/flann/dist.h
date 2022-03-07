@@ -440,4 +440,62 @@ struct Hamming
             uint64x2_t bitSet2 = vpaddlq_u32 (bits);
             result = vgetq_lane_s32 (vreinterpretq_s32_u64(bitSet2),0);
             result += vgetq_lane_s32 (vreinterpretq_s32_u64(bitSet2),2);
-     
+        }
+#elif __GNUC__
+        {
+            //for portability just use unsigned long -- and use the __builtin_popcountll (see docs for __builtin_popcountll)
+            typedef unsigned long long pop_t;
+            const size_t modulo = size % sizeof(pop_t);
+            const pop_t* a2 = reinterpret_cast<const pop_t*> (a);
+            const pop_t* b2 = reinterpret_cast<const pop_t*> (b);
+            const pop_t* a2_end = a2 + (size / sizeof(pop_t));
+
+            for (; a2 != a2_end; ++a2, ++b2) result += __builtin_popcountll((*a2) ^ (*b2));
+
+            if (modulo) {
+                //in the case where size is not dividable by sizeof(size_t)
+                //need to mask off the bits at the end
+                pop_t a_final = 0, b_final = 0;
+                memcpy(&a_final, a2, modulo);
+                memcpy(&b_final, b2, modulo);
+                result += __builtin_popcountll(a_final ^ b_final);
+            }
+        }
+#else // NO NEON and NOT GNUC
+        typedef unsigned long long pop_t;
+        HammingLUT lut;
+        result = lut(reinterpret_cast<const unsigned char*> (a),
+                     reinterpret_cast<const unsigned char*> (b), size * sizeof(pop_t));
+#endif
+        return result;
+    }
+};
+
+template<typename T>
+struct Hamming2
+{
+    typedef False is_kdtree_distance;
+    typedef False is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef int ResultType;
+
+    /** This is popcount_3() from:
+     * http://en.wikipedia.org/wiki/Hamming_weight */
+    unsigned int popcnt32(uint32_t n) const
+    {
+        n -= ((n >> 1) & 0x55555555);
+        n = (n & 0x33333333) + ((n >> 2) & 0x33333333);
+        return (((n + (n >> 4))& 0xF0F0F0F)* 0x1010101) >> 24;
+    }
+
+#ifdef FLANN_PLATFORM_64_BIT
+    unsigned int popcnt64(uint64_t n) const
+    {
+        n -= ((n >> 1) & 0x5555555555555555);
+        n = (n & 0x3333333333333333) + ((n >> 2) & 0x3333333333333333);
+        return (((n + (n >> 4))& 0x0f0f0f0f0f0f0f0f)* 0x0101010101010101) >> 56;
+    }
+#endif
+
+    template <typename Iterator1,
