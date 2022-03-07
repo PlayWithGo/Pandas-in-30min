@@ -498,4 +498,65 @@ struct Hamming2
     }
 #endif
 
-    template <typename Iterator1,
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType /*worst_dist*/ = -1) const
+    {
+#ifdef FLANN_PLATFORM_64_BIT
+        const uint64_t* pa = reinterpret_cast<const uint64_t*>(a);
+        const uint64_t* pb = reinterpret_cast<const uint64_t*>(b);
+        ResultType result = 0;
+        size /= (sizeof(uint64_t)/sizeof(unsigned char));
+        for(size_t i = 0; i < size; ++i ) {
+            result += popcnt64(*pa ^ *pb);
+            ++pa;
+            ++pb;
+        }
+#else
+        const uint32_t* pa = reinterpret_cast<const uint32_t*>(a);
+        const uint32_t* pb = reinterpret_cast<const uint32_t*>(b);
+        ResultType result = 0;
+        size /= (sizeof(uint32_t)/sizeof(unsigned char));
+        for(size_t i = 0; i < size; ++i ) {
+            result += popcnt32(*pa ^ *pb);
+            ++pa;
+            ++pb;
+        }
+#endif
+        return result;
+    }
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<class T>
+struct HistIntersectionDistance
+{
+    typedef True is_kdtree_distance;
+    typedef True is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef typename Accumulator<T>::Type ResultType;
+
+    /**
+     *  Compute the histogram intersection distance
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+    {
+        ResultType result = ResultType();
+        ResultType min0, min1, min2, min3;
+        Iterator1 last = a + size;
+        Iterator1 lastgroup = last - 3;
+
+        /* Process 4 items with each loop for efficiency. */
+        while (a < lastgroup) {
+            min0 = (ResultType)(a[0] < b[0] ? a[0] : b[0]);
+            min1 = (ResultType)(a[1] < b[1] ? a[1] : b[1]);
+            min2 = (ResultType)(a[2] < b[2] ? a[2] : b[2]);
+            min3 = (ResultType)(a[3] < b[3] ? a[3] : b[3]);
+            result += min0 + min1 + min2 + min3;
+            a += 4;
+            b += 4;
+            if ((worst_dist>0)&&(result>wor
