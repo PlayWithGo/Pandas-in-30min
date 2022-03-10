@@ -559,4 +559,71 @@ struct HistIntersectionDistance
             result += min0 + min1 + min2 + min3;
             a += 4;
             b += 4;
-            if ((worst_dist>0)&&(result>wor
+            if ((worst_dist>0)&&(result>worst_dist)) {
+                return result;
+            }
+        }
+        /* Process last 0-3 pixels.  Not needed for standard vector lengths. */
+        while (a < last) {
+            min0 = (ResultType)(*a < *b ? *a : *b);
+            result += min0;
+            ++a;
+            ++b;
+        }
+        return result;
+    }
+
+    /**
+     * Partial distance, used by the kd-tree.
+     */
+    template <typename U, typename V>
+    inline ResultType accum_dist(const U& a, const V& b, int) const
+    {
+        return a<b ? a : b;
+    }
+};
+
+
+
+template<class T>
+struct HellingerDistance
+{
+    typedef True is_kdtree_distance;
+    typedef True is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef typename Accumulator<T>::Type ResultType;
+
+    /**
+     *  Compute the Hellinger distance
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType /*worst_dist*/ = -1) const
+    {
+        ResultType result = ResultType();
+        ResultType diff0, diff1, diff2, diff3;
+        Iterator1 last = a + size;
+        Iterator1 lastgroup = last - 3;
+
+        /* Process 4 items with each loop for efficiency. */
+        while (a < lastgroup) {
+            diff0 = sqrt(static_cast<ResultType>(a[0])) - sqrt(static_cast<ResultType>(b[0]));
+            diff1 = sqrt(static_cast<ResultType>(a[1])) - sqrt(static_cast<ResultType>(b[1]));
+            diff2 = sqrt(static_cast<ResultType>(a[2])) - sqrt(static_cast<ResultType>(b[2]));
+            diff3 = sqrt(static_cast<ResultType>(a[3])) - sqrt(static_cast<ResultType>(b[3]));
+            result += diff0 * diff0 + diff1 * diff1 + diff2 * diff2 + diff3 * diff3;
+            a += 4;
+            b += 4;
+        }
+        while (a < last) {
+            diff0 = sqrt(static_cast<ResultType>(*a++)) - sqrt(static_cast<ResultType>(*b++));
+            result += diff0 * diff0;
+        }
+        return result;
+    }
+
+    /**
+     * Partial distance, used by the kd-tree.
+     */
+    template <typename U, typename V>
+    inline ResultType accum_dist(const U& a, const
