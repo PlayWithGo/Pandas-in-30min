@@ -626,4 +626,88 @@ struct HellingerDistance
      * Partial distance, used by the kd-tree.
      */
     template <typename U, typename V>
-    inline ResultType accum_dist(const U& a, const
+    inline ResultType accum_dist(const U& a, const V& b, int) const
+    {
+        ResultType diff = sqrt(static_cast<ResultType>(a)) - sqrt(static_cast<ResultType>(b));
+        return diff * diff;
+    }
+};
+
+
+template<class T>
+struct ChiSquareDistance
+{
+    typedef True is_kdtree_distance;
+    typedef True is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef typename Accumulator<T>::Type ResultType;
+
+    /**
+     *  Compute the chi-square distance
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+    {
+        ResultType result = ResultType();
+        ResultType sum, diff;
+        Iterator1 last = a + size;
+
+        while (a < last) {
+            sum = (ResultType)(*a + *b);
+            if (sum>0) {
+                diff = (ResultType)(*a - *b);
+                result += diff*diff/sum;
+            }
+            ++a;
+            ++b;
+
+            if ((worst_dist>0)&&(result>worst_dist)) {
+                return result;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Partial distance, used by the kd-tree.
+     */
+    template <typename U, typename V>
+    inline ResultType accum_dist(const U& a, const V& b, int) const
+    {
+        ResultType result = ResultType();
+        ResultType sum, diff;
+
+        sum = (ResultType)(a+b);
+        if (sum>0) {
+            diff = (ResultType)(a-b);
+            result = diff*diff/sum;
+        }
+        return result;
+    }
+};
+
+
+template<class T>
+struct KL_Divergence
+{
+    typedef True is_kdtree_distance;
+    typedef True is_vector_space_distance;
+
+    typedef T ElementType;
+    typedef typename Accumulator<T>::Type ResultType;
+
+    /**
+     *  Compute the Kullback-Leibler divergence
+     */
+    template <typename Iterator1, typename Iterator2>
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType worst_dist = -1) const
+    {
+        ResultType result = ResultType();
+        Iterator1 last = a + size;
+
+        while (a < last) {
+            if (* b != 0) {
+                ResultType ratio = (ResultType)(*a / *b);
+                if (ratio>0) {
+       
