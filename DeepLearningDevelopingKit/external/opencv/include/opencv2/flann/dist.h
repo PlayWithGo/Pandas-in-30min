@@ -869,4 +869,37 @@ struct simpleDistance<L2<ElementType>, ElementType>
 };
 
 
-template <typename ElementTyp
+template <typename ElementType>
+struct simpleDistance<MinkowskiDistance<ElementType>, ElementType>
+{
+    typedef typename MinkowskiDistance<ElementType>::ResultType ResultType;
+    ResultType operator()( ResultType dist ) { return sqrt(dist); }
+};
+
+template <typename ElementType>
+struct simpleDistance<HellingerDistance<ElementType>, ElementType>
+{
+    typedef typename HellingerDistance<ElementType>::ResultType ResultType;
+    ResultType operator()( ResultType dist ) { return sqrt(dist); }
+};
+
+template <typename ElementType>
+struct simpleDistance<ChiSquareDistance<ElementType>, ElementType>
+{
+    typedef typename ChiSquareDistance<ElementType>::ResultType ResultType;
+    ResultType operator()( ResultType dist ) { return sqrt(dist); }
+};
+
+
+template <typename Distance>
+typename Distance::ResultType ensureSimpleDistance( typename Distance::ResultType dist )
+{
+    typedef typename Distance::ElementType ElementType;
+
+    simpleDistance<Distance, ElementType> dummy;
+    return dummy( dist );
+}
+
+}
+
+#endif //OPENCV_FLANN_DIST_H_
