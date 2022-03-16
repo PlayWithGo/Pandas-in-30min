@@ -61,4 +61,34 @@ void find_nearest(const Matrix<typename Distance::ElementType>& dataset, typenam
         }
         else if (tmp < dists[dcnt-1]) {
             dists[dcnt-1] = tmp;
-      
+            match[dcnt-1] = (int)i;
+        }
+
+        int j = dcnt-1;
+        // bubble up
+        while (j>=1 && dists[j]<dists[j-1]) {
+            std::swap(dists[j],dists[j-1]);
+            std::swap(match[j],match[j-1]);
+            j--;
+        }
+    }
+
+    for (int i=0; i<nn; ++i) {
+        matches[i] = match[i+skip];
+    }
+}
+
+
+template <typename Distance>
+void compute_ground_truth(const Matrix<typename Distance::ElementType>& dataset, const Matrix<typename Distance::ElementType>& testset, Matrix<int>& matches,
+                          int skip=0, Distance d = Distance())
+{
+    for (size_t i=0; i<testset.rows; ++i) {
+        find_nearest<Distance>(dataset, testset[i], matches[i], (int)matches.cols, skip, d);
+    }
+}
+
+
+}
+
+#endif //OPENCV_FLANN_GROUND_TRUTH_H_
