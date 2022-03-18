@@ -173,4 +173,59 @@ void load_from_file(cvflann::Matrix<T>& dataset, const String& filename, const S
 
     int mpi_size, mpi_rank;
     MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_
+    MPI_Comm_rank(comm, &mpi_rank);
+
+    herr_t status;
+
+    hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(plist_id, comm, info);
+    hid_t file_id = H5Fopen(filename.c_str(), H5F_ACC_RDWR, plist_id);
+    CHECK_ERROR(file_id,"Error opening hdf5 file.");
+    H5Pclose(plist_id);
+    hid_t dataset_id;
+#if H5Dopen_vers == 2
+    dataset_id = H5Dopen2(file_id, name.c_str(), H5P_DEFAULT);
+#else
+    dataset_id = H5Dopen(file_id, name.c_str());
+#endif
+    CHECK_ERROR(dataset_id,"Error opening dataset in file.");
+
+    hid_t space_id = H5Dget_space(dataset_id);
+    hsize_t dims[2];
+    H5Sget_simple_extent_dims(space_id, dims, NULL);
+
+    hsize_t count[2];
+    hsize_t offset[2];
+
+    hsize_t item_cnt = dims[0]/mpi_size+(dims[0]%mpi_size==0 ? 0 : 1);
+    hsize_t cnt = (mpi_rank<mpi_size-1 ? item_cnt : dims[0]-item_cnt*(mpi_size-1));
+
+    count[0] = cnt;
+    count[1] = dims[1];
+    offset[0] = mpi_rank*item_cnt;
+    offset[1] = 0;
+
+    hid_t memspace_id = H5Screate_simple(2,count,NULL);
+
+    H5Sselect_hyperslab(space_id, H5S_SELECT_SET, offset, NULL, count, NULL);
+
+    dataset.rows = count[0];
+    dataset.cols = count[1];
+    dataset.data = new T[dataset.rows*dataset.cols];
+
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+    status = H5Dread(dataset_id, get_hdf5_type<T>(), memspace_id, space_id, plist_id, dataset.data);
+    CHECK_ERROR(status, "Error reading dataset");
+
+    H5Pclose(plist_id);
+    H5Sclose(space_id);
+    H5Sclose(memspace_id);
+    H5Dclose(dataset_id);
+    H5Fclose(file_id);
+}
+}
+#endif // HAVE_MPI
+} // namespace cvflann::mpi
+
+#endif /* OPENCV_FLANN_HDF5_H_ */
