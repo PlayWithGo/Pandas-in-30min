@@ -55,4 +55,75 @@ struct HierarchicalClusteringIndexParams : public IndexParams
 {
     HierarchicalClusteringIndexParams(int branching = 32,
                                       flann_centers_init_t centers_init = FLANN_CENTERS_RANDOM,
-                                      int trees = 4, i
+                                      int trees = 4, int leaf_size = 100)
+    {
+        (*this)["algorithm"] = FLANN_INDEX_HIERARCHICAL;
+        // The branching factor used in the hierarchical clustering
+        (*this)["branching"] = branching;
+        // Algorithm used for picking the initial cluster centers
+        (*this)["centers_init"] = centers_init;
+        // number of parallel trees to build
+        (*this)["trees"] = trees;
+        // maximum leaf size
+        (*this)["leaf_size"] = leaf_size;
+    }
+};
+
+
+/**
+ * Hierarchical index
+ *
+ * Contains a tree constructed through a hierarchical clustering
+ * and other information for indexing a set of points for nearest-neighbour matching.
+ */
+template <typename Distance>
+class HierarchicalClusteringIndex : public NNIndex<Distance>
+{
+public:
+    typedef typename Distance::ElementType ElementType;
+    typedef typename Distance::ResultType DistanceType;
+
+private:
+
+
+    typedef void (HierarchicalClusteringIndex::* centersAlgFunction)(int, int*, int, int*, int&);
+
+    /**
+     * The function used for choosing the cluster centers.
+     */
+    centersAlgFunction chooseCenters;
+
+
+
+    /**
+     * Chooses the initial centers in the k-means clustering in a random manner.
+     *
+     * Params:
+     *     k = number of centers
+     *     vecs = the dataset of points
+     *     indices = indices in the dataset
+     *     indices_length = length of indices vector
+     *
+     */
+    void chooseCentersRandom(int k, int* dsindices, int indices_length, int* centers, int& centers_length)
+    {
+        UniqueRandom r(indices_length);
+
+        int index;
+        for (index=0; index<k; ++index) {
+            bool duplicate = true;
+            int rnd;
+            while (duplicate) {
+                duplicate = false;
+                rnd = r.next();
+                if (rnd<0) {
+                    centers_length = index;
+                    return;
+                }
+
+                centers[index] = dsindices[rnd];
+
+                for (int j=0; j<index; ++j) {
+                    DistanceType sq = distance(dataset[centers[index]], dataset[centers[j]], dataset.cols);
+                    if (sq<1e-16) {
+                        duplicate = 
