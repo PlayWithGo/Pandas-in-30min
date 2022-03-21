@@ -126,4 +126,75 @@ private:
                 for (int j=0; j<index; ++j) {
                     DistanceType sq = distance(dataset[centers[index]], dataset[centers[j]], dataset.cols);
                     if (sq<1e-16) {
-                        duplicate = 
+                        duplicate = true;
+                    }
+                }
+            }
+        }
+
+        centers_length = index;
+    }
+
+
+    /**
+     * Chooses the initial centers in the k-means using Gonzales' algorithm
+     * so that the centers are spaced apart from each other.
+     *
+     * Params:
+     *     k = number of centers
+     *     vecs = the dataset of points
+     *     indices = indices in the dataset
+     * Returns:
+     */
+    void chooseCentersGonzales(int k, int* dsindices, int indices_length, int* centers, int& centers_length)
+    {
+        int n = indices_length;
+
+        int rnd = rand_int(n);
+        assert(rnd >=0 && rnd < n);
+
+        centers[0] = dsindices[rnd];
+
+        int index;
+        for (index=1; index<k; ++index) {
+
+            int best_index = -1;
+            DistanceType best_val = 0;
+            for (int j=0; j<n; ++j) {
+                DistanceType dist = distance(dataset[centers[0]],dataset[dsindices[j]],dataset.cols);
+                for (int i=1; i<index; ++i) {
+                    DistanceType tmp_dist = distance(dataset[centers[i]],dataset[dsindices[j]],dataset.cols);
+                    if (tmp_dist<dist) {
+                        dist = tmp_dist;
+                    }
+                }
+                if (dist>best_val) {
+                    best_val = dist;
+                    best_index = j;
+                }
+            }
+            if (best_index!=-1) {
+                centers[index] = dsindices[best_index];
+            }
+            else {
+                break;
+            }
+        }
+        centers_length = index;
+    }
+
+
+    /**
+     * Chooses the initial centers in the k-means using the algorithm
+     * proposed in the KMeans++ paper:
+     * Arthur, David; Vassilvitskii, Sergei - k-means++: The Advantages of Careful Seeding
+     *
+     * Implementation of this function was converted from the one provided in Arthur's code.
+     *
+     * Params:
+     *     k = number of centers
+     *     vecs = the dataset of points
+     *     indices = indices in the dataset
+     * Returns:
+     */
+    void chooseCentersKMeanspp(int k, int* ds
