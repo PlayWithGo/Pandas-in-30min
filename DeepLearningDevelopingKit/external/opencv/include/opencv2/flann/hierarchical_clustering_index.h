@@ -197,4 +197,53 @@ private:
      *     indices = indices in the dataset
      * Returns:
      */
-    void chooseCentersKMeanspp(int k, int* ds
+    void chooseCentersKMeanspp(int k, int* dsindices, int indices_length, int* centers, int& centers_length)
+    {
+        int n = indices_length;
+
+        double currentPot = 0;
+        DistanceType* closestDistSq = new DistanceType[n];
+
+        // Choose one random center and set the closestDistSq values
+        int index = rand_int(n);
+        assert(index >=0 && index < n);
+        centers[0] = dsindices[index];
+
+        // Computing distance^2 will have the advantage of even higher probability further to pick new centers
+        // far from previous centers (and this complies to "k-means++: the advantages of careful seeding" article)
+        for (int i = 0; i < n; i++) {
+            closestDistSq[i] = distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols);
+            closestDistSq[i] = ensureSquareDistance<Distance>( closestDistSq[i] );
+            currentPot += closestDistSq[i];
+        }
+
+
+        const int numLocalTries = 1;
+
+        // Choose each center
+        int centerCount;
+        for (centerCount = 1; centerCount < k; centerCount++) {
+
+            // Repeat several trials
+            double bestNewPot = -1;
+            int bestNewIndex = 0;
+            for (int localTrial = 0; localTrial < numLocalTries; localTrial++) {
+
+                // Choose our center - have to be slightly careful to return a valid answer even accounting
+                // for possible rounding errors
+                double randVal = rand_double(currentPot);
+                for (index = 0; index < n-1; index++) {
+                    if (randVal <= closestDistSq[index]) break;
+                    else randVal -= closestDistSq[index];
+                }
+
+                // Compute the new potential
+                double newPot = 0;
+                for (int i = 0; i < n; i++) {
+                    DistanceType dist = distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols);
+                    newPot += std::min( ensureSquareDistance<Distance>(dist), closestDistSq[i] );
+                }
+
+                // Store the best result
+                if ((bestNewPot < 0)||(newPot < bestNewPot)) {
+                    bestNewPot = n
