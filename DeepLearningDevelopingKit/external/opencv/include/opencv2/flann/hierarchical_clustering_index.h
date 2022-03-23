@@ -301,4 +301,59 @@ private:
         }
 
 
-  
+        // Choose each center
+        int centerCount;
+        for (centerCount = 1; centerCount < k; centerCount++) {
+
+            // Repeat several trials
+            double bestNewPot = -1;
+            int bestNewIndex = 0;
+            DistanceType furthest = 0;
+            for (index = 0; index < n; index++) {
+
+                // We will test only the potential of the points further than current candidate
+                if( closestDistSq[index] > kSpeedUpFactor * (float)furthest ) {
+
+                    // Compute the new potential
+                    double newPot = 0;
+                    for (int i = 0; i < n; i++) {
+                        newPot += std::min( distance(dataset[dsindices[i]], dataset[dsindices[index]], dataset.cols)
+                                            , closestDistSq[i] );
+                    }
+
+                    // Store the best result
+                    if ((bestNewPot < 0)||(newPot <= bestNewPot)) {
+                        bestNewPot = newPot;
+                        bestNewIndex = index;
+                        furthest = closestDistSq[index];
+                    }
+                }
+            }
+
+            // Add the appropriate center
+            centers[centerCount] = dsindices[bestNewIndex];
+            for (int i = 0; i < n; i++) {
+                closestDistSq[i] = std::min( distance(dataset[dsindices[i]], dataset[dsindices[bestNewIndex]], dataset.cols)
+                                             , closestDistSq[i] );
+            }
+        }
+
+        centers_length = centerCount;
+
+        delete[] closestDistSq;
+    }
+
+
+public:
+
+
+    /**
+     * Index constructor
+     *
+     * Params:
+     *          inputData = dataset with the input features
+     *          params = parameters passed to the hierarchical k-means algorithm
+     */
+    HierarchicalClusteringIndex(const Matrix<ElementType>& inputData, const IndexParams& index_params = HierarchicalClusteringIndexParams(),
+                                Distance d = Distance())
+        : dataset(inputData), params(index_para
