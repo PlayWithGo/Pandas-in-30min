@@ -356,4 +356,81 @@ public:
      */
     HierarchicalClusteringIndex(const Matrix<ElementType>& inputData, const IndexParams& index_params = HierarchicalClusteringIndexParams(),
                                 Distance d = Distance())
-        : dataset(inputData), params(index_para
+        : dataset(inputData), params(index_params), root(NULL), indices(NULL), distance(d)
+    {
+        memoryCounter = 0;
+
+        size_ = dataset.rows;
+        veclen_ = dataset.cols;
+
+        branching_ = get_param(params,"branching",32);
+        centers_init_ = get_param(params,"centers_init", FLANN_CENTERS_RANDOM);
+        trees_ = get_param(params,"trees",4);
+        leaf_size_ = get_param(params,"leaf_size",100);
+
+        if (centers_init_==FLANN_CENTERS_RANDOM) {
+            chooseCenters = &HierarchicalClusteringIndex::chooseCentersRandom;
+        }
+        else if (centers_init_==FLANN_CENTERS_GONZALES) {
+            chooseCenters = &HierarchicalClusteringIndex::chooseCentersGonzales;
+        }
+        else if (centers_init_==FLANN_CENTERS_KMEANSPP) {
+            chooseCenters = &HierarchicalClusteringIndex::chooseCentersKMeanspp;
+        }
+        else if (centers_init_==FLANN_CENTERS_GROUPWISE) {
+            chooseCenters = &HierarchicalClusteringIndex::GroupWiseCenterChooser;
+        }
+        else {
+            throw FLANNException("Unknown algorithm for choosing initial centers.");
+        }
+
+        trees_ = get_param(params,"trees",4);
+        root = new NodePtr[trees_];
+        indices = new int*[trees_];
+
+        for (int i=0; i<trees_; ++i) {
+            root[i] = NULL;
+            indices[i] = NULL;
+        }
+    }
+
+    HierarchicalClusteringIndex(const HierarchicalClusteringIndex&);
+    HierarchicalClusteringIndex& operator=(const HierarchicalClusteringIndex&);
+
+    /**
+     * Index destructor.
+     *
+     * Release the memory used by the index.
+     */
+    virtual ~HierarchicalClusteringIndex()
+    {
+        free_elements();
+
+        if (root!=NULL) {
+            delete[] root;
+        }
+
+        if (indices!=NULL) {
+            delete[] indices;
+        }
+    }
+
+
+    /**
+     * Release the inner elements of indices[]
+     */
+    void free_elements()
+    {
+        if (indices!=NULL) {
+            for(int i=0; i<trees_; ++i) {
+                if (indices[i]!=NULL) {
+                    delete[] indices[i];
+                    indices[i] = NULL;
+                }
+            }
+        }
+    }
+
+
+    /**
+     
