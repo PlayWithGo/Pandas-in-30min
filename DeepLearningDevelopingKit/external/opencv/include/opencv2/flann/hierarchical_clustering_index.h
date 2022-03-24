@@ -433,4 +433,98 @@ public:
 
 
     /**
-     
+     *  Returns size of index.
+     */
+    size_t size() const
+    {
+        return size_;
+    }
+
+    /**
+     * Returns the length of an index feature.
+     */
+    size_t veclen() const
+    {
+        return veclen_;
+    }
+
+
+    /**
+     * Computes the inde memory usage
+     * Returns: memory used by the index
+     */
+    int usedMemory() const
+    {
+        return pool.usedMemory+pool.wastedMemory+memoryCounter;
+    }
+
+    /**
+     * Builds the index
+     */
+    void buildIndex()
+    {
+        if (branching_<2) {
+            throw FLANNException("Branching factor must be at least 2");
+        }
+
+        free_elements();
+
+        for (int i=0; i<trees_; ++i) {
+            indices[i] = new int[size_];
+            for (size_t j=0; j<size_; ++j) {
+                indices[i][j] = (int)j;
+            }
+            root[i] = pool.allocate<Node>();
+            computeClustering(root[i], indices[i], (int)size_, branching_,0);
+        }
+    }
+
+
+    flann_algorithm_t getType() const
+    {
+        return FLANN_INDEX_HIERARCHICAL;
+    }
+
+
+    void saveIndex(FILE* stream)
+    {
+        save_value(stream, branching_);
+        save_value(stream, trees_);
+        save_value(stream, centers_init_);
+        save_value(stream, leaf_size_);
+        save_value(stream, memoryCounter);
+        for (int i=0; i<trees_; ++i) {
+            save_value(stream, *indices[i], size_);
+            save_tree(stream, root[i], i);
+        }
+
+    }
+
+
+    void loadIndex(FILE* stream)
+    {
+        free_elements();
+
+        if (root!=NULL) {
+            delete[] root;
+        }
+
+        if (indices!=NULL) {
+            delete[] indices;
+        }
+
+        load_value(stream, branching_);
+        load_value(stream, trees_);
+        load_value(stream, centers_init_);
+        load_value(stream, leaf_size_);
+        load_value(stream, memoryCounter);
+
+        indices = new int*[trees_];
+        root = new NodePtr[trees_];
+        for (int i=0; i<trees_; ++i) {
+            indices[i] = new int[size_];
+            load_value(stream, *indices[i], size_);
+            load_tree(stream, root[i], i);
+        }
+
+        params
