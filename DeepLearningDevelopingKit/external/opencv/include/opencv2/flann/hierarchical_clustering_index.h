@@ -527,4 +527,87 @@ public:
             load_tree(stream, root[i], i);
         }
 
-        params
+        params["algorithm"] = getType();
+        params["branching"] = branching_;
+        params["trees"] = trees_;
+        params["centers_init"] = centers_init_;
+        params["leaf_size"] = leaf_size_;
+    }
+
+
+    /**
+     * Find set of nearest neighbors to vec. Their indices are stored inside
+     * the result object.
+     *
+     * Params:
+     *     result = the result object in which the indices of the nearest-neighbors are stored
+     *     vec = the vector for which to search the nearest neighbors
+     *     searchParams = parameters that influence the search algorithm (checks)
+     */
+    void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams)
+    {
+
+        int maxChecks = get_param(searchParams,"checks",32);
+
+        // Priority queue storing intermediate branches in the best-bin-first search
+        Heap<BranchSt>* heap = new Heap<BranchSt>((int)size_);
+
+        std::vector<bool> checked(size_,false);
+        int checks = 0;
+        for (int i=0; i<trees_; ++i) {
+            findNN(root[i], result, vec, checks, maxChecks, heap, checked);
+        }
+
+        BranchSt branch;
+        while (heap->popMin(branch) && (checks<maxChecks || !result.full())) {
+            NodePtr node = branch.node;
+            findNN(node, result, vec, checks, maxChecks, heap, checked);
+        }
+        assert(result.full());
+
+        delete heap;
+
+    }
+
+    IndexParams getParameters() const
+    {
+        return params;
+    }
+
+
+private:
+
+    /**
+     * Struture representing a node in the hierarchical k-means tree.
+     */
+    struct Node
+    {
+        /**
+         * The cluster center index
+         */
+        int pivot;
+        /**
+         * The cluster size (number of points in the cluster)
+         */
+        int size;
+        /**
+         * Child nodes (only for non-terminal nodes)
+         */
+        Node** childs;
+        /**
+         * Node points (only for terminal nodes)
+         */
+        int* indices;
+        /**
+         * Level
+         */
+        int level;
+    };
+    typedef Node* NodePtr;
+
+
+
+    /**
+     * Alias definition for a nicer syntax.
+     */
+    typedef BranchStruct<NodePtr
