@@ -678,4 +678,64 @@ private:
      *
      * TODO: for 1-sized clusters don't store a cluster center (it's the same as the single cluster point)
      */
-    void computeClustering(NodeP
+    void computeClustering(NodePtr node, int* dsindices, int indices_length, int branching, int level)
+    {
+        node->size = indices_length;
+        node->level = level;
+
+        if (indices_length < leaf_size_) { // leaf node
+            node->indices = dsindices;
+            std::sort(node->indices,node->indices+indices_length);
+            node->childs = NULL;
+            return;
+        }
+
+        std::vector<int> centers(branching);
+        std::vector<int> labels(indices_length);
+
+        int centers_length;
+        (this->*chooseCenters)(branching, dsindices, indices_length, &centers[0], centers_length);
+
+        if (centers_length<branching) {
+            node->indices = dsindices;
+            std::sort(node->indices,node->indices+indices_length);
+            node->childs = NULL;
+            return;
+        }
+
+
+        //	assign points to clusters
+        DistanceType cost;
+        computeLabels(dsindices, indices_length, &centers[0], centers_length, &labels[0], cost);
+
+        node->childs = pool.allocate<NodePtr>(branching);
+        int start = 0;
+        int end = start;
+        for (int i=0; i<branching; ++i) {
+            for (int j=0; j<indices_length; ++j) {
+                if (labels[j]==i) {
+                    std::swap(dsindices[j],dsindices[end]);
+                    std::swap(labels[j],labels[end]);
+                    end++;
+                }
+            }
+
+            node->childs[i] = pool.allocate<Node>();
+            node->childs[i]->pivot = centers[i];
+            node->childs[i]->indices = NULL;
+            computeClustering(node->childs[i],dsindices+start, end-start, branching, level+1);
+            start=end;
+        }
+    }
+
+
+
+    /**
+     * Performs one descent in the hierarchical k-means tree. The branches not
+     * visited are stored in a priority queue.
+     *
+     * Params:
+     *      node = node to explore
+     *      result = container for the k-nearest neighbors found
+     *      vec = query points
+     *      checks = how many points in the dataset have been checke
