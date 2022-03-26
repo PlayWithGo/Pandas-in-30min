@@ -610,4 +610,72 @@ private:
     /**
      * Alias definition for a nicer syntax.
      */
-    typedef BranchStruct<NodePtr
+    typedef BranchStruct<NodePtr, DistanceType> BranchSt;
+
+
+
+    void save_tree(FILE* stream, NodePtr node, int num)
+    {
+        save_value(stream, *node);
+        if (node->childs==NULL) {
+            int indices_offset = (int)(node->indices - indices[num]);
+            save_value(stream, indices_offset);
+        }
+        else {
+            for(int i=0; i<branching_; ++i) {
+                save_tree(stream, node->childs[i], num);
+            }
+        }
+    }
+
+
+    void load_tree(FILE* stream, NodePtr& node, int num)
+    {
+        node = pool.allocate<Node>();
+        load_value(stream, *node);
+        if (node->childs==NULL) {
+            int indices_offset;
+            load_value(stream, indices_offset);
+            node->indices = indices[num] + indices_offset;
+        }
+        else {
+            node->childs = pool.allocate<NodePtr>(branching_);
+            for(int i=0; i<branching_; ++i) {
+                load_tree(stream, node->childs[i], num);
+            }
+        }
+    }
+
+
+
+
+    void computeLabels(int* dsindices, int indices_length,  int* centers, int centers_length, int* labels, DistanceType& cost)
+    {
+        cost = 0;
+        for (int i=0; i<indices_length; ++i) {
+            ElementType* point = dataset[dsindices[i]];
+            DistanceType dist = distance(point, dataset[centers[0]], veclen_);
+            labels[i] = 0;
+            for (int j=1; j<centers_length; ++j) {
+                DistanceType new_dist = distance(point, dataset[centers[j]], veclen_);
+                if (dist>new_dist) {
+                    labels[i] = j;
+                    dist = new_dist;
+                }
+            }
+            cost += dist;
+        }
+    }
+
+    /**
+     * The method responsible with actually doing the recursive hierarchical
+     * clustering
+     *
+     * Params:
+     *     node = the node to cluster
+     *     indices = indices of the points belonging to the current node
+     *     branching = the branching factor to use in the clustering
+     *
+     * TODO: for 1-sized clusters don't store a cluster center (it's the same as the single cluster point)
+     */
+    void computeClustering(NodeP
