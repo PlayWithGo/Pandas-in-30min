@@ -738,4 +738,82 @@ private:
      *      node = node to explore
      *      result = container for the k-nearest neighbors found
      *      vec = query points
-     *      checks = how many points in the dataset have been checke
+     *      checks = how many points in the dataset have been checked so far
+     *      maxChecks = maximum dataset points to checks
+     */
+
+
+    void findNN(NodePtr node, ResultSet<DistanceType>& result, const ElementType* vec, int& checks, int maxChecks,
+                Heap<BranchSt>* heap, std::vector<bool>& checked)
+    {
+        if (node->childs==NULL) {
+            if (checks>=maxChecks) {
+                if (result.full()) return;
+            }
+            for (int i=0; i<node->size; ++i) {
+                int index = node->indices[i];
+                if (!checked[index]) {
+                    DistanceType dist = distance(dataset[index], vec, veclen_);
+                    result.addPoint(dist, index);
+                    checked[index] = true;
+                    ++checks;
+                }
+            }
+        }
+        else {
+            DistanceType* domain_distances = new DistanceType[branching_];
+            int best_index = 0;
+            domain_distances[best_index] = distance(vec, dataset[node->childs[best_index]->pivot], veclen_);
+            for (int i=1; i<branching_; ++i) {
+                domain_distances[i] = distance(vec, dataset[node->childs[i]->pivot], veclen_);
+                if (domain_distances[i]<domain_distances[best_index]) {
+                    best_index = i;
+                }
+            }
+            for (int i=0; i<branching_; ++i) {
+                if (i!=best_index) {
+                    heap->insert(BranchSt(node->childs[i],domain_distances[i]));
+                }
+            }
+            delete[] domain_distances;
+            findNN(node->childs[best_index],result,vec, checks, maxChecks, heap, checked);
+        }
+    }
+
+private:
+
+
+    /**
+     * The dataset used by this index
+     */
+    const Matrix<ElementType> dataset;
+
+    /**
+     * Parameters used by this index
+     */
+    IndexParams params;
+
+
+    /**
+     * Number of features in the dataset.
+     */
+    size_t size_;
+
+    /**
+     * Length of each feature.
+     */
+    size_t veclen_;
+
+    /**
+     * The root node in the tree.
+     */
+    NodePtr* root;
+
+    /**
+     *  Array of indices to vectors in the dataset.
+     */
+    int** indices;
+
+
+    /**
+     * T
