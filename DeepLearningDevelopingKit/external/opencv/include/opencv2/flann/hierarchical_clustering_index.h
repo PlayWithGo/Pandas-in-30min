@@ -816,4 +816,33 @@ private:
 
 
     /**
-     * T
+     * The distance
+     */
+    Distance distance;
+
+    /**
+     * Pooled memory allocator.
+     *
+     * Using a pooled memory allocator is more efficient
+     * than allocating memory directly when there is a large
+     * number small of memory allocations.
+     */
+    PooledAllocator pool;
+
+    /**
+     * Memory occupied by the index.
+     */
+    int memoryCounter;
+
+    /** index parameters */
+    int branching_;
+    int trees_;
+    flann_centers_init_t centers_init_;
+    int leaf_size_;
+
+
+};
+
+}
+
+#endif /* OPENCV_FLANN_HIERARCHICAL_CLUSTERING_INDEX_H_ */
