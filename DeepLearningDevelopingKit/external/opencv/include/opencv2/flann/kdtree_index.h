@@ -98,4 +98,103 @@ public:
         }
 
         mean_ = new DistanceType[veclen_];
-        var_ = n
+        var_ = new DistanceType[veclen_];
+    }
+
+
+    KDTreeIndex(const KDTreeIndex&);
+    KDTreeIndex& operator=(const KDTreeIndex&);
+
+    /**
+     * Standard destructor
+     */
+    ~KDTreeIndex()
+    {
+        if (tree_roots_!=NULL) {
+            delete[] tree_roots_;
+        }
+        delete[] mean_;
+        delete[] var_;
+    }
+
+    /**
+     * Builds the index
+     */
+    void buildIndex()
+    {
+        /* Construct the randomized trees. */
+        for (int i = 0; i < trees_; i++) {
+            /* Randomize the order of vectors to allow for unbiased sampling. */
+#ifndef OPENCV_FLANN_USE_STD_RAND
+            cv::randShuffle(vind_);
+#else
+            std::random_shuffle(vind_.begin(), vind_.end());
+#endif
+
+            tree_roots_[i] = divideTree(&vind_[0], int(size_) );
+        }
+    }
+
+
+    flann_algorithm_t getType() const
+    {
+        return FLANN_INDEX_KDTREE;
+    }
+
+
+    void saveIndex(FILE* stream)
+    {
+        save_value(stream, trees_);
+        for (int i=0; i<trees_; ++i) {
+            save_tree(stream, tree_roots_[i]);
+        }
+    }
+
+
+
+    void loadIndex(FILE* stream)
+    {
+        load_value(stream, trees_);
+        if (tree_roots_!=NULL) {
+            delete[] tree_roots_;
+        }
+        tree_roots_ = new NodePtr[trees_];
+        for (int i=0; i<trees_; ++i) {
+            load_tree(stream,tree_roots_[i]);
+        }
+
+        index_params_["algorithm"] = getType();
+        index_params_["trees"] = tree_roots_;
+    }
+
+    /**
+     *  Returns size of index.
+     */
+    size_t size() const
+    {
+        return size_;
+    }
+
+    /**
+     * Returns the length of an index feature.
+     */
+    size_t veclen() const
+    {
+        return veclen_;
+    }
+
+    /**
+     * Computes the inde memory usage
+     * Returns: memory used by the index
+     */
+    int usedMemory() const
+    {
+        return int(pool_.usedMemory+pool_.wastedMemory+dataset_.rows*sizeof(int));  // pool memory and vind array memory
+    }
+
+    /**
+     * Find set of nearest neighbors to vec. Their indices are stored inside
+     * the result object.
+     *
+     * Params:
+     *     result 
