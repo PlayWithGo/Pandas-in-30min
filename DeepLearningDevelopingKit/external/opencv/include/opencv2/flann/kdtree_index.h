@@ -197,4 +197,79 @@ public:
      * the result object.
      *
      * Params:
-     *     result 
+     *     result = the result object in which the indices of the nearest-neighbors are stored
+     *     vec = the vector for which to search the nearest neighbors
+     *     maxCheck = the maximum number of restarts (in a best-bin-first manner)
+     */
+    void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams)
+    {
+        int maxChecks = get_param(searchParams,"checks", 32);
+        float epsError = 1+get_param(searchParams,"eps",0.0f);
+
+        if (maxChecks==FLANN_CHECKS_UNLIMITED) {
+            getExactNeighbors(result, vec, epsError);
+        }
+        else {
+            getNeighbors(result, vec, maxChecks, epsError);
+        }
+    }
+
+    IndexParams getParameters() const
+    {
+        return index_params_;
+    }
+
+private:
+
+
+    /*--------------------- Internal Data Structures --------------------------*/
+    struct Node
+    {
+        /**
+         * Dimension used for subdivision.
+         */
+        int divfeat;
+        /**
+         * The values used for subdivision.
+         */
+        DistanceType divval;
+        /**
+         * The child nodes.
+         */
+        Node* child1, * child2;
+    };
+    typedef Node* NodePtr;
+    typedef BranchStruct<NodePtr, DistanceType> BranchSt;
+    typedef BranchSt* Branch;
+
+
+
+    void save_tree(FILE* stream, NodePtr tree)
+    {
+        save_value(stream, *tree);
+        if (tree->child1!=NULL) {
+            save_tree(stream, tree->child1);
+        }
+        if (tree->child2!=NULL) {
+            save_tree(stream, tree->child2);
+        }
+    }
+
+
+    void load_tree(FILE* stream, NodePtr& tree)
+    {
+        tree = pool_.allocate<Node>();
+        load_value(stream, *tree);
+        if (tree->child1!=NULL) {
+            load_tree(stream, tree->child1);
+        }
+        if (tree->child2!=NULL) {
+            load_tree(stream, tree->child2);
+        }
+    }
+
+
+    /**
+     * Create a tree node that subdivides the list of vecs from vind[first]
+     * to vind[last].  The routine is called recursively on each sublist.
+     * Place a pointer to this new tree node in the locati
