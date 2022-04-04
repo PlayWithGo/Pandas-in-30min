@@ -272,4 +272,63 @@ private:
     /**
      * Create a tree node that subdivides the list of vecs from vind[first]
      * to vind[last].  The routine is called recursively on each sublist.
-     * Place a pointer to this new tree node in the locati
+     * Place a pointer to this new tree node in the location pTree.
+     *
+     * Params: pTree = the new node to create
+     *                  first = index of the first vector
+     *                  last = index of the last vector
+     */
+    NodePtr divideTree(int* ind, int count)
+    {
+        NodePtr node = pool_.allocate<Node>(); // allocate memory
+
+        /* If too few exemplars remain, then make this a leaf node. */
+        if ( count == 1) {
+            node->child1 = node->child2 = NULL;    /* Mark as leaf node. */
+            node->divfeat = *ind;    /* Store index of this vec. */
+        }
+        else {
+            int idx;
+            int cutfeat;
+            DistanceType cutval;
+            meanSplit(ind, count, idx, cutfeat, cutval);
+
+            node->divfeat = cutfeat;
+            node->divval = cutval;
+            node->child1 = divideTree(ind, idx);
+            node->child2 = divideTree(ind+idx, count-idx);
+        }
+
+        return node;
+    }
+
+
+    /**
+     * Choose which feature to use in order to subdivide this set of vectors.
+     * Make a random choice among those with the highest variance, and use
+     * its variance as the threshold value.
+     */
+    void meanSplit(int* ind, int count, int& index, int& cutfeat, DistanceType& cutval)
+    {
+        memset(mean_,0,veclen_*sizeof(DistanceType));
+        memset(var_,0,veclen_*sizeof(DistanceType));
+
+        /* Compute mean values.  Only the first SAMPLE_MEAN values need to be
+            sampled to get a good estimate.
+         */
+        int cnt = std::min((int)SAMPLE_MEAN+1, count);
+        for (int j = 0; j < cnt; ++j) {
+            ElementType* v = dataset_[ind[j]];
+            for (size_t k=0; k<veclen_; ++k) {
+                mean_[k] += v[k];
+            }
+        }
+        for (size_t k=0; k<veclen_; ++k) {
+            mean_[k] /= cnt;
+        }
+
+        /* Compute variances (no need to divide by count). */
+        for (int j = 0; j < cnt; ++j) {
+            ElementType* v = dataset_[ind[j]];
+            for (size_t k=0; k<veclen_; ++k) {
+        
