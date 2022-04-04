@@ -331,4 +331,66 @@ private:
         for (int j = 0; j < cnt; ++j) {
             ElementType* v = dataset_[ind[j]];
             for (size_t k=0; k<veclen_; ++k) {
-        
+                DistanceType dist = v[k] - mean_[k];
+                var_[k] += dist * dist;
+            }
+        }
+        /* Select one of the highest variance indices at random. */
+        cutfeat = selectDivision(var_);
+        cutval = mean_[cutfeat];
+
+        int lim1, lim2;
+        planeSplit(ind, count, cutfeat, cutval, lim1, lim2);
+
+        if (lim1>count/2) index = lim1;
+        else if (lim2<count/2) index = lim2;
+        else index = count/2;
+
+        /* If either list is empty, it means that all remaining features
+         * are identical. Split in the middle to maintain a balanced tree.
+         */
+        if ((lim1==count)||(lim2==0)) index = count/2;
+    }
+
+
+    /**
+     * Select the top RAND_DIM largest values from v and return the index of
+     * one of these selected at random.
+     */
+    int selectDivision(DistanceType* v)
+    {
+        int num = 0;
+        size_t topind[RAND_DIM];
+
+        /* Create a list of the indices of the top RAND_DIM values. */
+        for (size_t i = 0; i < veclen_; ++i) {
+            if ((num < RAND_DIM)||(v[i] > v[topind[num-1]])) {
+                /* Put this element at end of topind. */
+                if (num < RAND_DIM) {
+                    topind[num++] = i;            /* Add to list. */
+                }
+                else {
+                    topind[num-1] = i;         /* Replace last element. */
+                }
+                /* Bubble end value down to right location by repeated swapping. */
+                int j = num - 1;
+                while (j > 0  &&  v[topind[j]] > v[topind[j-1]]) {
+                    std::swap(topind[j], topind[j-1]);
+                    --j;
+                }
+            }
+        }
+        /* Select a random integer in range [0,num-1], and return that index. */
+        int rnd = rand_int(num);
+        return (int)topind[rnd];
+    }
+
+
+    /**
+     *  Subdivide the list of points by a plane perpendicular on axe corresponding
+     *  to the 'cutfeat' dimension at 'cutval' position.
+     *
+     *  On return:
+     *  dataset[ind[0..lim1-1]][cutfeat]<cutval
+     *  dataset[ind[lim1..lim2-1]][cutfeat]==cutval
+     *  data
