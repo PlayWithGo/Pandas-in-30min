@@ -393,4 +393,60 @@ private:
      *  On return:
      *  dataset[ind[0..lim1-1]][cutfeat]<cutval
      *  dataset[ind[lim1..lim2-1]][cutfeat]==cutval
-     *  data
+     *  dataset[ind[lim2..count]][cutfeat]>cutval
+     */
+    void planeSplit(int* ind, int count, int cutfeat, DistanceType cutval, int& lim1, int& lim2)
+    {
+        /* Move vector indices for left subtree to front of list. */
+        int left = 0;
+        int right = count-1;
+        for (;; ) {
+            while (left<=right && dataset_[ind[left]][cutfeat]<cutval) ++left;
+            while (left<=right && dataset_[ind[right]][cutfeat]>=cutval) --right;
+            if (left>right) break;
+            std::swap(ind[left], ind[right]); ++left; --right;
+        }
+        lim1 = left;
+        right = count-1;
+        for (;; ) {
+            while (left<=right && dataset_[ind[left]][cutfeat]<=cutval) ++left;
+            while (left<=right && dataset_[ind[right]][cutfeat]>cutval) --right;
+            if (left>right) break;
+            std::swap(ind[left], ind[right]); ++left; --right;
+        }
+        lim2 = left;
+    }
+
+    /**
+     * Performs an exact nearest neighbor search. The exact search performs a full
+     * traversal of the tree.
+     */
+    void getExactNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, float epsError)
+    {
+        //		checkID -= 1;  /* Set a different unique ID for each search. */
+
+        if (trees_ > 1) {
+            fprintf(stderr,"It doesn't make any sense to use more than one tree for exact search");
+        }
+        if (trees_>0) {
+            searchLevelExact(result, vec, tree_roots_[0], 0.0, epsError);
+        }
+        assert(result.full());
+    }
+
+    /**
+     * Performs the approximate nearest-neighbor search. The search is approximate
+     * because the tree traversal is abandoned after a given number of descends in
+     * the tree.
+     */
+    void getNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, int maxCheck, float epsError)
+    {
+        int i;
+        BranchSt branch;
+
+        int checkCount = 0;
+        Heap<BranchSt>* heap = new Heap<BranchSt>((int)size_);
+        DynamicBitset checked(size_);
+
+        /* Search once through each tree down to root. */
+        for (i = 0; i < trees_; 
