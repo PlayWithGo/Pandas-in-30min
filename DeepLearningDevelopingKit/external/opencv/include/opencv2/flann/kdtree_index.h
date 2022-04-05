@@ -449,4 +449,56 @@ private:
         DynamicBitset checked(size_);
 
         /* Search once through each tree down to root. */
-        for (i = 0; i < trees_; 
+        for (i = 0; i < trees_; ++i) {
+            searchLevel(result, vec, tree_roots_[i], 0, checkCount, maxCheck, epsError, heap, checked);
+        }
+
+        /* Keep searching other branches from heap until finished. */
+        while ( heap->popMin(branch) && (checkCount < maxCheck || !result.full() )) {
+            searchLevel(result, vec, branch.node, branch.mindist, checkCount, maxCheck, epsError, heap, checked);
+        }
+
+        delete heap;
+
+        assert(result.full());
+    }
+
+
+    /**
+     *  Search starting from a given node of the tree.  Based on any mismatches at
+     *  higher levels, all exemplars below this level must have a distance of
+     *  at least "mindistsq".
+     */
+    void searchLevel(ResultSet<DistanceType>& result_set, const ElementType* vec, NodePtr node, DistanceType mindist, int& checkCount, int maxCheck,
+                     float epsError, Heap<BranchSt>* heap, DynamicBitset& checked)
+    {
+        if (result_set.worstDist()<mindist) {
+            //			printf("Ignoring branch, too far\n");
+            return;
+        }
+
+        /* If this is a leaf node, then do check and return. */
+        if ((node->child1 == NULL)&&(node->child2 == NULL)) {
+            /*  Do not check same node more than once when searching multiple trees.
+                Once a vector is checked, we set its location in vind to the
+                current checkID.
+             */
+            int index = node->divfeat;
+            if ( checked.test(index) || ((checkCount>=maxCheck)&& result_set.full()) ) return;
+            checked.set(index);
+            checkCount++;
+
+            DistanceType dist = distance_(dataset_[index], vec, veclen_);
+            result_set.addPoint(dist,index);
+
+            return;
+        }
+
+        /* Which child branch should be taken first? */
+        ElementType val = vec[node->divfeat];
+        DistanceType diff = val - node->divval;
+        NodePtr bestChild = (diff < 0) ? node->child1 : node->child2;
+        NodePtr otherChild = (diff < 0) ? node->child2 : node->child1;
+
+        /* Create a branch record for the branch not taken.  Add distance
+            of this feature bound
