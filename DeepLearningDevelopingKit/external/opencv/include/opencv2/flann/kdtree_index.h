@@ -501,4 +501,48 @@ private:
         NodePtr otherChild = (diff < 0) ? node->child2 : node->child1;
 
         /* Create a branch record for the branch not taken.  Add distance
-            of this feature bound
+            of this feature boundary (we don't attempt to correct for any
+            use of this feature in a parent node, which is unlikely to
+            happen and would have only a small effect).  Don't bother
+            adding more branches to heap after halfway point, as cost of
+            adding exceeds their value.
+         */
+
+        DistanceType new_distsq = mindist + distance_.accum_dist(val, node->divval, node->divfeat);
+        //		if (2 * checkCount < maxCheck  ||  !result.full()) {
+        if ((new_distsq*epsError < result_set.worstDist())||  !result_set.full()) {
+            heap->insert( BranchSt(otherChild, new_distsq) );
+        }
+
+        /* Call recursively to search next level down. */
+        searchLevel(result_set, vec, bestChild, mindist, checkCount, maxCheck, epsError, heap, checked);
+    }
+
+    /**
+     * Performs an exact search in the tree starting from a node.
+     */
+    void searchLevelExact(ResultSet<DistanceType>& result_set, const ElementType* vec, const NodePtr node, DistanceType mindist, const float epsError)
+    {
+        /* If this is a leaf node, then do check and return. */
+        if ((node->child1 == NULL)&&(node->child2 == NULL)) {
+            int index = node->divfeat;
+            DistanceType dist = distance_(dataset_[index], vec, veclen_);
+            result_set.addPoint(dist,index);
+            return;
+        }
+
+        /* Which child branch should be taken first? */
+        ElementType val = vec[node->divfeat];
+        DistanceType diff = val - node->divval;
+        NodePtr bestChild = (diff < 0) ? node->child1 : node->child2;
+        NodePtr otherChild = (diff < 0) ? node->child2 : node->child1;
+
+        /* Create a branch record for the branch not taken.  Add distance
+            of this feature boundary (we don't attempt to correct for any
+            use of this feature in a parent node, which is unlikely to
+            happen and would have only a small effect).  Don't bother
+            adding more branches to heap after halfway point, as cost of
+            adding exceeds their value.
+         */
+
+        DistanceType new
