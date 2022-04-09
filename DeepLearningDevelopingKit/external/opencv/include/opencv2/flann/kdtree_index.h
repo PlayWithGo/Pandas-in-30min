@@ -545,4 +545,82 @@ private:
             adding exceeds their value.
          */
 
-        DistanceType new
+        DistanceType new_distsq = mindist + distance_.accum_dist(val, node->divval, node->divfeat);
+
+        /* Call recursively to search next level down. */
+        searchLevelExact(result_set, vec, bestChild, mindist, epsError);
+
+        if (new_distsq*epsError<=result_set.worstDist()) {
+            searchLevelExact(result_set, vec, otherChild, new_distsq, epsError);
+        }
+    }
+
+
+private:
+
+    enum
+    {
+        /**
+         * To improve efficiency, only SAMPLE_MEAN random values are used to
+         * compute the mean and variance at each level when building a tree.
+         * A value of 100 seems to perform as well as using all values.
+         */
+        SAMPLE_MEAN = 100,
+        /**
+         * Top random dimensions to consider
+         *
+         * When creating random trees, the dimension on which to subdivide is
+         * selected at random from among the top RAND_DIM dimensions with the
+         * highest variance.  A value of 5 works well.
+         */
+        RAND_DIM=5
+    };
+
+
+    /**
+     * Number of randomized trees that are used
+     */
+    int trees_;
+
+    /**
+     *  Array of indices to vectors in the dataset.
+     */
+    std::vector<int> vind_;
+
+    /**
+     * The dataset used by this index
+     */
+    const Matrix<ElementType> dataset_;
+
+    IndexParams index_params_;
+
+    size_t size_;
+    size_t veclen_;
+
+
+    DistanceType* mean_;
+    DistanceType* var_;
+
+
+    /**
+     * Array of k-d trees used to find neighbours.
+     */
+    NodePtr* tree_roots_;
+
+    /**
+     * Pooled memory allocator.
+     *
+     * Using a pooled memory allocator is more efficient
+     * than allocating memory directly when there is a large
+     * number small of memory allocations.
+     */
+    PooledAllocator pool_;
+
+    Distance distance_;
+
+
+};   // class KDTreeForest
+
+}
+
+#endif //OPENCV_FLANN_KDTREE_INDEX_H_
