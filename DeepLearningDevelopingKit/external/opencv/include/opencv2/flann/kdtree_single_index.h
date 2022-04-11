@@ -136,4 +136,79 @@ public:
     flann_algorithm_t getType() const
     {
         return FLANN_INDEX_KDTREE_SINGLE;
+    }
+
+
+    void saveIndex(FILE* stream)
+    {
+        save_value(stream, size_);
+        save_value(stream, dim_);
+        save_value(stream, root_bbox_);
+        save_value(stream, reorder_);
+        save_value(stream, leaf_max_size_);
+        save_value(stream, vind_);
+        if (reorder_) {
+            save_value(stream, data_);
+        }
+        save_tree(stream, root_node_);
+    }
+
+
+    void loadIndex(FILE* stream)
+    {
+        load_value(stream, size_);
+        load_value(stream, dim_);
+        load_value(stream, root_bbox_);
+        load_value(stream, reorder_);
+        load_value(stream, leaf_max_size_);
+        load_value(stream, vind_);
+        if (reorder_) {
+            load_value(stream, data_);
+        }
+        else {
+            data_ = dataset_;
+        }
+        load_tree(stream, root_node_);
+
+
+        index_params_["algorithm"] = getType();
+        index_params_["leaf_max_size"] = leaf_max_size_;
+        index_params_["reorder"] = reorder_;
+    }
+
+    /**
+     *  Returns size of index.
+     */
+    size_t size() const
+    {
+        return size_;
+    }
+
+    /**
+     * Returns the length of an index feature.
+     */
+    size_t veclen() const
+    {
+        return dim_;
+    }
+
+    /**
+     * Computes the inde memory usage
+     * Returns: memory used by the index
+     */
+    int usedMemory() const
+    {
+        return (int)(pool_.usedMemory+pool_.wastedMemory+dataset_.rows*sizeof(int));  // pool memory and vind array memory
+    }
+
+
+    /**
+     * \brief Perform k-nearest neighbor search
+     * \param[in] queries The query points for which to find the nearest neighbors
+     * \param[out] indices The indices of the nearest neighbors found
+     * \param[out] dists Distances to the nearest neighbors found
+     * \param[in] knn Number of nearest neighbors to return
+     * \param[in] params Search parameters
+     */
+    void knnSearch(const Matrix<ElementType>& queries, Matrix<int>& indices, Matrix<DistanceType>& dists, int knn, const SearchParams& params)
    
