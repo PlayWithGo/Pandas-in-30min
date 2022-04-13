@@ -211,4 +211,82 @@ public:
      * \param[in] params Search parameters
      */
     void knnSearch(const Matrix<ElementType>& queries, Matrix<int>& indices, Matrix<DistanceType>& dists, int knn, const SearchParams& params)
-   
+    {
+        assert(queries.cols == veclen());
+        assert(indices.rows >= queries.rows);
+        assert(dists.rows >= queries.rows);
+        assert(int(indices.cols) >= knn);
+        assert(int(dists.cols) >= knn);
+
+        KNNSimpleResultSet<DistanceType> resultSet(knn);
+        for (size_t i = 0; i < queries.rows; i++) {
+            resultSet.init(indices[i], dists[i]);
+            findNeighbors(resultSet, queries[i], params);
+        }
+    }
+
+    IndexParams getParameters() const
+    {
+        return index_params_;
+    }
+
+    /**
+     * Find set of nearest neighbors to vec. Their indices are stored inside
+     * the result object.
+     *
+     * Params:
+     *     result = the result object in which the indices of the nearest-neighbors are stored
+     *     vec = the vector for which to search the nearest neighbors
+     *     maxCheck = the maximum number of restarts (in a best-bin-first manner)
+     */
+    void findNeighbors(ResultSet<DistanceType>& result, const ElementType* vec, const SearchParams& searchParams)
+    {
+        float epsError = 1+get_param(searchParams,"eps",0.0f);
+
+        std::vector<DistanceType> dists(dim_,0);
+        DistanceType distsq = computeInitialDistances(vec, dists);
+        searchLevel(result, vec, root_node_, distsq, dists, epsError);
+    }
+
+private:
+
+
+    /*--------------------- Internal Data Structures --------------------------*/
+    struct Node
+    {
+        /**
+         * Indices of points in leaf node
+         */
+        int left, right;
+        /**
+         * Dimension used for subdivision.
+         */
+        int divfeat;
+        /**
+         * The values used for subdivision.
+         */
+        DistanceType divlow, divhigh;
+        /**
+         * The child nodes.
+         */
+        Node* child1, * child2;
+    };
+    typedef Node* NodePtr;
+
+
+    struct Interval
+    {
+        DistanceType low, high;
+    };
+
+    typedef std::vector<Interval> BoundingBox;
+
+    typedef BranchStruct<NodePtr, DistanceType> BranchSt;
+    typedef BranchSt* Branch;
+
+
+
+
+    void save_tree(FILE* stream, NodePtr tree)
+    {
+      
