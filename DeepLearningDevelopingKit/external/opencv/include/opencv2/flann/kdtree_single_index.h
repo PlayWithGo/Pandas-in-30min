@@ -289,4 +289,67 @@ private:
 
     void save_tree(FILE* stream, NodePtr tree)
     {
-      
+        save_value(stream, *tree);
+        if (tree->child1!=NULL) {
+            save_tree(stream, tree->child1);
+        }
+        if (tree->child2!=NULL) {
+            save_tree(stream, tree->child2);
+        }
+    }
+
+
+    void load_tree(FILE* stream, NodePtr& tree)
+    {
+        tree = pool_.allocate<Node>();
+        load_value(stream, *tree);
+        if (tree->child1!=NULL) {
+            load_tree(stream, tree->child1);
+        }
+        if (tree->child2!=NULL) {
+            load_tree(stream, tree->child2);
+        }
+    }
+
+
+    void computeBoundingBox(BoundingBox& bbox)
+    {
+        bbox.resize(dim_);
+        for (size_t i=0; i<dim_; ++i) {
+            bbox[i].low = (DistanceType)dataset_[0][i];
+            bbox[i].high = (DistanceType)dataset_[0][i];
+        }
+        for (size_t k=1; k<dataset_.rows; ++k) {
+            for (size_t i=0; i<dim_; ++i) {
+                if (dataset_[k][i]<bbox[i].low) bbox[i].low = (DistanceType)dataset_[k][i];
+                if (dataset_[k][i]>bbox[i].high) bbox[i].high = (DistanceType)dataset_[k][i];
+            }
+        }
+    }
+
+
+    /**
+     * Create a tree node that subdivides the list of vecs from vind[first]
+     * to vind[last].  The routine is called recursively on each sublist.
+     * Place a pointer to this new tree node in the location pTree.
+     *
+     * Params: pTree = the new node to create
+     *                  first = index of the first vector
+     *                  last = index of the last vector
+     */
+    NodePtr divideTree(int left, int right, BoundingBox& bbox)
+    {
+        NodePtr node = pool_.allocate<Node>(); // allocate memory
+
+        /* If too few exemplars remain, then make this a leaf node. */
+        if ( (right-left) <= leaf_max_size_) {
+            node->child1 = node->child2 = NULL;    /* Mark as leaf node. */
+            node->left = left;
+            node->right = right;
+
+            // compute bounding-box of leaf points
+            for (size_t i=0; i<dim_; ++i) {
+                bbox[i].low = (DistanceType)dataset_[vind_[left]][i];
+                bbox[i].high = (DistanceType)dataset_[vind_[left]][i];
+            }
+            for (int k=left+1
