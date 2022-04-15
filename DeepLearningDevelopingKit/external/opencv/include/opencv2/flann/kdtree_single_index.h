@@ -352,4 +352,58 @@ private:
                 bbox[i].low = (DistanceType)dataset_[vind_[left]][i];
                 bbox[i].high = (DistanceType)dataset_[vind_[left]][i];
             }
-            for (int k=left+1
+            for (int k=left+1; k<right; ++k) {
+                for (size_t i=0; i<dim_; ++i) {
+                    if (bbox[i].low>dataset_[vind_[k]][i]) bbox[i].low=(DistanceType)dataset_[vind_[k]][i];
+                    if (bbox[i].high<dataset_[vind_[k]][i]) bbox[i].high=(DistanceType)dataset_[vind_[k]][i];
+                }
+            }
+        }
+        else {
+            int idx;
+            int cutfeat;
+            DistanceType cutval;
+            middleSplit_(&vind_[0]+left, right-left, idx, cutfeat, cutval, bbox);
+
+            node->divfeat = cutfeat;
+
+            BoundingBox left_bbox(bbox);
+            left_bbox[cutfeat].high = cutval;
+            node->child1 = divideTree(left, left+idx, left_bbox);
+
+            BoundingBox right_bbox(bbox);
+            right_bbox[cutfeat].low = cutval;
+            node->child2 = divideTree(left+idx, right, right_bbox);
+
+            node->divlow = left_bbox[cutfeat].high;
+            node->divhigh = right_bbox[cutfeat].low;
+
+            for (size_t i=0; i<dim_; ++i) {
+                bbox[i].low = std::min(left_bbox[i].low, right_bbox[i].low);
+                bbox[i].high = std::max(left_bbox[i].high, right_bbox[i].high);
+            }
+        }
+
+        return node;
+    }
+
+    void computeMinMax(int* ind, int count, int dim, ElementType& min_elem, ElementType& max_elem)
+    {
+        min_elem = dataset_[ind[0]][dim];
+        max_elem = dataset_[ind[0]][dim];
+        for (int i=1; i<count; ++i) {
+            ElementType val = dataset_[ind[i]][dim];
+            if (val<min_elem) min_elem = val;
+            if (val>max_elem) max_elem = val;
+        }
+    }
+
+    void middleSplit(int* ind, int count, int& index, int& cutfeat, DistanceType& cutval, const BoundingBox& bbox)
+    {
+        // find the largest span from the approximate bounding box
+        ElementType max_span = bbox[0].high-bbox[0].low;
+        cutfeat = 0;
+        cutval = (bbox[0].high+bbox[0].low)/2;
+        for (size_t i=1; i<dim_; ++i) {
+            ElementType span = bbox[i].high-bbox[i].low;
+            if (span>max_span) {
