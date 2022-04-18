@@ -521,4 +521,61 @@ private:
 
     DistanceType computeInitialDistances(const ElementType* vec, std::vector<DistanceType>& dists)
     {
- 
+        DistanceType distsq = 0.0;
+
+        for (size_t i = 0; i < dim_; ++i) {
+            if (vec[i] < root_bbox_[i].low) {
+                dists[i] = distance_.accum_dist(vec[i], root_bbox_[i].low, (int)i);
+                distsq += dists[i];
+            }
+            if (vec[i] > root_bbox_[i].high) {
+                dists[i] = distance_.accum_dist(vec[i], root_bbox_[i].high, (int)i);
+                distsq += dists[i];
+            }
+        }
+
+        return distsq;
+    }
+
+    /**
+     * Performs an exact search in the tree starting from a node.
+     */
+    void searchLevel(ResultSet<DistanceType>& result_set, const ElementType* vec, const NodePtr node, DistanceType mindistsq,
+                     std::vector<DistanceType>& dists, const float epsError)
+    {
+        /* If this is a leaf node, then do check and return. */
+        if ((node->child1 == NULL)&&(node->child2 == NULL)) {
+            DistanceType worst_dist = result_set.worstDist();
+            for (int i=node->left; i<node->right; ++i) {
+                int index = reorder_ ? i : vind_[i];
+                DistanceType dist = distance_(vec, data_[index], dim_, worst_dist);
+                if (dist<worst_dist) {
+                    result_set.addPoint(dist,vind_[i]);
+                }
+            }
+            return;
+        }
+
+        /* Which child branch should be taken first? */
+        int idx = node->divfeat;
+        ElementType val = vec[idx];
+        DistanceType diff1 = val - node->divlow;
+        DistanceType diff2 = val - node->divhigh;
+
+        NodePtr bestChild;
+        NodePtr otherChild;
+        DistanceType cut_dist;
+        if ((diff1+diff2)<0) {
+            bestChild = node->child1;
+            otherChild = node->child2;
+            cut_dist = distance_.accum_dist(val, node->divhigh, idx);
+        }
+        else {
+            bestChild = node->child2;
+            otherChild = node->child1;
+            cut_dist = distance_.accum_dist( val, node->divlow, idx);
+        }
+
+        /* Call recursively to search next level down. */
+        searchLevel(result_set, vec, bestChild, mindistsq, dists, epsError);
+
