@@ -466,4 +466,59 @@ private:
                     max_spread = spread;
                 }
             }
-    
+        }
+        // split in the middle
+        DistanceType split_val = (bbox[cutfeat].low+bbox[cutfeat].high)/2;
+        ElementType min_elem, max_elem;
+        computeMinMax(ind, count, cutfeat, min_elem, max_elem);
+
+        if (split_val<min_elem) cutval = (DistanceType)min_elem;
+        else if (split_val>max_elem) cutval = (DistanceType)max_elem;
+        else cutval = split_val;
+
+        int lim1, lim2;
+        planeSplit(ind, count, cutfeat, cutval, lim1, lim2);
+
+        if (lim1>count/2) index = lim1;
+        else if (lim2<count/2) index = lim2;
+        else index = count/2;
+    }
+
+
+    /**
+     *  Subdivide the list of points by a plane perpendicular on axe corresponding
+     *  to the 'cutfeat' dimension at 'cutval' position.
+     *
+     *  On return:
+     *  dataset[ind[0..lim1-1]][cutfeat]<cutval
+     *  dataset[ind[lim1..lim2-1]][cutfeat]==cutval
+     *  dataset[ind[lim2..count]][cutfeat]>cutval
+     */
+    void planeSplit(int* ind, int count, int cutfeat, DistanceType cutval, int& lim1, int& lim2)
+    {
+        /* Move vector indices for left subtree to front of list. */
+        int left = 0;
+        int right = count-1;
+        for (;; ) {
+            while (left<=right && dataset_[ind[left]][cutfeat]<cutval) ++left;
+            while (left<=right && dataset_[ind[right]][cutfeat]>=cutval) --right;
+            if (left>right) break;
+            std::swap(ind[left], ind[right]); ++left; --right;
+        }
+        /* If either list is empty, it means that all remaining features
+         * are identical. Split in the middle to maintain a balanced tree.
+         */
+        lim1 = left;
+        right = count-1;
+        for (;; ) {
+            while (left<=right && dataset_[ind[left]][cutfeat]<=cutval) ++left;
+            while (left<=right && dataset_[ind[right]][cutfeat]>cutval) --right;
+            if (left>right) break;
+            std::swap(ind[left], ind[right]); ++left; --right;
+        }
+        lim2 = left;
+    }
+
+    DistanceType computeInitialDistances(const ElementType* vec, std::vector<DistanceType>& dists)
+    {
+ 
