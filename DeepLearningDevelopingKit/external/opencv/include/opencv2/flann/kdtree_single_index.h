@@ -579,3 +579,57 @@ private:
         /* Call recursively to search next level down. */
         searchLevel(result_set, vec, bestChild, mindistsq, dists, epsError);
 
+        DistanceType dst = dists[idx];
+        mindistsq = mindistsq + cut_dist - dst;
+        dists[idx] = cut_dist;
+        if (mindistsq*epsError<=result_set.worstDist()) {
+            searchLevel(result_set, vec, otherChild, mindistsq, dists, epsError);
+        }
+        dists[idx] = dst;
+    }
+
+private:
+
+    /**
+     * The dataset used by this index
+     */
+    const Matrix<ElementType> dataset_;
+
+    IndexParams index_params_;
+
+    int leaf_max_size_;
+    bool reorder_;
+
+
+    /**
+     *  Array of indices to vectors in the dataset.
+     */
+    std::vector<int> vind_;
+
+    Matrix<ElementType> data_;
+
+    size_t size_;
+    size_t dim_;
+
+    /**
+     * Array of k-d trees used to find neighbours.
+     */
+    NodePtr root_node_;
+
+    BoundingBox root_bbox_;
+
+    /**
+     * Pooled memory allocator.
+     *
+     * Using a pooled memory allocator is more efficient
+     * than allocating memory directly when there is a large
+     * number small of memory allocations.
+     */
+    PooledAllocator pool_;
+
+    Distance distance_;
+};   // class KDTree
+
+}
+
+#endif //OPENCV_FLANN_KDTREE_SINGLE_INDEX_H_
