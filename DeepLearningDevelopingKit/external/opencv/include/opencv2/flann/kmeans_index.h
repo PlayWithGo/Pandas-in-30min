@@ -1057,3 +1057,116 @@ private:
      * Helper function the descends in the hierarchical k-means tree by splitting those clusters that minimize
      * the overall variance of the clustering.
      * Params:
+     *     root = root node
+     *     clusters = array with clusters centers (return value)
+     *     varianceValue = variance of the clustering (return value)
+     * Returns:
+     */
+    int getMinVarianceClusters(KMeansNodePtr root, KMeansNodePtr* clusters, int clusters_length, DistanceType& varianceValue)
+    {
+        int clusterCount = 1;
+        clusters[0] = root;
+
+        DistanceType meanVariance = root->variance*root->size;
+
+        while (clusterCount<clusters_length) {
+            DistanceType minVariance = (std::numeric_limits<DistanceType>::max)();
+            int splitIndex = -1;
+
+            for (int i=0; i<clusterCount; ++i) {
+                if (clusters[i]->childs != NULL) {
+
+                    DistanceType variance = meanVariance - clusters[i]->variance*clusters[i]->size;
+
+                    for (int j=0; j<branching_; ++j) {
+                        variance += clusters[i]->childs[j]->variance*clusters[i]->childs[j]->size;
+                    }
+                    if (variance<minVariance) {
+                        minVariance = variance;
+                        splitIndex = i;
+                    }
+                }
+            }
+
+            if (splitIndex==-1) break;
+            if ( (branching_+clusterCount-1) > clusters_length) break;
+
+            meanVariance = minVariance;
+
+            // split node
+            KMeansNodePtr toSplit = clusters[splitIndex];
+            clusters[splitIndex] = toSplit->childs[0];
+            for (int i=1; i<branching_; ++i) {
+                clusters[clusterCount++] = toSplit->childs[i];
+            }
+        }
+
+        varianceValue = meanVariance/root->size;
+        return clusterCount;
+    }
+
+private:
+    /** The branching factor used in the hierarchical k-means clustering */
+    int branching_;
+
+    /** Maximum number of iterations to use when performing k-means clustering */
+    int iterations_;
+
+    /** Algorithm for choosing the cluster centers */
+    flann_centers_init_t centers_init_;
+
+    /**
+     * Cluster border index. This is used in the tree search phase when determining
+     * the closest cluster to explore next. A zero value takes into account only
+     * the cluster centres, a value greater then zero also take into account the size
+     * of the cluster.
+     */
+    float cb_index_;
+
+    /**
+     * The dataset used by this index
+     */
+    const Matrix<ElementType> dataset_;
+
+    /** Index parameters */
+    IndexParams index_params_;
+
+    /**
+     * Number of features in the dataset.
+     */
+    size_t size_;
+
+    /**
+     * Length of each feature.
+     */
+    size_t veclen_;
+
+    /**
+     * The root node in the tree.
+     */
+    KMeansNodePtr root_;
+
+    /**
+     *  Array of indices to vectors in the dataset.
+     */
+    int* indices_;
+
+    /**
+     * The distance
+     */
+    Distance distance_;
+
+    /**
+     * Pooled memory allocator.
+     */
+    PooledAllocator pool_;
+
+    /**
+     * Memory occupied by the index.
+     */
+    int memoryCounter_;
+};
+
+}
+
+#endif //OPENCV_FLANN_KMEANS_INDEX_H_
