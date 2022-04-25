@@ -49,4 +49,51 @@ struct SearchParams : public IndexParams
         (*this)["checks"] = checks;
         // search for eps-approximate neighbours (default: 0)
         (*this)["eps"] = eps;
-        // only for radi
+        // only for radius search, require neighbours sorted by distance (default: true)
+        (*this)["sorted"] = sorted;
+    }
+};
+
+
+template<typename T>
+T get_param(const IndexParams& params, cv::String name, const T& default_value)
+{
+    IndexParams::const_iterator it = params.find(name);
+    if (it != params.end()) {
+        return it->second.cast<T>();
+    }
+    else {
+        return default_value;
+    }
+}
+
+template<typename T>
+T get_param(const IndexParams& params, cv::String name)
+{
+    IndexParams::const_iterator it = params.find(name);
+    if (it != params.end()) {
+        return it->second.cast<T>();
+    }
+    else {
+        throw FLANNException(cv::String("Missing parameter '")+name+cv::String("' in the parameters given"));
+    }
+}
+
+inline void print_params(const IndexParams& params, std::ostream& stream)
+{
+    IndexParams::const_iterator it;
+
+    for(it=params.begin(); it!=params.end(); ++it) {
+        stream << it->first << " : " << it->second << std::endl;
+    }
+}
+
+inline void print_params(const IndexParams& params)
+{
+    print_params(params, std::cout);
+}
+
+}
+
+
+#endif /* OPENCV_FLANN_PARAMS_H_ */
