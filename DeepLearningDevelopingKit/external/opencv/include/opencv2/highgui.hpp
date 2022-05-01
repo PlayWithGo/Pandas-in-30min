@@ -73,4 +73,65 @@ It provides easy interface to:
 
     This figure explains new functionality implemented with Qt\* GUI. The new GUI provides a statusbar,
     a toolbar, and a control panel. The control panel can have trackbars and buttonbars attached to it.
-    I
+    If you cannot see the control panel, press Ctrl+P or right-click any Qt window and select **Display
+    properties window**.
+
+    -   To attach a trackbar, the window name parameter must be NULL.
+
+    -   To attach a buttonbar, a button must be created. If the last bar attached to the control panel
+        is a buttonbar, the new button is added to the right of the last button. If the last bar
+        attached to the control panel is a trackbar, or the control panel is empty, a new buttonbar is
+        created. Then, a new button is attached to it.
+
+    See below the example used to generate the figure:
+    @code
+        int main(int argc, char *argv[])
+        {
+
+            int value = 50;
+            int value2 = 0;
+
+
+            namedWindow("main1",WINDOW_NORMAL);
+            namedWindow("main2",WINDOW_AUTOSIZE | CV_GUI_NORMAL);
+            createTrackbar( "track1", "main1", &value, 255,  NULL);
+
+            String nameb1 = "button1";
+            String nameb2 = "button2";
+
+            createButton(nameb1,callbackButton,&nameb1,QT_CHECKBOX,1);
+            createButton(nameb2,callbackButton,NULL,QT_CHECKBOX,0);
+            createTrackbar( "track2", NULL, &value2, 255, NULL);
+            createButton("button5",callbackButton1,NULL,QT_RADIOBOX,0);
+            createButton("button6",callbackButton2,NULL,QT_RADIOBOX,1);
+
+            setMouseCallback( "main2",on_mouse,NULL );
+
+            Mat img1 = imread("files/flower.jpg");
+            VideoCapture video;
+            video.open("files/hockey.avi");
+
+            Mat img2,img3;
+
+            while( waitKey(33) != 27 )
+            {
+                img1.convertTo(img2,-1,1,value);
+                video >> img3;
+
+                imshow("main1",img2);
+                imshow("main2",img3);
+            }
+
+            destroyAllWindows();
+
+            return 0;
+        }
+    @endcode
+
+
+    @defgroup highgui_winrt WinRT support
+
+    This figure explains new functionality implemented with WinRT GUI. The new GUI provides an Image control,
+    and a slider panel. Slider panel holds trackbars attached to it.
+
+    Sliders are attached below the image control. Every new slider is ad
