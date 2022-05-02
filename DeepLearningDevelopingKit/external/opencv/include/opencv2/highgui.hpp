@@ -186,4 +186,36 @@ enum WindowFlags {
 
        WINDOW_FULLSCREEN = 1,          //!< change the window to fullscreen.
        WINDOW_FREERATIO  = 0x00000100, //!< the image expends as much as it can (no ratio constraint).
-       WINDOW_KEEPRATIO  = 0x00000000, //!< the ratio of the image is respecte
+       WINDOW_KEEPRATIO  = 0x00000000, //!< the ratio of the image is respected.
+       WINDOW_GUI_EXPANDED=0x00000000, //!< status bar and tool bar
+       WINDOW_GUI_NORMAL = 0x00000010, //!< old fashious way
+    };
+
+//! Flags for cv::setWindowProperty / cv::getWindowProperty
+enum WindowPropertyFlags {
+       WND_PROP_FULLSCREEN   = 0, //!< fullscreen property    (can be WINDOW_NORMAL or WINDOW_FULLSCREEN).
+       WND_PROP_AUTOSIZE     = 1, //!< autosize property      (can be WINDOW_NORMAL or WINDOW_AUTOSIZE).
+       WND_PROP_ASPECT_RATIO = 2, //!< window's aspect ration (can be set to WINDOW_FREERATIO or WINDOW_KEEPRATIO).
+       WND_PROP_OPENGL       = 3, //!< opengl support.
+       WND_PROP_VISIBLE      = 4  //!< checks whether the window exists and is visible
+     };
+
+//! Mouse Events see cv::MouseCallback
+enum MouseEventTypes {
+       EVENT_MOUSEMOVE      = 0, //!< indicates that the mouse pointer has moved over the window.
+       EVENT_LBUTTONDOWN    = 1, //!< indicates that the left mouse button is pressed.
+       EVENT_RBUTTONDOWN    = 2, //!< indicates that the right mouse button is pressed.
+       EVENT_MBUTTONDOWN    = 3, //!< indicates that the middle mouse button is pressed.
+       EVENT_LBUTTONUP      = 4, //!< indicates that left mouse button is released.
+       EVENT_RBUTTONUP      = 5, //!< indicates that right mouse button is released.
+       EVENT_MBUTTONUP      = 6, //!< indicates that middle mouse button is released.
+       EVENT_LBUTTONDBLCLK  = 7, //!< indicates that left mouse button is double clicked.
+       EVENT_RBUTTONDBLCLK  = 8, //!< indicates that right mouse button is double clicked.
+       EVENT_MBUTTONDBLCLK  = 9, //!< indicates that middle mouse button is double clicked.
+       EVENT_MOUSEWHEEL     = 10,//!< positive and negative values mean forward and backward scrolling, respectively.
+       EVENT_MOUSEHWHEEL    = 11 //!< positive and negative values mean right and left scrolling, respectively.
+     };
+
+//! Mouse Event Flags see cv::MouseCallback
+enum MouseEventFlags {
+       EVENT_FLAG_LBUTTON   = 1, //!< indicates that the left mouse
