@@ -134,4 +134,56 @@ It provides easy interface to:
     This figure explains new functionality implemented with WinRT GUI. The new GUI provides an Image control,
     and a slider panel. Slider panel holds trackbars attached to it.
 
-    Sliders are attached below the image control. Every new slider is ad
+    Sliders are attached below the image control. Every new slider is added below the previous one.
+
+    See below the example used to generate the figure:
+    @code
+        void sample_app::MainPage::ShowWindow()
+        {
+            static cv::String windowName("sample");
+            cv::winrt_initContainer(this->cvContainer);
+            cv::namedWindow(windowName); // not required
+
+            cv::Mat image = cv::imread("Assets/sample.jpg");
+            cv::Mat converted = cv::Mat(image.rows, image.cols, CV_8UC4);
+            cv::cvtColor(image, converted, COLOR_BGR2BGRA);
+            cv::imshow(windowName, converted); // this will create window if it hasn't been created before
+
+            int state = 42;
+            cv::TrackbarCallback callback = [](int pos, void* userdata)
+            {
+                if (pos == 0) {
+                    cv::destroyWindow(windowName);
+                }
+            };
+            cv::TrackbarCallback callbackTwin = [](int pos, void* userdata)
+            {
+                if (pos >= 70) {
+                    cv::destroyAllWindows();
+                }
+            };
+            cv::createTrackbar("Sample trackbar", windowName, &state, 100, callback);
+            cv::createTrackbar("Twin brother", windowName, &state, 100, callbackTwin);
+        }
+    @endcode
+
+    @defgroup highgui_c C API
+@}
+*/
+
+///////////////////////// graphical user interface //////////////////////////
+namespace cv
+{
+
+//! @addtogroup highgui
+//! @{
+
+//! Flags for cv::namedWindow
+enum WindowFlags {
+       WINDOW_NORMAL     = 0x00000000, //!< the user can resize the window (no constraint) / also use to switch a fullscreen window to a normal size.
+       WINDOW_AUTOSIZE   = 0x00000001, //!< the user cannot resize the window, the size is constrainted by the image displayed.
+       WINDOW_OPENGL     = 0x00001000, //!< window with opengl support.
+
+       WINDOW_FULLSCREEN = 1,          //!< change the window to fullscreen.
+       WINDOW_FREERATIO  = 0x00000100, //!< the image expends as much as it can (no ratio constraint).
+       WINDOW_KEEPRATIO  = 0x00000000, //!< the ratio of the image is respecte
