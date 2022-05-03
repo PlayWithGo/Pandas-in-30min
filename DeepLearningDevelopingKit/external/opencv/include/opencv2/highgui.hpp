@@ -218,4 +218,56 @@ enum MouseEventTypes {
 
 //! Mouse Event Flags see cv::MouseCallback
 enum MouseEventFlags {
-       EVENT_FLAG_LBUTTON   = 1, //!< indicates that the left mouse
+       EVENT_FLAG_LBUTTON   = 1, //!< indicates that the left mouse button is down.
+       EVENT_FLAG_RBUTTON   = 2, //!< indicates that the right mouse button is down.
+       EVENT_FLAG_MBUTTON   = 4, //!< indicates that the middle mouse button is down.
+       EVENT_FLAG_CTRLKEY   = 8, //!< indicates that CTRL Key is pressed.
+       EVENT_FLAG_SHIFTKEY  = 16,//!< indicates that SHIFT Key is pressed.
+       EVENT_FLAG_ALTKEY    = 32 //!< indicates that ALT Key is pressed.
+     };
+
+//! Qt font weight
+enum QtFontWeights {
+        QT_FONT_LIGHT           = 25, //!< Weight of 25
+        QT_FONT_NORMAL          = 50, //!< Weight of 50
+        QT_FONT_DEMIBOLD        = 63, //!< Weight of 63
+        QT_FONT_BOLD            = 75, //!< Weight of 75
+        QT_FONT_BLACK           = 87  //!< Weight of 87
+     };
+
+//! Qt font style
+enum QtFontStyles {
+        QT_STYLE_NORMAL         = 0, //!< Normal font.
+        QT_STYLE_ITALIC         = 1, //!< Italic font.
+        QT_STYLE_OBLIQUE        = 2  //!< Oblique font.
+     };
+
+//! Qt "button" type
+enum QtButtonTypes {
+       QT_PUSH_BUTTON   = 0,    //!< Push button.
+       QT_CHECKBOX      = 1,    //!< Checkbox button.
+       QT_RADIOBOX      = 2,    //!< Radiobox button.
+       QT_NEW_BUTTONBAR = 1024  //!< Button should create a new buttonbar
+     };
+
+/** @brief Callback function for mouse events. see cv::setMouseCallback
+@param event one of the cv::MouseEventTypes constants.
+@param x The x-coordinate of the mouse event.
+@param y The y-coordinate of the mouse event.
+@param flags one of the cv::MouseEventFlags constants.
+@param userdata The optional parameter.
+ */
+typedef void (*MouseCallback)(int event, int x, int y, int flags, void* userdata);
+
+/** @brief Callback function for Trackbar see cv::createTrackbar
+@param pos current position of the specified trackbar.
+@param userdata The optional parameter.
+ */
+typedef void (*TrackbarCallback)(int pos, void* userdata);
+
+/** @brief Callback function defined to be called every frame. See cv::setOpenGlDrawCallback
+@param userdata The optional parameter.
+ */
+typedef void (*OpenGlDrawCallback)(void* userdata);
+
+/** @brief Callback function
