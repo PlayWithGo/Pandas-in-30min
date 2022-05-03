@@ -270,4 +270,46 @@ typedef void (*TrackbarCallback)(int pos, void* userdata);
  */
 typedef void (*OpenGlDrawCallback)(void* userdata);
 
-/** @brief Callback function
+/** @brief Callback function for a button created by cv::createButton
+@param state current state of the button. It could be -1 for a push button, 0 or 1 for a check/radio box button.
+@param userdata The optional parameter.
+ */
+typedef void (*ButtonCallback)(int state, void* userdata);
+
+/** @brief Creates a window.
+
+The function namedWindow creates a window that can be used as a placeholder for images and
+trackbars. Created windows are referred to by their names.
+
+If a window with the same name already exists, the function does nothing.
+
+You can call cv::destroyWindow or cv::destroyAllWindows to close the window and de-allocate any associated
+memory usage. For a simple program, you do not really have to call these functions because all the
+resources and windows of the application are closed automatically by the operating system upon exit.
+
+@note
+
+Qt backend supports additional flags:
+ -   **WINDOW_NORMAL or WINDOW_AUTOSIZE:** WINDOW_NORMAL enables you to resize the
+     window, whereas WINDOW_AUTOSIZE adjusts automatically the window size to fit the
+     displayed image (see imshow ), and you cannot change the window size manually.
+ -   **WINDOW_FREERATIO or WINDOW_KEEPRATIO:** WINDOW_FREERATIO adjusts the image
+     with no respect to its ratio, whereas WINDOW_KEEPRATIO keeps the image ratio.
+ -   **WINDOW_GUI_NORMAL or WINDOW_GUI_EXPANDED:** WINDOW_GUI_NORMAL is the old way to draw the window
+     without statusbar and toolbar, whereas WINDOW_GUI_EXPANDED is a new enhanced GUI.
+By default, flags == WINDOW_AUTOSIZE | WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED
+
+@param winname Name of the window in the window caption that may be used as a window identifier.
+@param flags Flags of the window. The supported flags are: (cv::WindowFlags)
+ */
+CV_EXPORTS_W void namedWindow(const String& winname, int flags = WINDOW_AUTOSIZE);
+
+/** @brief Destroys the specified window.
+
+The function destroyWindow destroys the window with the given name.
+
+@param winname Name of the window to be destroyed.
+ */
+CV_EXPORTS_W void destroyWindow(const String& winname);
+
+/** @brief Destroys all of the Hig
