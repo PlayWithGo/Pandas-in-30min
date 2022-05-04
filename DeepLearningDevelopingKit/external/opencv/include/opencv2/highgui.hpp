@@ -312,4 +312,53 @@ The function destroyWindow destroys the window with the given name.
  */
 CV_EXPORTS_W void destroyWindow(const String& winname);
 
-/** @brief Destroys all of the Hig
+/** @brief Destroys all of the HighGUI windows.
+
+The function destroyAllWindows destroys all of the opened HighGUI windows.
+ */
+CV_EXPORTS_W void destroyAllWindows();
+
+CV_EXPORTS_W int startWindowThread();
+
+/** @brief Similar to #waitKey, but returns full key code.
+
+@note
+
+Key code is implementation specific and depends on used backend: QT/GTK/Win32/etc
+
+*/
+CV_EXPORTS_W int waitKeyEx(int delay = 0);
+
+/** @brief Waits for a pressed key.
+
+The function waitKey waits for a key event infinitely (when \f$\texttt{delay}\leq 0\f$ ) or for delay
+milliseconds, when it is positive. Since the OS has a minimum time between switching threads, the
+function will not wait exactly delay ms, it will wait at least delay ms, depending on what else is
+running on your computer at that time. It returns the code of the pressed key or -1 if no key was
+pressed before the specified time had elapsed.
+
+@note
+
+This function is the only method in HighGUI that can fetch and handle events, so it needs to be
+called periodically for normal event processing unless HighGUI is used within an environment that
+takes care of event processing.
+
+@note
+
+The function only works if there is at least one HighGUI window created and the window is active.
+If there are several HighGUI windows, any of them can be active.
+
+@param delay Delay in milliseconds. 0 is the special value that means "forever".
+ */
+CV_EXPORTS_W int waitKey(int delay = 0);
+
+/** @brief Displays an image in the specified window.
+
+The function imshow displays an image in the specified window. If the window was created with the
+cv::WINDOW_AUTOSIZE flag, the image is shown with its original size, however it is still limited by the screen resolution.
+Otherwise, the image is scaled to fit the window. The function may scale the image, depending on its depth:
+
+-   If the image is 8-bit unsigned, it is displayed as is.
+-   If the image is 16-bit unsigned or 32-bit integer, the pixels are divided by 256. That is, the
+    value range [0,255\*256] is mapped to [0,255].
+-   If the image is 32-bit or 64-bit floating-point, the pixel values are multiplied by 255. That is,
