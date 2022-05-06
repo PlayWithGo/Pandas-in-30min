@@ -361,4 +361,60 @@ Otherwise, the image is scaled to fit the window. The function may scale the ima
 -   If the image is 8-bit unsigned, it is displayed as is.
 -   If the image is 16-bit unsigned or 32-bit integer, the pixels are divided by 256. That is, the
     value range [0,255\*256] is mapped to [0,255].
--   If the image is 32-bit or 64-bit floating-point, the pixel values are multiplied by 255. That is,
+-   If the image is 32-bit or 64-bit floating-point, the pixel values are multiplied by 255. That is, the
+    value range [0,1] is mapped to [0,255].
+
+If window was created with OpenGL support, cv::imshow also support ogl::Buffer , ogl::Texture2D and
+cuda::GpuMat as input.
+
+If the window was not created before this function, it is assumed creating a window with cv::WINDOW_AUTOSIZE.
+
+If you need to show an image that is bigger than the screen resolution, you will need to call namedWindow("", WINDOW_NORMAL) before the imshow.
+
+@note This function should be followed by cv::waitKey function which displays the image for specified
+milliseconds. Otherwise, it won't display the image. For example, **waitKey(0)** will display the window
+infinitely until any keypress (it is suitable for image display). **waitKey(25)** will display a frame
+for 25 ms, after which display will be automatically closed. (If you put it in a loop to read
+videos, it will display the video frame-by-frame)
+
+@note
+
+[__Windows Backend Only__] Pressing Ctrl+C will copy the image to the clipboard.
+
+[__Windows Backend Only__] Pressing Ctrl+S will show a dialog to save the image.
+
+@param winname Name of the window.
+@param mat Image to be shown.
+ */
+CV_EXPORTS_W void imshow(const String& winname, InputArray mat);
+
+/** @brief Resizes window to the specified size
+
+@note
+
+-   The specified window size is for the image area. Toolbars are not counted.
+-   Only windows created without cv::WINDOW_AUTOSIZE flag can be resized.
+
+@param winname Window name.
+@param width The new window width.
+@param height The new window height.
+ */
+CV_EXPORTS_W void resizeWindow(const String& winname, int width, int height);
+
+/** @overload
+@param winname Window name.
+@param size The new window size.
+*/
+CV_EXPORTS_W void resizeWindow(const String& winname, const cv::Size& size);
+
+/** @brief Moves window to the specified position
+
+@param winname Name of the window.
+@param x The new x-coordinate of the window.
+@param y The new y-coordinate of the window.
+ */
+CV_EXPORTS_W void moveWindow(const String& winname, int x, int y);
+
+/** @brief Changes parameters of a window dynamically.
+
+The function setWindowPro
