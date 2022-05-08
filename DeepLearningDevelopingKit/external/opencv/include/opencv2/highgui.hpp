@@ -417,4 +417,54 @@ CV_EXPORTS_W void moveWindow(const String& winname, int x, int y);
 
 /** @brief Changes parameters of a window dynamically.
 
-The function setWindowPro
+The function setWindowProperty enables changing properties of a window.
+
+@param winname Name of the window.
+@param prop_id Window property to edit. The supported operation flags are: (cv::WindowPropertyFlags)
+@param prop_value New value of the window property. The supported flags are: (cv::WindowFlags)
+ */
+CV_EXPORTS_W void setWindowProperty(const String& winname, int prop_id, double prop_value);
+
+/** @brief Updates window title
+@param winname Name of the window.
+@param title New title.
+*/
+CV_EXPORTS_W void setWindowTitle(const String& winname, const String& title);
+
+/** @brief Provides parameters of a window.
+
+The function getWindowProperty returns properties of a window.
+
+@param winname Name of the window.
+@param prop_id Window property to retrieve. The following operation flags are available: (cv::WindowPropertyFlags)
+
+@sa setWindowProperty
+ */
+CV_EXPORTS_W double getWindowProperty(const String& winname, int prop_id);
+
+/** @brief Provides rectangle of image in the window.
+
+The function getWindowImageRect returns the client screen coordinates, width and height of the image rendering area.
+
+@param winname Name of the window.
+
+@sa resizeWindow moveWindow
+ */
+CV_EXPORTS_W Rect getWindowImageRect(const String& winname);
+
+/** @brief Sets mouse handler for the specified window
+
+@param winname Name of the window.
+@param onMouse Mouse callback. See OpenCV samples, such as
+<https://github.com/opencv/opencv/tree/master/samples/cpp/ffilldemo.cpp>, on how to specify and
+use the callback.
+@param userdata The optional parameter passed to the callback.
+ */
+CV_EXPORTS void setMouseCallback(const String& winname, MouseCallback onMouse, void* userdata = 0);
+
+/** @brief Gets the mouse-wheel motion delta, when handling mouse-wheel events cv::EVENT_MOUSEWHEEL and
+cv::EVENT_MOUSEHWHEEL.
+
+For regular mice with a scroll-wheel, delta will be a multiple of 120. The value 120 corresponds to
+a one notch rotation of the wheel or the threshold for action to be taken and one such action should
+occur for each delta. Some high-precision mice with 
