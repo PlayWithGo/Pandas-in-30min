@@ -548,4 +548,71 @@ the NULL pointer, no callbacks are called, but only value is updated.
 @param userdata User data that is passed as is to the callback. It can be used to handle trackbar
 events without using global variables.
  */
-CV_EXPORTS int create
+CV_EXPORTS int createTrackbar(const String& trackbarname, const String& winname,
+                              int* value, int count,
+                              TrackbarCallback onChange = 0,
+                              void* userdata = 0);
+
+/** @brief Returns the trackbar position.
+
+The function returns the current position of the specified trackbar.
+
+@note
+
+[__Qt Backend Only__] winname can be empty (or NULL) if the trackbar is attached to the control
+panel.
+
+@param trackbarname Name of the trackbar.
+@param winname Name of the window that is the parent of the trackbar.
+ */
+CV_EXPORTS_W int getTrackbarPos(const String& trackbarname, const String& winname);
+
+/** @brief Sets the trackbar position.
+
+The function sets the position of the specified trackbar in the specified window.
+
+@note
+
+[__Qt Backend Only__] winname can be empty (or NULL) if the trackbar is attached to the control
+panel.
+
+@param trackbarname Name of the trackbar.
+@param winname Name of the window that is the parent of trackbar.
+@param pos New position.
+ */
+CV_EXPORTS_W void setTrackbarPos(const String& trackbarname, const String& winname, int pos);
+
+/** @brief Sets the trackbar maximum position.
+
+The function sets the maximum position of the specified trackbar in the specified window.
+
+@note
+
+[__Qt Backend Only__] winname can be empty (or NULL) if the trackbar is attached to the control
+panel.
+
+@param trackbarname Name of the trackbar.
+@param winname Name of the window that is the parent of trackbar.
+@param maxval New maximum position.
+ */
+CV_EXPORTS_W void setTrackbarMax(const String& trackbarname, const String& winname, int maxval);
+
+/** @brief Sets the trackbar minimum position.
+
+The function sets the minimum position of the specified trackbar in the specified window.
+
+@note
+
+[__Qt Backend Only__] winname can be empty (or NULL) if the trackbar is attached to the control
+panel.
+
+@param trackbarname Name of the trackbar.
+@param winname Name of the window that is the parent of trackbar.
+@param minval New minimum position.
+ */
+CV_EXPORTS_W void setTrackbarMin(const String& trackbarname, const String& winname, int minval);
+
+//! @addtogroup highgui_opengl OpenGL support
+//! @{
+
+/** @brief 
