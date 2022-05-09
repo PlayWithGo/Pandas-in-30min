@@ -513,4 +513,39 @@ use `esc` to terminate multiple ROI selection process.
 @param img image to select a ROI.
 @param boundingBoxes selected ROIs.
 @param showCrosshair if true crosshair of selection rectangle will be shown.
-@
+@param fromCenter if true center of selection will match initial mouse position. In opposite case a corner of
+selection rectangle will correspont to the initial mouse position.
+
+@note The function sets it's own mouse callback for specified window using cv::setMouseCallback(windowName, ...).
+After finish of work an empty callback will be set for the used window.
+ */
+CV_EXPORTS_W void selectROIs(const String& windowName, InputArray img,
+                             CV_OUT std::vector<Rect>& boundingBoxes, bool showCrosshair = true, bool fromCenter = false);
+
+/** @brief Creates a trackbar and attaches it to the specified window.
+
+The function createTrackbar creates a trackbar (a slider or range control) with the specified name
+and range, assigns a variable value to be a position synchronized with the trackbar and specifies
+the callback function onChange to be called on the trackbar position change. The created trackbar is
+displayed in the specified window winname.
+
+@note
+
+[__Qt Backend Only__] winname can be empty (or NULL) if the trackbar should be attached to the
+control panel.
+
+Clicking the label of each trackbar enables editing the trackbar values manually.
+
+@param trackbarname Name of the created trackbar.
+@param winname Name of the window that will be used as a parent of the created trackbar.
+@param value Optional pointer to an integer variable whose value reflects the position of the
+slider. Upon creation, the slider position is defined by this variable.
+@param count Maximal position of the slider. The minimal position is always 0.
+@param onChange Pointer to the function to be called every time the slider changes position. This
+function should be prototyped as void Foo(int,void\*); , where the first parameter is the trackbar
+position and the second parameter is the user data (see the next parameter). If the callback is
+the NULL pointer, no callbacks are called, but only value is updated.
+@param userdata User data that is passed as is to the callback. It can be used to handle trackbar
+events without using global variables.
+ */
+CV_EXPORTS int create
