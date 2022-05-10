@@ -615,4 +615,59 @@ CV_EXPORTS_W void setTrackbarMin(const String& trackbarname, const String& winna
 //! @addtogroup highgui_opengl OpenGL support
 //! @{
 
-/** @brief 
+/** @brief Displays OpenGL 2D texture in the specified window.
+
+@param winname Name of the window.
+@param tex OpenGL 2D texture data.
+ */
+CV_EXPORTS void imshow(const String& winname, const ogl::Texture2D& tex);
+
+/** @brief Sets a callback function to be called to draw on top of displayed image.
+
+The function setOpenGlDrawCallback can be used to draw 3D data on the window. See the example of
+callback function below:
+@code
+    void on_opengl(void* param)
+    {
+        glLoadIdentity();
+
+        glTranslated(0.0, 0.0, -1.0);
+
+        glRotatef( 55, 1, 0, 0 );
+        glRotatef( 45, 0, 1, 0 );
+        glRotatef( 0, 0, 0, 1 );
+
+        static const int coords[6][4][3] = {
+            { { +1, -1, -1 }, { -1, -1, -1 }, { -1, +1, -1 }, { +1, +1, -1 } },
+            { { +1, +1, -1 }, { -1, +1, -1 }, { -1, +1, +1 }, { +1, +1, +1 } },
+            { { +1, -1, +1 }, { +1, -1, -1 }, { +1, +1, -1 }, { +1, +1, +1 } },
+            { { -1, -1, -1 }, { -1, -1, +1 }, { -1, +1, +1 }, { -1, +1, -1 } },
+            { { +1, -1, +1 }, { -1, -1, +1 }, { -1, -1, -1 }, { +1, -1, -1 } },
+            { { -1, -1, +1 }, { +1, -1, +1 }, { +1, +1, +1 }, { -1, +1, +1 } }
+        };
+
+        for (int i = 0; i < 6; ++i) {
+                    glColor3ub( i*20, 100+i*10, i*42 );
+                    glBegin(GL_QUADS);
+                    for (int j = 0; j < 4; ++j) {
+                            glVertex3d(0.2 * coords[i][j][0], 0.2 * coords[i][j][1], 0.2 * coords[i][j][2]);
+                    }
+                    glEnd();
+        }
+    }
+@endcode
+
+@param winname Name of the window.
+@param onOpenGlDraw Pointer to the function to be called every frame. This function should be
+prototyped as void Foo(void\*) .
+@param userdata Pointer passed to the callback function.(__Optional__)
+ */
+CV_EXPORTS void setOpenGlDrawCallback(const String& winname, OpenGlDrawCallback onOpenGlDraw, void* userdata = 0);
+
+/** @brief Sets the specified window as current OpenGL context.
+
+@param winname Name of the window.
+ */
+CV_EXPORTS void setOpenGlContext(const String& winname);
+
+/** @brief Force window to redraw its contex
