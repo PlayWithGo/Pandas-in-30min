@@ -758,4 +758,51 @@ amount of time *delayms*. The function does not modify the image, displayed in t
 after the specified delay the original content of the window is restored.
 
 @param winname Name of the window.
-@param text Overlay text to write on a window 
+@param text Overlay text to write on a window image.
+@param delayms The period (in milliseconds), during which the overlay text is displayed. If this
+function is called before the previous overlay text timed out, the timer is restarted and the text
+is updated. If this value is zero, the text never disappears.
+ */
+CV_EXPORTS_W void displayOverlay(const String& winname, const String& text, int delayms = 0);
+
+/** @brief Displays a text on the window statusbar during the specified period of time.
+
+The function displayStatusBar displays useful information/tips on top of the window for a certain
+amount of time *delayms* . This information is displayed on the window statusbar (the window must be
+created with the CV_GUI_EXPANDED flags).
+
+@param winname Name of the window.
+@param text Text to write on the window statusbar.
+@param delayms Duration (in milliseconds) to display the text. If this function is called before
+the previous text timed out, the timer is restarted and the text is updated. If this value is
+zero, the text never disappears.
+ */
+CV_EXPORTS_W void displayStatusBar(const String& winname, const String& text, int delayms = 0);
+
+/** @brief Saves parameters of the specified window.
+
+The function saveWindowParameters saves size, location, flags, trackbars value, zoom and panning
+location of the window windowName.
+
+@param windowName Name of the window.
+ */
+CV_EXPORTS void saveWindowParameters(const String& windowName);
+
+/** @brief Loads parameters of the specified window.
+
+The function loadWindowParameters loads size, location, flags, trackbars value, zoom and panning
+location of the window windowName.
+
+@param windowName Name of the window.
+ */
+CV_EXPORTS void loadWindowParameters(const String& windowName);
+
+CV_EXPORTS  int startLoop(int (*pt2Func)(int argc, char *argv[]), int argc, char* argv[]);
+
+CV_EXPORTS  void stopLoop();
+
+/** @brief Attaches a button to the control panel.
+
+The function createButton attaches a button to the control panel. Each button is added to a
+buttonbar to the right of the last button. A new buttonbar is created if nothing was attached to the
+control panel before, or if the last element attached to the control panel was
