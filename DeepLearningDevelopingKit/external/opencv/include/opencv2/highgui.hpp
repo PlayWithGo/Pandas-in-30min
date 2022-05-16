@@ -805,4 +805,40 @@ CV_EXPORTS  void stopLoop();
 
 The function createButton attaches a button to the control panel. Each button is added to a
 buttonbar to the right of the last button. A new buttonbar is created if nothing was attached to the
-control panel before, or if the last element attached to the control panel was
+control panel before, or if the last element attached to the control panel was a trackbar or if the
+QT_NEW_BUTTONBAR flag is added to the type.
+
+See below various examples of the cv::createButton function call: :
+@code
+    createButton(NULL,callbackButton);//create a push button "button 0", that will call callbackButton.
+    createButton("button2",callbackButton,NULL,QT_CHECKBOX,0);
+    createButton("button3",callbackButton,&value);
+    createButton("button5",callbackButton1,NULL,QT_RADIOBOX);
+    createButton("button6",callbackButton2,NULL,QT_PUSH_BUTTON,1);
+    createButton("button6",callbackButton2,NULL,QT_PUSH_BUTTON|QT_NEW_BUTTONBAR);// create a push button in a new row
+@endcode
+
+@param  bar_name Name of the button.
+@param on_change Pointer to the function to be called every time the button changes its state.
+This function should be prototyped as void Foo(int state,\*void); . *state* is the current state
+of the button. It could be -1 for a push button, 0 or 1 for a check/radio box button.
+@param userdata Pointer passed to the callback function.
+@param type Optional type of the button. Available types are: (cv::QtButtonTypes)
+@param initial_button_state Default state of the button. Use for checkbox and radiobox. Its
+value could be 0 or 1. (__Optional__)
+*/
+CV_EXPORTS int createButton( const String& bar_name, ButtonCallback on_change,
+                             void* userdata = 0, int type = QT_PUSH_BUTTON,
+                             bool initial_button_state = false);
+
+//! @} highgui_qt
+
+//! @} highgui
+
+} // cv
+
+#ifndef DISABLE_OPENCV_24_COMPATIBILITY
+#include "opencv2/highgui/highgui_c.h"
+#endif
+
+#endif
