@@ -769,3 +769,443 @@ CVAPI(void)  cvCalcArrHist( CvArr** arr, CvHistogram* hist,
                             const CvArr* mask CV_DEFAULT(NULL) );
 
 /** @overload */
+CV_INLINE  void  cvCalcHist( IplImage** image, CvHistogram* hist,
+                             int accumulate CV_DEFAULT(0),
+                             const CvArr* mask CV_DEFAULT(NULL) )
+{
+    cvCalcArrHist( (CvArr**)image, hist, accumulate, mask );
+}
+
+/** @brief Calculates back project
+@see cvCalcBackProject, cv::calcBackProject
+*/
+CVAPI(void)  cvCalcArrBackProject( CvArr** image, CvArr* dst,
+                                   const CvHistogram* hist );
+
+#define  cvCalcBackProject(image, dst, hist) cvCalcArrBackProject((CvArr**)image, dst, hist)
+
+
+/** @brief Locates a template within an image by using a histogram comparison.
+
+The function calculates the back projection by comparing histograms of the source image patches with
+the given histogram. The function is similar to matchTemplate, but instead of comparing the raster
+patch with all its possible positions within the search window, the function CalcBackProjectPatch
+compares histograms. See the algorithm diagram below:
+
+![image](pics/backprojectpatch.png)
+
+@param image Source images (though, you may pass CvMat\*\* as well).
+@param dst Destination image.
+@param range
+@param hist Histogram.
+@param method Comparison method passed to cvCompareHist (see the function description).
+@param factor Normalization factor for histograms that affects the normalization scale of the
+destination image. Pass 1 if not sure.
+
+@see cvCalcBackProjectPatch
+ */
+CVAPI(void)  cvCalcArrBackProjectPatch( CvArr** image, CvArr* dst, CvSize range,
+                                        CvHistogram* hist, int method,
+                                        double factor );
+
+#define  cvCalcBackProjectPatch( image, dst, range, hist, method, factor ) \
+     cvCalcArrBackProjectPatch( (CvArr**)image, dst, range, hist, method, factor )
+
+
+/** @brief Divides one histogram by another.
+
+The function calculates the object probability density from two histograms as:
+
+\f[\texttt{disthist} (I)= \forkthree{0}{if \(\texttt{hist1}(I)=0\)}{\texttt{scale}}{if \(\texttt{hist1}(I) \ne 0\) and \(\texttt{hist2}(I) > \texttt{hist1}(I)\)}{\frac{\texttt{hist2}(I) \cdot \texttt{scale}}{\texttt{hist1}(I)}}{if \(\texttt{hist1}(I) \ne 0\) and \(\texttt{hist2}(I) \le \texttt{hist1}(I)\)}\f]
+
+@param hist1 First histogram (the divisor).
+@param hist2 Second histogram.
+@param dst_hist Destination histogram.
+@param scale Scale factor for the destination histogram.
+ */
+CVAPI(void)  cvCalcProbDensity( const CvHistogram* hist1, const CvHistogram* hist2,
+                                CvHistogram* dst_hist, double scale CV_DEFAULT(255) );
+
+/** @brief equalizes histogram of 8-bit single-channel image
+@see cv::equalizeHist
+*/
+CVAPI(void)  cvEqualizeHist( const CvArr* src, CvArr* dst );
+
+
+/** @brief Applies distance transform to binary image
+@see cv::distanceTransform
+*/
+CVAPI(void)  cvDistTransform( const CvArr* src, CvArr* dst,
+                              int distance_type CV_DEFAULT(CV_DIST_L2),
+                              int mask_size CV_DEFAULT(3),
+                              const float* mask CV_DEFAULT(NULL),
+                              CvArr* labels CV_DEFAULT(NULL),
+                              int labelType CV_DEFAULT(CV_DIST_LABEL_CCOMP));
+
+
+/** @brief Applies fixed-level threshold to grayscale image.
+
+   This is a basic operation applied before retrieving contours
+@see cv::threshold
+*/
+CVAPI(double)  cvThreshold( const CvArr*  src, CvArr*  dst,
+                            double  threshold, double  max_value,
+                            int threshold_type );
+
+/** @brief Applies adaptive threshold to grayscale image.
+
+   The two parameters for methods CV_ADAPTIVE_THRESH_MEAN_C and
+   CV_ADAPTIVE_THRESH_GAUSSIAN_C are:
+   neighborhood size (3, 5, 7 etc.),
+   and a constant subtracted from mean (...,-3,-2,-1,0,1,2,3,...)
+@see cv::adaptiveThreshold
+*/
+CVAPI(void)  cvAdaptiveThreshold( const CvArr* src, CvArr* dst, double max_value,
+                                  int adaptive_method CV_DEFAULT(CV_ADAPTIVE_THRESH_MEAN_C),
+                                  int threshold_type CV_DEFAULT(CV_THRESH_BINARY),
+                                  int block_size CV_DEFAULT(3),
+                                  double param1 CV_DEFAULT(5));
+
+/** @brief Fills the connected component until the color difference gets large enough
+@see cv::floodFill
+*/
+CVAPI(void)  cvFloodFill( CvArr* image, CvPoint seed_point,
+                          CvScalar new_val, CvScalar lo_diff CV_DEFAULT(cvScalarAll(0)),
+                          CvScalar up_diff CV_DEFAULT(cvScalarAll(0)),
+                          CvConnectedComp* comp CV_DEFAULT(NULL),
+                          int flags CV_DEFAULT(4),
+                          CvArr* mask CV_DEFAULT(NULL));
+
+/****************************************************************************************\
+*                                  Feature detection                                     *
+\****************************************************************************************/
+
+/** @brief Runs canny edge detector
+@see cv::Canny
+*/
+CVAPI(void)  cvCanny( const CvArr* image, CvArr* edges, double threshold1,
+                      double threshold2, int  aperture_size CV_DEFAULT(3) );
+
+/** @brief Calculates constraint image for corner detection
+
+   Dx^2 * Dyy + Dxx * Dy^2 - 2 * Dx * Dy * Dxy.
+   Applying threshold to the result gives coordinates of corners
+@see cv::preCornerDetect
+*/
+CVAPI(void) cvPreCornerDetect( const CvArr* image, CvArr* corners,
+                               int aperture_size CV_DEFAULT(3) );
+
+/** @brief Calculates eigen values and vectors of 2x2
+   gradient covariation matrix at every image pixel
+@see cv::cornerEigenValsAndVecs
+*/
+CVAPI(void)  cvCornerEigenValsAndVecs( const CvArr* image, CvArr* eigenvv,
+                                       int block_size, int aperture_size CV_DEFAULT(3) );
+
+/** @brief Calculates minimal eigenvalue for 2x2 gradient covariation matrix at
+   every image pixel
+@see cv::cornerMinEigenVal
+*/
+CVAPI(void)  cvCornerMinEigenVal( const CvArr* image, CvArr* eigenval,
+                                  int block_size, int aperture_size CV_DEFAULT(3) );
+
+/** @brief Harris corner detector:
+
+   Calculates det(M) - k*(trace(M)^2), where M is 2x2 gradient covariation matrix for each pixel
+@see cv::cornerHarris
+*/
+CVAPI(void)  cvCornerHarris( const CvArr* image, CvArr* harris_response,
+                             int block_size, int aperture_size CV_DEFAULT(3),
+                             double k CV_DEFAULT(0.04) );
+
+/** @brief Adjust corner position using some sort of gradient search
+@see cv::cornerSubPix
+*/
+CVAPI(void)  cvFindCornerSubPix( const CvArr* image, CvPoint2D32f* corners,
+                                 int count, CvSize win, CvSize zero_zone,
+                                 CvTermCriteria  criteria );
+
+/** @brief Finds a sparse set of points within the selected region
+   that seem to be easy to track
+@see cv::goodFeaturesToTrack
+*/
+CVAPI(void)  cvGoodFeaturesToTrack( const CvArr* image, CvArr* eig_image,
+                                    CvArr* temp_image, CvPoint2D32f* corners,
+                                    int* corner_count, double  quality_level,
+                                    double  min_distance,
+                                    const CvArr* mask CV_DEFAULT(NULL),
+                                    int block_size CV_DEFAULT(3),
+                                    int use_harris CV_DEFAULT(0),
+                                    double k CV_DEFAULT(0.04) );
+
+/** @brief Finds lines on binary image using one of several methods.
+
+   line_storage is either memory storage or 1 x _max number of lines_ CvMat, its
+   number of columns is changed by the function.
+   method is one of CV_HOUGH_*;
+   rho, theta and threshold are used for each of those methods;
+   param1 ~ line length, param2 ~ line gap - for probabilistic,
+   param1 ~ srn, param2 ~ stn - for multi-scale
+@see cv::HoughLines
+*/
+CVAPI(CvSeq*)  cvHoughLines2( CvArr* image, void* line_storage, int method,
+                              double rho, double theta, int threshold,
+                              double param1 CV_DEFAULT(0), double param2 CV_DEFAULT(0),
+                              double min_theta CV_DEFAULT(0), double max_theta CV_DEFAULT(CV_PI));
+
+/** @brief Finds circles in the image
+@see cv::HoughCircles
+*/
+CVAPI(CvSeq*) cvHoughCircles( CvArr* image, void* circle_storage,
+                              int method, double dp, double min_dist,
+                              double param1 CV_DEFAULT(100),
+                              double param2 CV_DEFAULT(100),
+                              int min_radius CV_DEFAULT(0),
+                              int max_radius CV_DEFAULT(0));
+
+/** @brief Fits a line into set of 2d or 3d points in a robust way (M-estimator technique)
+@see cv::fitLine
+*/
+CVAPI(void)  cvFitLine( const CvArr* points, int dist_type, double param,
+                        double reps, double aeps, float* line );
+
+/****************************************************************************************\
+*                                     Drawing                                            *
+\****************************************************************************************/
+
+/****************************************************************************************\
+*       Drawing functions work with images/matrices of arbitrary type.                   *
+*       For color images the channel order is BGR[A]                                     *
+*       Antialiasing is supported only for 8-bit image now.                              *
+*       All the functions include parameter color that means rgb value (that may be      *
+*       constructed with CV_RGB macro) for color images and brightness                   *
+*       for grayscale images.                                                            *
+*       If a drawn figure is partially or completely outside of the image, it is clipped.*
+\****************************************************************************************/
+
+#define CV_RGB( r, g, b )  cvScalar( (b), (g), (r), 0 )
+#define CV_FILLED -1
+
+#define CV_AA 16
+
+/** @brief Draws 4-connected, 8-connected or antialiased line segment connecting two points
+@see cv::line
+*/
+CVAPI(void)  cvLine( CvArr* img, CvPoint pt1, CvPoint pt2,
+                     CvScalar color, int thickness CV_DEFAULT(1),
+                     int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) );
+
+/** @brief Draws a rectangle given two opposite corners of the rectangle (pt1 & pt2)
+
+   if thickness<0 (e.g. thickness == CV_FILLED), the filled box is drawn
+@see cv::rectangle
+*/
+CVAPI(void)  cvRectangle( CvArr* img, CvPoint pt1, CvPoint pt2,
+                          CvScalar color, int thickness CV_DEFAULT(1),
+                          int line_type CV_DEFAULT(8),
+                          int shift CV_DEFAULT(0));
+
+/** @brief Draws a rectangle specified by a CvRect structure
+@see cv::rectangle
+*/
+CVAPI(void)  cvRectangleR( CvArr* img, CvRect r,
+                           CvScalar color, int thickness CV_DEFAULT(1),
+                           int line_type CV_DEFAULT(8),
+                           int shift CV_DEFAULT(0));
+
+
+/** @brief Draws a circle with specified center and radius.
+
+   Thickness works in the same way as with cvRectangle
+@see cv::circle
+*/
+CVAPI(void)  cvCircle( CvArr* img, CvPoint center, int radius,
+                       CvScalar color, int thickness CV_DEFAULT(1),
+                       int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0));
+
+/** @brief Draws ellipse outline, filled ellipse, elliptic arc or filled elliptic sector
+
+   depending on _thickness_, _start_angle_ and _end_angle_ parameters. The resultant figure
+   is rotated by _angle_. All the angles are in degrees
+@see cv::ellipse
+*/
+CVAPI(void)  cvEllipse( CvArr* img, CvPoint center, CvSize axes,
+                        double angle, double start_angle, double end_angle,
+                        CvScalar color, int thickness CV_DEFAULT(1),
+                        int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0));
+
+CV_INLINE  void  cvEllipseBox( CvArr* img, CvBox2D box, CvScalar color,
+                               int thickness CV_DEFAULT(1),
+                               int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) )
+{
+    CvSize axes;
+    axes.width = cvRound(box.size.width*0.5);
+    axes.height = cvRound(box.size.height*0.5);
+
+    cvEllipse( img, cvPointFrom32f( box.center ), axes, box.angle,
+               0, 360, color, thickness, line_type, shift );
+}
+
+/** @brief Fills convex or monotonous polygon.
+@see cv::fillConvexPoly
+*/
+CVAPI(void)  cvFillConvexPoly( CvArr* img, const CvPoint* pts, int npts, CvScalar color,
+                               int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0));
+
+/** @brief Fills an area bounded by one or more arbitrary polygons
+@see cv::fillPoly
+*/
+CVAPI(void)  cvFillPoly( CvArr* img, CvPoint** pts, const int* npts,
+                         int contours, CvScalar color,
+                         int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) );
+
+/** @brief Draws one or more polygonal curves
+@see cv::polylines
+*/
+CVAPI(void)  cvPolyLine( CvArr* img, CvPoint** pts, const int* npts, int contours,
+                         int is_closed, CvScalar color, int thickness CV_DEFAULT(1),
+                         int line_type CV_DEFAULT(8), int shift CV_DEFAULT(0) );
+
+#define cvDrawRect cvRectangle
+#define cvDrawLine cvLine
+#define cvDrawCircle cvCircle
+#define cvDrawEllipse cvEllipse
+#define cvDrawPolyLine cvPolyLine
+
+/** @brief Clips the line segment connecting *pt1 and *pt2
+   by the rectangular window
+
+   (0<=x<img_size.width, 0<=y<img_size.height).
+@see cv::clipLine
+*/
+CVAPI(int) cvClipLine( CvSize img_size, CvPoint* pt1, CvPoint* pt2 );
+
+/** @brief Initializes line iterator.
+
+Initially, line_iterator->ptr will point to pt1 (or pt2, see left_to_right description) location in
+the image. Returns the number of pixels on the line between the ending points.
+@see cv::LineIterator
+*/
+CVAPI(int)  cvInitLineIterator( const CvArr* image, CvPoint pt1, CvPoint pt2,
+                                CvLineIterator* line_iterator,
+                                int connectivity CV_DEFAULT(8),
+                                int left_to_right CV_DEFAULT(0));
+
+#define CV_NEXT_LINE_POINT( line_iterator )                     \
+{                                                               \
+    int _line_iterator_mask = (line_iterator).err < 0 ? -1 : 0; \
+    (line_iterator).err += (line_iterator).minus_delta +        \
+        ((line_iterator).plus_delta & _line_iterator_mask);     \
+    (line_iterator).ptr += (line_iterator).minus_step +         \
+        ((line_iterator).plus_step & _line_iterator_mask);      \
+}
+
+
+#define CV_FONT_HERSHEY_SIMPLEX         0
+#define CV_FONT_HERSHEY_PLAIN           1
+#define CV_FONT_HERSHEY_DUPLEX          2
+#define CV_FONT_HERSHEY_COMPLEX         3
+#define CV_FONT_HERSHEY_TRIPLEX         4
+#define CV_FONT_HERSHEY_COMPLEX_SMALL   5
+#define CV_FONT_HERSHEY_SCRIPT_SIMPLEX  6
+#define CV_FONT_HERSHEY_SCRIPT_COMPLEX  7
+
+#define CV_FONT_ITALIC                 16
+
+#define CV_FONT_VECTOR0    CV_FONT_HERSHEY_SIMPLEX
+
+
+/** Font structure */
+typedef struct CvFont
+{
+  const char* nameFont;   //Qt:nameFont
+  CvScalar color;       //Qt:ColorFont -> cvScalar(blue_component, green_component, red_component[, alpha_component])
+    int         font_face;    //Qt: bool italic         /** =CV_FONT_* */
+    const int*  ascii;      //!< font data and metrics
+    const int*  greek;
+    const int*  cyrillic;
+    float       hscale, vscale;
+    float       shear;      //!< slope coefficient: 0 - normal, >0 - italic
+    int         thickness;    //!< Qt: weight               /** letters thickness */
+    float       dx;       //!< horizontal interval between letters
+    int         line_type;    //!< Qt: PointSize
+}
+CvFont;
+
+/** @brief Initializes font structure (OpenCV 1.x API).
+
+The function initializes the font structure that can be passed to text rendering functions.
+
+@param font Pointer to the font structure initialized by the function
+@param font_face Font name identifier. See cv::HersheyFonts and corresponding old CV_* identifiers.
+@param hscale Horizontal scale. If equal to 1.0f , the characters have the original width
+depending on the font type. If equal to 0.5f , the characters are of half the original width.
+@param vscale Vertical scale. If equal to 1.0f , the characters have the original height depending
+on the font type. If equal to 0.5f , the characters are of half the original height.
+@param shear Approximate tangent of the character slope relative to the vertical line. A zero
+value means a non-italic font, 1.0f means about a 45 degree slope, etc.
+@param thickness Thickness of the text strokes
+@param line_type Type of the strokes, see line description
+
+@sa cvPutText
+ */
+CVAPI(void)  cvInitFont( CvFont* font, int font_face,
+                         double hscale, double vscale,
+                         double shear CV_DEFAULT(0),
+                         int thickness CV_DEFAULT(1),
+                         int line_type CV_DEFAULT(8));
+
+CV_INLINE CvFont cvFont( double scale, int thickness CV_DEFAULT(1) )
+{
+    CvFont font;
+    cvInitFont( &font, CV_FONT_HERSHEY_PLAIN, scale, scale, 0, thickness, CV_AA );
+    return font;
+}
+
+/** @brief Renders text stroke with specified font and color at specified location.
+   CvFont should be initialized with cvInitFont
+@see cvInitFont, cvGetTextSize, cvFont, cv::putText
+*/
+CVAPI(void)  cvPutText( CvArr* img, const char* text, CvPoint org,
+                        const CvFont* font, CvScalar color );
+
+/** @brief Calculates bounding box of text stroke (useful for alignment)
+@see cv::getTextSize
+*/
+CVAPI(void)  cvGetTextSize( const char* text_string, const CvFont* font,
+                            CvSize* text_size, int* baseline );
+
+/** @brief Unpacks color value
+
+if arrtype is CV_8UC?, _color_ is treated as packed color value, otherwise the first channels
+(depending on arrtype) of destination scalar are set to the same value = _color_
+*/
+CVAPI(CvScalar)  cvColorToScalar( double packed_color, int arrtype );
+
+/** @brief Returns the polygon points which make up the given ellipse.
+
+The ellipse is define by the box of size 'axes' rotated 'angle' around the 'center'. A partial
+sweep of the ellipse arc can be done by spcifying arc_start and arc_end to be something other than
+0 and 360, respectively. The input array 'pts' must be large enough to hold the result. The total
+number of points stored into 'pts' is returned by this function.
+@see cv::ellipse2Poly
+*/
+CVAPI(int) cvEllipse2Poly( CvPoint center, CvSize axes,
+                 int angle, int arc_start, int arc_end, CvPoint * pts, int delta );
+
+/** @brief Draws contour outlines or filled interiors on the image
+@see cv::drawContours
+*/
+CVAPI(void)  cvDrawContours( CvArr *img, CvSeq* contour,
+                             CvScalar external_color, CvScalar hole_color,
+                             int max_level, int thickness CV_DEFAULT(1),
+                             int line_type CV_DEFAULT(8),
+                             CvPoint offset CV_DEFAULT(cvPoint(0,0)));
+
+/** @} */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
