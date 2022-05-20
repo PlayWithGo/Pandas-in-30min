@@ -1016,3 +1016,2073 @@ public:
     CV_WRAP void insert(const std::vector<Point2f>& ptvec);
 
     /** @brief Returns the location of a point within a Delaunay triangulation.
+
+    @param pt Point to locate.
+    @param edge Output edge that the point belongs to or is located to the right of it.
+    @param vertex Optional output vertex the input point coincides with.
+
+    The function locates the input point within the subdivision and gives one of the triangle edges
+    or vertices.
+
+    @returns an integer which specify one of the following five cases for point location:
+    -  The point falls into some facet. The function returns #PTLOC_INSIDE and edge will contain one of
+       edges of the facet.
+    -  The point falls onto the edge. The function returns #PTLOC_ON_EDGE and edge will contain this edge.
+    -  The point coincides with one of the subdivision vertices. The function returns #PTLOC_VERTEX and
+       vertex will contain a pointer to the vertex.
+    -  The point is outside the subdivision reference rectangle. The function returns #PTLOC_OUTSIDE_RECT
+       and no pointers are filled.
+    -  One of input arguments is invalid. A runtime error is raised or, if silent or "parent" error
+       processing mode is selected, #PTLOC_ERROR is returned.
+     */
+    CV_WRAP int locate(Point2f pt, CV_OUT int& edge, CV_OUT int& vertex);
+
+    /** @brief Finds the subdivision vertex closest to the given point.
+
+    @param pt Input point.
+    @param nearestPt Output subdivision vertex point.
+
+    The function is another function that locates the input point within the subdivision. It finds the
+    subdivision vertex that is the closest to the input point. It is not necessarily one of vertices
+    of the facet containing the input point, though the facet (located using locate() ) is used as a
+    starting point.
+
+    @returns vertex ID.
+     */
+    CV_WRAP int findNearest(Point2f pt, CV_OUT Point2f* nearestPt = 0);
+
+    /** @brief Returns a list of all edges.
+
+    @param edgeList Output vector.
+
+    The function gives each edge as a 4 numbers vector, where each two are one of the edge
+    vertices. i.e. org_x = v[0], org_y = v[1], dst_x = v[2], dst_y = v[3].
+     */
+    CV_WRAP void getEdgeList(CV_OUT std::vector<Vec4f>& edgeList) const;
+
+    /** @brief Returns a list of the leading edge ID connected to each triangle.
+
+    @param leadingEdgeList Output vector.
+
+    The function gives one edge ID for each triangle.
+     */
+    CV_WRAP void getLeadingEdgeList(CV_OUT std::vector<int>& leadingEdgeList) const;
+
+    /** @brief Returns a list of all triangles.
+
+    @param triangleList Output vector.
+
+    The function gives each triangle as a 6 numbers vector, where each two are one of the triangle
+    vertices. i.e. p1_x = v[0], p1_y = v[1], p2_x = v[2], p2_y = v[3], p3_x = v[4], p3_y = v[5].
+     */
+    CV_WRAP void getTriangleList(CV_OUT std::vector<Vec6f>& triangleList) const;
+
+    /** @brief Returns a list of all Voroni facets.
+
+    @param idx Vector of vertices IDs to consider. For all vertices you can pass empty vector.
+    @param facetList Output vector of the Voroni facets.
+    @param facetCenters Output vector of the Voroni facets center points.
+
+     */
+    CV_WRAP void getVoronoiFacetList(const std::vector<int>& idx, CV_OUT std::vector<std::vector<Point2f> >& facetList,
+                                     CV_OUT std::vector<Point2f>& facetCenters);
+
+    /** @brief Returns vertex location from vertex ID.
+
+    @param vertex vertex ID.
+    @param firstEdge Optional. The first edge ID which is connected to the vertex.
+    @returns vertex (x,y)
+
+     */
+    CV_WRAP Point2f getVertex(int vertex, CV_OUT int* firstEdge = 0) const;
+
+    /** @brief Returns one of the edges related to the given edge.
+
+    @param edge Subdivision edge ID.
+    @param nextEdgeType Parameter specifying which of the related edges to return.
+    The following values are possible:
+    -   NEXT_AROUND_ORG next around the edge origin ( eOnext on the picture below if e is the input edge)
+    -   NEXT_AROUND_DST next around the edge vertex ( eDnext )
+    -   PREV_AROUND_ORG previous around the edge origin (reversed eRnext )
+    -   PREV_AROUND_DST previous around the edge destination (reversed eLnext )
+    -   NEXT_AROUND_LEFT next around the left facet ( eLnext )
+    -   NEXT_AROUND_RIGHT next around the right facet ( eRnext )
+    -   PREV_AROUND_LEFT previous around the left facet (reversed eOnext )
+    -   PREV_AROUND_RIGHT previous around the right facet (reversed eDnext )
+
+    ![sample output](pics/quadedge.png)
+
+    @returns edge ID related to the input edge.
+     */
+    CV_WRAP int getEdge( int edge, int nextEdgeType ) const;
+
+    /** @brief Returns next edge around the edge origin.
+
+    @param edge Subdivision edge ID.
+
+    @returns an integer which is next edge ID around the edge origin: eOnext on the
+    picture above if e is the input edge).
+     */
+    CV_WRAP int nextEdge(int edge) const;
+
+    /** @brief Returns another edge of the same quad-edge.
+
+    @param edge Subdivision edge ID.
+    @param rotate Parameter specifying which of the edges of the same quad-edge as the input
+    one to return. The following values are possible:
+    -   0 - the input edge ( e on the picture below if e is the input edge)
+    -   1 - the rotated edge ( eRot )
+    -   2 - the reversed edge (reversed e (in green))
+    -   3 - the reversed rotated edge (reversed eRot (in green))
+
+    @returns one of the edges ID of the same quad-edge as the input edge.
+     */
+    CV_WRAP int rotateEdge(int edge, int rotate) const;
+    CV_WRAP int symEdge(int edge) const;
+
+    /** @brief Returns the edge origin.
+
+    @param edge Subdivision edge ID.
+    @param orgpt Output vertex location.
+
+    @returns vertex ID.
+     */
+    CV_WRAP int edgeOrg(int edge, CV_OUT Point2f* orgpt = 0) const;
+
+    /** @brief Returns the edge destination.
+
+    @param edge Subdivision edge ID.
+    @param dstpt Output vertex location.
+
+    @returns vertex ID.
+     */
+    CV_WRAP int edgeDst(int edge, CV_OUT Point2f* dstpt = 0) const;
+
+protected:
+    int newEdge();
+    void deleteEdge(int edge);
+    int newPoint(Point2f pt, bool isvirtual, int firstEdge = 0);
+    void deletePoint(int vtx);
+    void setEdgePoints( int edge, int orgPt, int dstPt );
+    void splice( int edgeA, int edgeB );
+    int connectEdges( int edgeA, int edgeB );
+    void swapEdges( int edge );
+    int isRightOf(Point2f pt, int edge) const;
+    void calcVoronoi();
+    void clearVoronoi();
+    void checkSubdiv() const;
+
+    struct CV_EXPORTS Vertex
+    {
+        Vertex();
+        Vertex(Point2f pt, bool _isvirtual, int _firstEdge=0);
+        bool isvirtual() const;
+        bool isfree() const;
+
+        int firstEdge;
+        int type;
+        Point2f pt;
+    };
+
+    struct CV_EXPORTS QuadEdge
+    {
+        QuadEdge();
+        QuadEdge(int edgeidx);
+        bool isfree() const;
+
+        int next[4];
+        int pt[4];
+    };
+
+    //! All of the vertices
+    std::vector<Vertex> vtx;
+    //! All of the edges
+    std::vector<QuadEdge> qedges;
+    int freeQEdge;
+    int freePoint;
+    bool validGeometry;
+
+    int recentEdge;
+    //! Top left corner of the bounding rect
+    Point2f topLeft;
+    //! Bottom right corner of the bounding rect
+    Point2f bottomRight;
+};
+
+//! @} imgproc_subdiv2d
+
+//! @addtogroup imgproc_feature
+//! @{
+
+/** @example lsd_lines.cpp
+An example using the LineSegmentDetector
+\image html building_lsd.png "Sample output image" width=434 height=300
+*/
+
+/** @brief Line segment detector class
+
+following the algorithm described at @cite Rafael12 .
+*/
+class CV_EXPORTS_W LineSegmentDetector : public Algorithm
+{
+public:
+
+    /** @brief Finds lines in the input image.
+
+    This is the output of the default parameters of the algorithm on the above shown image.
+
+    ![image](pics/building_lsd.png)
+
+    @param _image A grayscale (CV_8UC1) input image. If only a roi needs to be selected, use:
+    `lsd_ptr-\>detect(image(roi), lines, ...); lines += Scalar(roi.x, roi.y, roi.x, roi.y);`
+    @param _lines A vector of Vec4i or Vec4f elements specifying the beginning and ending point of a line. Where
+    Vec4i/Vec4f is (x1, y1, x2, y2), point 1 is the start, point 2 - end. Returned lines are strictly
+    oriented depending on the gradient.
+    @param width Vector of widths of the regions, where the lines are found. E.g. Width of line.
+    @param prec Vector of precisions with which the lines are found.
+    @param nfa Vector containing number of false alarms in the line region, with precision of 10%. The
+    bigger the value, logarithmically better the detection.
+    - -1 corresponds to 10 mean false alarms
+    - 0 corresponds to 1 mean false alarm
+    - 1 corresponds to 0.1 mean false alarms
+    This vector will be calculated only when the objects type is #LSD_REFINE_ADV.
+    */
+    CV_WRAP virtual void detect(InputArray _image, OutputArray _lines,
+                        OutputArray width = noArray(), OutputArray prec = noArray(),
+                        OutputArray nfa = noArray()) = 0;
+
+    /** @brief Draws the line segments on a given image.
+    @param _image The image, where the lines will be drawn. Should be bigger or equal to the image,
+    where the lines were found.
+    @param lines A vector of the lines that needed to be drawn.
+     */
+    CV_WRAP virtual void drawSegments(InputOutputArray _image, InputArray lines) = 0;
+
+    /** @brief Draws two groups of lines in blue and red, counting the non overlapping (mismatching) pixels.
+
+    @param size The size of the image, where lines1 and lines2 were found.
+    @param lines1 The first group of lines that needs to be drawn. It is visualized in blue color.
+    @param lines2 The second group of lines. They visualized in red color.
+    @param _image Optional image, where the lines will be drawn. The image should be color(3-channel)
+    in order for lines1 and lines2 to be drawn in the above mentioned colors.
+     */
+    CV_WRAP virtual int compareSegments(const Size& size, InputArray lines1, InputArray lines2, InputOutputArray _image = noArray()) = 0;
+
+    virtual ~LineSegmentDetector() { }
+};
+
+/** @brief Creates a smart pointer to a LineSegmentDetector object and initializes it.
+
+The LineSegmentDetector algorithm is defined using the standard values. Only advanced users may want
+to edit those, as to tailor it for their own application.
+
+@param _refine The way found lines will be refined, see #LineSegmentDetectorModes
+@param _scale The scale of the image that will be used to find the lines. Range (0..1].
+@param _sigma_scale Sigma for Gaussian filter. It is computed as sigma = _sigma_scale/_scale.
+@param _quant Bound to the quantization error on the gradient norm.
+@param _ang_th Gradient angle tolerance in degrees.
+@param _log_eps Detection threshold: -log10(NFA) \> log_eps. Used only when advance refinement
+is chosen.
+@param _density_th Minimal density of aligned region points in the enclosing rectangle.
+@param _n_bins Number of bins in pseudo-ordering of gradient modulus.
+ */
+CV_EXPORTS_W Ptr<LineSegmentDetector> createLineSegmentDetector(
+    int _refine = LSD_REFINE_STD, double _scale = 0.8,
+    double _sigma_scale = 0.6, double _quant = 2.0, double _ang_th = 22.5,
+    double _log_eps = 0, double _density_th = 0.7, int _n_bins = 1024);
+
+//! @} imgproc_feature
+
+//! @addtogroup imgproc_filter
+//! @{
+
+/** @brief Returns Gaussian filter coefficients.
+
+The function computes and returns the \f$\texttt{ksize} \times 1\f$ matrix of Gaussian filter
+coefficients:
+
+\f[G_i= \alpha *e^{-(i-( \texttt{ksize} -1)/2)^2/(2* \texttt{sigma}^2)},\f]
+
+where \f$i=0..\texttt{ksize}-1\f$ and \f$\alpha\f$ is the scale factor chosen so that \f$\sum_i G_i=1\f$.
+
+Two of such generated kernels can be passed to sepFilter2D. Those functions automatically recognize
+smoothing kernels (a symmetrical kernel with sum of weights equal to 1) and handle them accordingly.
+You may also use the higher-level GaussianBlur.
+@param ksize Aperture size. It should be odd ( \f$\texttt{ksize} \mod 2 = 1\f$ ) and positive.
+@param sigma Gaussian standard deviation. If it is non-positive, it is computed from ksize as
+`sigma = 0.3*((ksize-1)*0.5 - 1) + 0.8`.
+@param ktype Type of filter coefficients. It can be CV_32F or CV_64F .
+@sa  sepFilter2D, getDerivKernels, getStructuringElement, GaussianBlur
+ */
+CV_EXPORTS_W Mat getGaussianKernel( int ksize, double sigma, int ktype = CV_64F );
+
+/** @brief Returns filter coefficients for computing spatial image derivatives.
+
+The function computes and returns the filter coefficients for spatial image derivatives. When
+`ksize=CV_SCHARR`, the Scharr \f$3 \times 3\f$ kernels are generated (see #Scharr). Otherwise, Sobel
+kernels are generated (see #Sobel). The filters are normally passed to #sepFilter2D or to
+
+@param kx Output matrix of row filter coefficients. It has the type ktype .
+@param ky Output matrix of column filter coefficients. It has the type ktype .
+@param dx Derivative order in respect of x.
+@param dy Derivative order in respect of y.
+@param ksize Aperture size. It can be CV_SCHARR, 1, 3, 5, or 7.
+@param normalize Flag indicating whether to normalize (scale down) the filter coefficients or not.
+Theoretically, the coefficients should have the denominator \f$=2^{ksize*2-dx-dy-2}\f$. If you are
+going to filter floating-point images, you are likely to use the normalized kernels. But if you
+compute derivatives of an 8-bit image, store the results in a 16-bit image, and wish to preserve
+all the fractional bits, you may want to set normalize=false .
+@param ktype Type of filter coefficients. It can be CV_32f or CV_64F .
+ */
+CV_EXPORTS_W void getDerivKernels( OutputArray kx, OutputArray ky,
+                                   int dx, int dy, int ksize,
+                                   bool normalize = false, int ktype = CV_32F );
+
+/** @brief Returns Gabor filter coefficients.
+
+For more details about gabor filter equations and parameters, see: [Gabor
+Filter](http://en.wikipedia.org/wiki/Gabor_filter).
+
+@param ksize Size of the filter returned.
+@param sigma Standard deviation of the gaussian envelope.
+@param theta Orientation of the normal to the parallel stripes of a Gabor function.
+@param lambd Wavelength of the sinusoidal factor.
+@param gamma Spatial aspect ratio.
+@param psi Phase offset.
+@param ktype Type of filter coefficients. It can be CV_32F or CV_64F .
+ */
+CV_EXPORTS_W Mat getGaborKernel( Size ksize, double sigma, double theta, double lambd,
+                                 double gamma, double psi = CV_PI*0.5, int ktype = CV_64F );
+
+//! returns "magic" border value for erosion and dilation. It is automatically transformed to Scalar::all(-DBL_MAX) for dilation.
+static inline Scalar morphologyDefaultBorderValue() { return Scalar::all(DBL_MAX); }
+
+/** @brief Returns a structuring element of the specified size and shape for morphological operations.
+
+The function constructs and returns the structuring element that can be further passed to #erode,
+#dilate or #morphologyEx. But you can also construct an arbitrary binary mask yourself and use it as
+the structuring element.
+
+@param shape Element shape that could be one of #MorphShapes
+@param ksize Size of the structuring element.
+@param anchor Anchor position within the element. The default value \f$(-1, -1)\f$ means that the
+anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor
+position. In other cases the anchor just regulates how much the result of the morphological
+operation is shifted.
+ */
+CV_EXPORTS_W Mat getStructuringElement(int shape, Size ksize, Point anchor = Point(-1,-1));
+
+/** @example Smoothing.cpp
+Sample code for simple filters
+![Sample screenshot](Smoothing_Tutorial_Result_Median_Filter.jpg)
+Check @ref tutorial_gausian_median_blur_bilateral_filter "the corresponding tutorial" for more details
+ */
+/** @brief Blurs an image using the median filter.
+
+The function smoothes an image using the median filter with the \f$\texttt{ksize} \times
+\texttt{ksize}\f$ aperture. Each channel of a multi-channel image is processed independently.
+In-place operation is supported.
+
+@note The median filter uses #BORDER_REPLICATE internally to cope with border pixels, see #BorderTypes
+
+@param src input 1-, 3-, or 4-channel image; when ksize is 3 or 5, the image depth should be
+CV_8U, CV_16U, or CV_32F, for larger aperture sizes, it can only be CV_8U.
+@param dst destination array of the same size and type as src.
+@param ksize aperture linear size; it must be odd and greater than 1, for example: 3, 5, 7 ...
+@sa  bilateralFilter, blur, boxFilter, GaussianBlur
+ */
+CV_EXPORTS_W void medianBlur( InputArray src, OutputArray dst, int ksize );
+
+/** @brief Blurs an image using a Gaussian filter.
+
+The function convolves the source image with the specified Gaussian kernel. In-place filtering is
+supported.
+
+@param src input image; the image can have any number of channels, which are processed
+independently, but the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
+@param dst output image of the same size and type as src.
+@param ksize Gaussian kernel size. ksize.width and ksize.height can differ but they both must be
+positive and odd. Or, they can be zero's and then they are computed from sigma.
+@param sigmaX Gaussian kernel standard deviation in X direction.
+@param sigmaY Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be
+equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height,
+respectively (see #getGaussianKernel for details); to fully control the result regardless of
+possible future modifications of all this semantics, it is recommended to specify all of ksize,
+sigmaX, and sigmaY.
+@param borderType pixel extrapolation method, see #BorderTypes
+
+@sa  sepFilter2D, filter2D, blur, boxFilter, bilateralFilter, medianBlur
+ */
+CV_EXPORTS_W void GaussianBlur( InputArray src, OutputArray dst, Size ksize,
+                                double sigmaX, double sigmaY = 0,
+                                int borderType = BORDER_DEFAULT );
+
+/** @brief Applies the bilateral filter to an image.
+
+The function applies bilateral filtering to the input image, as described in
+http://www.dai.ed.ac.uk/CVonline/LOCAL_COPIES/MANDUCHI1/Bilateral_Filtering.html
+bilateralFilter can reduce unwanted noise very well while keeping edges fairly sharp. However, it is
+very slow compared to most filters.
+
+_Sigma values_: For simplicity, you can set the 2 sigma values to be the same. If they are small (\<
+10), the filter will not have much effect, whereas if they are large (\> 150), they will have a very
+strong effect, making the image look "cartoonish".
+
+_Filter size_: Large filters (d \> 5) are very slow, so it is recommended to use d=5 for real-time
+applications, and perhaps d=9 for offline applications that need heavy noise filtering.
+
+This filter does not work inplace.
+@param src Source 8-bit or floating-point, 1-channel or 3-channel image.
+@param dst Destination image of the same size and type as src .
+@param d Diameter of each pixel neighborhood that is used during filtering. If it is non-positive,
+it is computed from sigmaSpace.
+@param sigmaColor Filter sigma in the color space. A larger value of the parameter means that
+farther colors within the pixel neighborhood (see sigmaSpace) will be mixed together, resulting
+in larger areas of semi-equal color.
+@param sigmaSpace Filter sigma in the coordinate space. A larger value of the parameter means that
+farther pixels will influence each other as long as their colors are close enough (see sigmaColor
+). When d\>0, it specifies the neighborhood size regardless of sigmaSpace. Otherwise, d is
+proportional to sigmaSpace.
+@param borderType border mode used to extrapolate pixels outside of the image, see #BorderTypes
+ */
+CV_EXPORTS_W void bilateralFilter( InputArray src, OutputArray dst, int d,
+                                   double sigmaColor, double sigmaSpace,
+                                   int borderType = BORDER_DEFAULT );
+
+/** @brief Blurs an image using the box filter.
+
+The function smooths an image using the kernel:
+
+\f[\texttt{K} =  \alpha \begin{bmatrix} 1 & 1 & 1 &  \cdots & 1 & 1  \\ 1 & 1 & 1 &  \cdots & 1 & 1  \\ \hdotsfor{6} \\ 1 & 1 & 1 &  \cdots & 1 & 1 \end{bmatrix}\f]
+
+where
+
+\f[\alpha = \fork{\frac{1}{\texttt{ksize.width*ksize.height}}}{when \texttt{normalize=true}}{1}{otherwise}\f]
+
+Unnormalized box filter is useful for computing various integral characteristics over each pixel
+neighborhood, such as covariance matrices of image derivatives (used in dense optical flow
+algorithms, and so on). If you need to compute pixel sums over variable-size windows, use #integral.
+
+@param src input image.
+@param dst output image of the same size and type as src.
+@param ddepth the output image depth (-1 to use src.depth()).
+@param ksize blurring kernel size.
+@param anchor anchor point; default value Point(-1,-1) means that the anchor is at the kernel
+center.
+@param normalize flag, specifying whether the kernel is normalized by its area or not.
+@param borderType border mode used to extrapolate pixels outside of the image, see #BorderTypes
+@sa  blur, bilateralFilter, GaussianBlur, medianBlur, integral
+ */
+CV_EXPORTS_W void boxFilter( InputArray src, OutputArray dst, int ddepth,
+                             Size ksize, Point anchor = Point(-1,-1),
+                             bool normalize = true,
+                             int borderType = BORDER_DEFAULT );
+
+/** @brief Calculates the normalized sum of squares of the pixel values overlapping the filter.
+
+For every pixel \f$ (x, y) \f$ in the source image, the function calculates the sum of squares of those neighboring
+pixel values which overlap the filter placed over the pixel \f$ (x, y) \f$.
+
+The unnormalized square box filter can be useful in computing local image statistics such as the the local
+variance and standard deviation around the neighborhood of a pixel.
+
+@param _src input image
+@param _dst output image of the same size and type as _src
+@param ddepth the output image depth (-1 to use src.depth())
+@param ksize kernel size
+@param anchor kernel anchor point. The default value of Point(-1, -1) denotes that the anchor is at the kernel
+center.
+@param normalize flag, specifying whether the kernel is to be normalized by it's area or not.
+@param borderType border mode used to extrapolate pixels outside of the image, see #BorderTypes
+@sa boxFilter
+*/
+CV_EXPORTS_W void sqrBoxFilter( InputArray _src, OutputArray _dst, int ddepth,
+                                Size ksize, Point anchor = Point(-1, -1),
+                                bool normalize = true,
+                                int borderType = BORDER_DEFAULT );
+
+/** @brief Blurs an image using the normalized box filter.
+
+The function smooths an image using the kernel:
+
+\f[\texttt{K} =  \frac{1}{\texttt{ksize.width*ksize.height}} \begin{bmatrix} 1 & 1 & 1 &  \cdots & 1 & 1  \\ 1 & 1 & 1 &  \cdots & 1 & 1  \\ \hdotsfor{6} \\ 1 & 1 & 1 &  \cdots & 1 & 1  \\ \end{bmatrix}\f]
+
+The call `blur(src, dst, ksize, anchor, borderType)` is equivalent to `boxFilter(src, dst, src.type(),
+anchor, true, borderType)`.
+
+@param src input image; it can have any number of channels, which are processed independently, but
+the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
+@param dst output image of the same size and type as src.
+@param ksize blurring kernel size.
+@param anchor anchor point; default value Point(-1,-1) means that the anchor is at the kernel
+center.
+@param borderType border mode used to extrapolate pixels outside of the image, see #BorderTypes
+@sa  boxFilter, bilateralFilter, GaussianBlur, medianBlur
+ */
+CV_EXPORTS_W void blur( InputArray src, OutputArray dst,
+                        Size ksize, Point anchor = Point(-1,-1),
+                        int borderType = BORDER_DEFAULT );
+
+/** @brief Convolves an image with the kernel.
+
+The function applies an arbitrary linear filter to an image. In-place operation is supported. When
+the aperture is partially outside the image, the function interpolates outlier pixel values
+according to the specified border mode.
+
+The function does actually compute correlation, not the convolution:
+
+\f[\texttt{dst} (x,y) =  \sum _{ \stackrel{0\leq x' < \texttt{kernel.cols},}{0\leq y' < \texttt{kernel.rows}} }  \texttt{kernel} (x',y')* \texttt{src} (x+x'- \texttt{anchor.x} ,y+y'- \texttt{anchor.y} )\f]
+
+That is, the kernel is not mirrored around the anchor point. If you need a real convolution, flip
+the kernel using #flip and set the new anchor to `(kernel.cols - anchor.x - 1, kernel.rows -
+anchor.y - 1)`.
+
+The function uses the DFT-based algorithm in case of sufficiently large kernels (~`11 x 11` or
+larger) and the direct algorithm for small kernels.
+
+@param src input image.
+@param dst output image of the same size and the same number of channels as src.
+@param ddepth desired depth of the destination image, see @ref filter_depths "combinations"
+@param kernel convolution kernel (or rather a correlation kernel), a single-channel floating point
+matrix; if you want to apply different kernels to different channels, split the image into
+separate color planes using split and process them individually.
+@param anchor anchor of the kernel that indicates the relative position of a filtered point within
+the kernel; the anchor should lie within the kernel; default value (-1,-1) means that the anchor
+is at the kernel center.
+@param delta optional value added to the filtered pixels before storing them in dst.
+@param borderType pixel extrapolation method, see #BorderTypes
+@sa  sepFilter2D, dft, matchTemplate
+ */
+CV_EXPORTS_W void filter2D( InputArray src, OutputArray dst, int ddepth,
+                            InputArray kernel, Point anchor = Point(-1,-1),
+                            double delta = 0, int borderType = BORDER_DEFAULT );
+
+/** @brief Applies a separable linear filter to an image.
+
+The function applies a separable linear filter to the image. That is, first, every row of src is
+filtered with the 1D kernel kernelX. Then, every column of the result is filtered with the 1D
+kernel kernelY. The final result shifted by delta is stored in dst .
+
+@param src Source image.
+@param dst Destination image of the same size and the same number of channels as src .
+@param ddepth Destination image depth, see @ref filter_depths "combinations"
+@param kernelX Coefficients for filtering each row.
+@param kernelY Coefficients for filtering each column.
+@param anchor Anchor position within the kernel. The default value \f$(-1,-1)\f$ means that the anchor
+is at the kernel center.
+@param delta Value added to the filtered results before storing them.
+@param borderType Pixel extrapolation method, see #BorderTypes
+@sa  filter2D, Sobel, GaussianBlur, boxFilter, blur
+ */
+CV_EXPORTS_W void sepFilter2D( InputArray src, OutputArray dst, int ddepth,
+                               InputArray kernelX, InputArray kernelY,
+                               Point anchor = Point(-1,-1),
+                               double delta = 0, int borderType = BORDER_DEFAULT );
+
+/** @example Sobel_Demo.cpp
+Sample code using Sobel and/or Scharr OpenCV functions to make a simple Edge Detector
+![Sample screenshot](Sobel_Derivatives_Tutorial_Result.jpg)
+Check @ref tutorial_sobel_derivatives "the corresponding tutorial" for more details
+ */
+/** @brief Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator.
+
+In all cases except one, the \f$\texttt{ksize} \times \texttt{ksize}\f$ separable kernel is used to
+calculate the derivative. When \f$\texttt{ksize = 1}\f$, the \f$3 \times 1\f$ or \f$1 \times 3\f$
+kernel is used (that is, no Gaussian smoothing is done). `ksize = 1` can only be used for the first
+or the second x- or y- derivatives.
+
+There is also the special value `ksize = #CV_SCHARR (-1)` that corresponds to the \f$3\times3\f$ Scharr
+filter that may give more accurate results than the \f$3\times3\f$ Sobel. The Scharr aperture is
+
+\f[\vecthreethree{-3}{0}{3}{-10}{0}{10}{-3}{0}{3}\f]
+
+for the x-derivative, or transposed for the y-derivative.
+
+The function calculates an image derivative by convolving the image with the appropriate kernel:
+
+\f[\texttt{dst} =  \frac{\partial^{xorder+yorder} \texttt{src}}{\partial x^{xorder} \partial y^{yorder}}\f]
+
+The Sobel operators combine Gaussian smoothing and differentiation, so the result is more or less
+resistant to the noise. Most often, the function is called with ( xorder = 1, yorder = 0, ksize = 3)
+or ( xorder = 0, yorder = 1, ksize = 3) to calculate the first x- or y- image derivative. The first
+case corresponds to a kernel of:
+
+\f[\vecthreethree{-1}{0}{1}{-2}{0}{2}{-1}{0}{1}\f]
+
+The second case corresponds to a kernel of:
+
+\f[\vecthreethree{-1}{-2}{-1}{0}{0}{0}{1}{2}{1}\f]
+
+@param src input image.
+@param dst output image of the same size and the same number of channels as src .
+@param ddepth output image depth, see @ref filter_depths "combinations"; in the case of
+    8-bit input images it will result in truncated derivatives.
+@param dx order of the derivative x.
+@param dy order of the derivative y.
+@param ksize size of the extended Sobel kernel; it must be 1, 3, 5, or 7.
+@param scale optional scale factor for the computed derivative values; by default, no scaling is
+applied (see #getDerivKernels for details).
+@param delta optional delta value that is added to the results prior to storing them in dst.
+@param borderType pixel extrapolation method, see #BorderTypes
+@sa  Scharr, Laplacian, sepFilter2D, filter2D, GaussianBlur, cartToPolar
+ */
+CV_EXPORTS_W void Sobel( InputArray src, OutputArray dst, int ddepth,
+                         int dx, int dy, int ksize = 3,
+                         double scale = 1, double delta = 0,
+                         int borderType = BORDER_DEFAULT );
+
+/** @brief Calculates the first order image derivative in both x and y using a Sobel operator
+
+Equivalent to calling:
+
+@code
+Sobel( src, dx, CV_16SC1, 1, 0, 3 );
+Sobel( src, dy, CV_16SC1, 0, 1, 3 );
+@endcode
+
+@param src input image.
+@param dx output image with first-order derivative in x.
+@param dy output image with first-order derivative in y.
+@param ksize size of Sobel kernel. It must be 3.
+@param borderType pixel extrapolation method, see #BorderTypes
+
+@sa Sobel
+ */
+
+CV_EXPORTS_W void spatialGradient( InputArray src, OutputArray dx,
+                                   OutputArray dy, int ksize = 3,
+                                   int borderType = BORDER_DEFAULT );
+
+/** @brief Calculates the first x- or y- image derivative using Scharr operator.
+
+The function computes the first x- or y- spatial image derivative using the Scharr operator. The
+call
+
+\f[\texttt{Scharr(src, dst, ddepth, dx, dy, scale, delta, borderType)}\f]
+
+is equivalent to
+
+\f[\texttt{Sobel(src, dst, ddepth, dx, dy, CV_SCHARR, scale, delta, borderType)} .\f]
+
+@param src input image.
+@param dst output image of the same size and the same number of channels as src.
+@param ddepth output image depth, see @ref filter_depths "combinations"
+@param dx order of the derivative x.
+@param dy order of the derivative y.
+@param scale optional scale factor for the computed derivative values; by default, no scaling is
+applied (see #getDerivKernels for details).
+@param delta optional delta value that is added to the results prior to storing them in dst.
+@param borderType pixel extrapolation method, see #BorderTypes
+@sa  cartToPolar
+ */
+CV_EXPORTS_W void Scharr( InputArray src, OutputArray dst, int ddepth,
+                          int dx, int dy, double scale = 1, double delta = 0,
+                          int borderType = BORDER_DEFAULT );
+
+/** @example laplace.cpp
+  An example using Laplace transformations for edge detection
+*/
+
+/** @brief Calculates the Laplacian of an image.
+
+The function calculates the Laplacian of the source image by adding up the second x and y
+derivatives calculated using the Sobel operator:
+
+\f[\texttt{dst} =  \Delta \texttt{src} =  \frac{\partial^2 \texttt{src}}{\partial x^2} +  \frac{\partial^2 \texttt{src}}{\partial y^2}\f]
+
+This is done when `ksize > 1`. When `ksize == 1`, the Laplacian is computed by filtering the image
+with the following \f$3 \times 3\f$ aperture:
+
+\f[\vecthreethree {0}{1}{0}{1}{-4}{1}{0}{1}{0}\f]
+
+@param src Source image.
+@param dst Destination image of the same size and the same number of channels as src .
+@param ddepth Desired depth of the destination image.
+@param ksize Aperture size used to compute the second-derivative filters. See #getDerivKernels for
+details. The size must be positive and odd.
+@param scale Optional scale factor for the computed Laplacian values. By default, no scaling is
+applied. See #getDerivKernels for details.
+@param delta Optional delta value that is added to the results prior to storing them in dst .
+@param borderType Pixel extrapolation method, see #BorderTypes
+@sa  Sobel, Scharr
+ */
+CV_EXPORTS_W void Laplacian( InputArray src, OutputArray dst, int ddepth,
+                             int ksize = 1, double scale = 1, double delta = 0,
+                             int borderType = BORDER_DEFAULT );
+
+//! @} imgproc_filter
+
+//! @addtogroup imgproc_feature
+//! @{
+
+/** @example edge.cpp
+  This program demonstrates usage of the Canny edge detector
+
+  Check @ref tutorial_canny_detector "the corresponding tutorial" for more details
+*/
+
+/** @brief Finds edges in an image using the Canny algorithm @cite Canny86 .
+
+The function finds edges in the input image and marks them in the output map edges using the
+Canny algorithm. The smallest value between threshold1 and threshold2 is used for edge linking. The
+largest value is used to find initial segments of strong edges. See
+<http://en.wikipedia.org/wiki/Canny_edge_detector>
+
+@param image 8-bit input image.
+@param edges output edge map; single channels 8-bit image, which has the same size as image .
+@param threshold1 first threshold for the hysteresis procedure.
+@param threshold2 second threshold for the hysteresis procedure.
+@param apertureSize aperture size for the Sobel operator.
+@param L2gradient a flag, indicating whether a more accurate \f$L_2\f$ norm
+\f$=\sqrt{(dI/dx)^2 + (dI/dy)^2}\f$ should be used to calculate the image gradient magnitude (
+L2gradient=true ), or whether the default \f$L_1\f$ norm \f$=|dI/dx|+|dI/dy|\f$ is enough (
+L2gradient=false ).
+ */
+CV_EXPORTS_W void Canny( InputArray image, OutputArray edges,
+                         double threshold1, double threshold2,
+                         int apertureSize = 3, bool L2gradient = false );
+
+/** \overload
+
+Finds edges in an image using the Canny algorithm with custom image gradient.
+
+@param dx 16-bit x derivative of input image (CV_16SC1 or CV_16SC3).
+@param dy 16-bit y derivative of input image (same type as dx).
+@param edges output edge map; single channels 8-bit image, which has the same size as image .
+@param threshold1 first threshold for the hysteresis procedure.
+@param threshold2 second threshold for the hysteresis procedure.
+@param L2gradient a flag, indicating whether a more accurate \f$L_2\f$ norm
+\f$=\sqrt{(dI/dx)^2 + (dI/dy)^2}\f$ should be used to calculate the image gradient magnitude (
+L2gradient=true ), or whether the default \f$L_1\f$ norm \f$=|dI/dx|+|dI/dy|\f$ is enough (
+L2gradient=false ).
+ */
+CV_EXPORTS_W void Canny( InputArray dx, InputArray dy,
+                         OutputArray edges,
+                         double threshold1, double threshold2,
+                         bool L2gradient = false );
+
+/** @brief Calculates the minimal eigenvalue of gradient matrices for corner detection.
+
+The function is similar to cornerEigenValsAndVecs but it calculates and stores only the minimal
+eigenvalue of the covariance matrix of derivatives, that is, \f$\min(\lambda_1, \lambda_2)\f$ in terms
+of the formulae in the cornerEigenValsAndVecs description.
+
+@param src Input single-channel 8-bit or floating-point image.
+@param dst Image to store the minimal eigenvalues. It has the type CV_32FC1 and the same size as
+src .
+@param blockSize Neighborhood size (see the details on #cornerEigenValsAndVecs ).
+@param ksize Aperture parameter for the Sobel operator.
+@param borderType Pixel extrapolation method. See #BorderTypes.
+ */
+CV_EXPORTS_W void cornerMinEigenVal( InputArray src, OutputArray dst,
+                                     int blockSize, int ksize = 3,
+                                     int borderType = BORDER_DEFAULT );
+
+/** @brief Harris corner detector.
+
+The function runs the Harris corner detector on the image. Similarly to cornerMinEigenVal and
+cornerEigenValsAndVecs , for each pixel \f$(x, y)\f$ it calculates a \f$2\times2\f$ gradient covariance
+matrix \f$M^{(x,y)}\f$ over a \f$\texttt{blockSize} \times \texttt{blockSize}\f$ neighborhood. Then, it
+computes the following characteristic:
+
+\f[\texttt{dst} (x,y) =  \mathrm{det} M^{(x,y)} - k  \cdot \left ( \mathrm{tr} M^{(x,y)} \right )^2\f]
+
+Corners in the image can be found as the local maxima of this response map.
+
+@param src Input single-channel 8-bit or floating-point image.
+@param dst Image to store the Harris detector responses. It has the type CV_32FC1 and the same
+size as src .
+@param blockSize Neighborhood size (see the details on #cornerEigenValsAndVecs ).
+@param ksize Aperture parameter for the Sobel operator.
+@param k Harris detector free parameter. See the formula below.
+@param borderType Pixel extrapolation method. See #BorderTypes.
+ */
+CV_EXPORTS_W void cornerHarris( InputArray src, OutputArray dst, int blockSize,
+                                int ksize, double k,
+                                int borderType = BORDER_DEFAULT );
+
+/** @brief Calculates eigenvalues and eigenvectors of image blocks for corner detection.
+
+For every pixel \f$p\f$ , the function cornerEigenValsAndVecs considers a blockSize \f$\times\f$ blockSize
+neighborhood \f$S(p)\f$ . It calculates the covariation matrix of derivatives over the neighborhood as:
+
+\f[M =  \begin{bmatrix} \sum _{S(p)}(dI/dx)^2 &  \sum _{S(p)}dI/dx dI/dy  \\ \sum _{S(p)}dI/dx dI/dy &  \sum _{S(p)}(dI/dy)^2 \end{bmatrix}\f]
+
+where the derivatives are computed using the Sobel operator.
+
+After that, it finds eigenvectors and eigenvalues of \f$M\f$ and stores them in the destination image as
+\f$(\lambda_1, \lambda_2, x_1, y_1, x_2, y_2)\f$ where
+
+-   \f$\lambda_1, \lambda_2\f$ are the non-sorted eigenvalues of \f$M\f$
+-   \f$x_1, y_1\f$ are the eigenvectors corresponding to \f$\lambda_1\f$
+-   \f$x_2, y_2\f$ are the eigenvectors corresponding to \f$\lambda_2\f$
+
+The output of the function can be used for robust edge or corner detection.
+
+@param src Input single-channel 8-bit or floating-point image.
+@param dst Image to store the results. It has the same size as src and the type CV_32FC(6) .
+@param blockSize Neighborhood size (see details below).
+@param ksize Aperture parameter for the Sobel operator.
+@param borderType Pixel extrapolation method. See #BorderTypes.
+
+@sa  cornerMinEigenVal, cornerHarris, preCornerDetect
+ */
+CV_EXPORTS_W void cornerEigenValsAndVecs( InputArray src, OutputArray dst,
+                                          int blockSize, int ksize,
+                                          int borderType = BORDER_DEFAULT );
+
+/** @brief Calculates a feature map for corner detection.
+
+The function calculates the complex spatial derivative-based function of the source image
+
+\f[\texttt{dst} = (D_x  \texttt{src} )^2  \cdot D_{yy}  \texttt{src} + (D_y  \texttt{src} )^2  \cdot D_{xx}  \texttt{src} - 2 D_x  \texttt{src} \cdot D_y  \texttt{src} \cdot D_{xy}  \texttt{src}\f]
+
+where \f$D_x\f$,\f$D_y\f$ are the first image derivatives, \f$D_{xx}\f$,\f$D_{yy}\f$ are the second image
+derivatives, and \f$D_{xy}\f$ is the mixed derivative.
+
+The corners can be found as local maximums of the functions, as shown below:
+@code
+    Mat corners, dilated_corners;
+    preCornerDetect(image, corners, 3);
+    // dilation with 3x3 rectangular structuring element
+    dilate(corners, dilated_corners, Mat(), 1);
+    Mat corner_mask = corners == dilated_corners;
+@endcode
+
+@param src Source single-channel 8-bit of floating-point image.
+@param dst Output image that has the type CV_32F and the same size as src .
+@param ksize %Aperture size of the Sobel .
+@param borderType Pixel extrapolation method. See #BorderTypes.
+ */
+CV_EXPORTS_W void preCornerDetect( InputArray src, OutputArray dst, int ksize,
+                                   int borderType = BORDER_DEFAULT );
+
+/** @brief Refines the corner locations.
+
+The function iterates to find the sub-pixel accurate location of corners or radial saddle points, as
+shown on the figure below.
+
+![image](pics/cornersubpix.png)
+
+Sub-pixel accurate corner locator is based on the observation that every vector from the center \f$q\f$
+to a point \f$p\f$ located within a neighborhood of \f$q\f$ is orthogonal to the image gradient at \f$p\f$
+subject to image and measurement noise. Consider the expression:
+
+\f[\epsilon _i = {DI_{p_i}}^T  \cdot (q - p_i)\f]
+
+where \f${DI_{p_i}}\f$ is an image gradient at one of the points \f$p_i\f$ in a neighborhood of \f$q\f$ . The
+value of \f$q\f$ is to be found so that \f$\epsilon_i\f$ is minimized. A system of equations may be set up
+with \f$\epsilon_i\f$ set to zero:
+
+\f[\sum _i(DI_{p_i}  \cdot {DI_{p_i}}^T) -  \sum _i(DI_{p_i}  \cdot {DI_{p_i}}^T  \cdot p_i)\f]
+
+where the gradients are summed within a neighborhood ("search window") of \f$q\f$ . Calling the first
+gradient term \f$G\f$ and the second gradient term \f$b\f$ gives:
+
+\f[q = G^{-1}  \cdot b\f]
+
+The algorithm sets the center of the neighborhood window at this new center \f$q\f$ and then iterates
+until the center stays within a set threshold.
+
+@param image Input image.
+@param corners Initial coordinates of the input corners and refined coordinates provided for
+output.
+@param winSize Half of the side length of the search window. For example, if winSize=Size(5,5) ,
+then a \f$5*2+1 \times 5*2+1 = 11 \times 11\f$ search window is used.
+@param zeroZone Half of the size of the dead region in the middle of the search zone over which
+the summation in the formula below is not done. It is used sometimes to avoid possible
+singularities of the autocorrelation matrix. The value of (-1,-1) indicates that there is no such
+a size.
+@param criteria Criteria for termination of the iterative process of corner refinement. That is,
+the process of corner position refinement stops either after criteria.maxCount iterations or when
+the corner position moves by less than criteria.epsilon on some iteration.
+ */
+CV_EXPORTS_W void cornerSubPix( InputArray image, InputOutputArray corners,
+                                Size winSize, Size zeroZone,
+                                TermCriteria criteria );
+
+/** @brief Determines strong corners on an image.
+
+The function finds the most prominent corners in the image or in the specified image region, as
+described in @cite Shi94
+
+-   Function calculates the corner quality measure at every source image pixel using the
+    #cornerMinEigenVal or #cornerHarris .
+-   Function performs a non-maximum suppression (the local maximums in *3 x 3* neighborhood are
+    retained).
+-   The corners with the minimal eigenvalue less than
+    \f$\texttt{qualityLevel} \cdot \max_{x,y} qualityMeasureMap(x,y)\f$ are rejected.
+-   The remaining corners are sorted by the quality measure in the descending order.
+-   Function throws away each corner for which there is a stronger corner at a distance less than
+    maxDistance.
+
+The function can be used to initialize a point-based tracker of an object.
+
+@note If the function is called with different values A and B of the parameter qualityLevel , and
+A \> B, the vector of returned corners with qualityLevel=A will be the prefix of the output vector
+with qualityLevel=B .
+
+@param image Input 8-bit or floating-point 32-bit, single-channel image.
+@param corners Output vector of detected corners.
+@param maxCorners Maximum number of corners to return. If there are more corners than are found,
+the strongest of them is returned. `maxCorners <= 0` implies that no limit on the maximum is set
+and all detected corners are returned.
+@param qualityLevel Parameter characterizing the minimal accepted quality of image corners. The
+parameter value is multiplied by the best corner quality measure, which is the minimal eigenvalue
+(see #cornerMinEigenVal ) or the Harris function response (see #cornerHarris ). The corners with the
+quality measure less than the product are rejected. For example, if the best corner has the
+quality measure = 1500, and the qualityLevel=0.01 , then all the corners with the quality measure
+less than 15 are rejected.
+@param minDistance Minimum possible Euclidean distance between the returned corners.
+@param mask Optional region of interest. If the image is not empty (it needs to have the type
+CV_8UC1 and the same size as image ), it specifies the region in which the corners are detected.
+@param blockSize Size of an average block for computing a derivative covariation matrix over each
+pixel neighborhood. See cornerEigenValsAndVecs .
+@param useHarrisDetector Parameter indicating whether to use a Harris detector (see #cornerHarris)
+or #cornerMinEigenVal.
+@param k Free parameter of the Harris detector.
+
+@sa  cornerMinEigenVal, cornerHarris, calcOpticalFlowPyrLK, estimateRigidTransform,
+ */
+
+CV_EXPORTS_W void goodFeaturesToTrack( InputArray image, OutputArray corners,
+                                     int maxCorners, double qualityLevel, double minDistance,
+                                     InputArray mask = noArray(), int blockSize = 3,
+                                     bool useHarrisDetector = false, double k = 0.04 );
+
+CV_EXPORTS_W void goodFeaturesToTrack( InputArray image, OutputArray corners,
+                                     int maxCorners, double qualityLevel, double minDistance,
+                                     InputArray mask, int blockSize,
+                                     int gradientSize, bool useHarrisDetector = false,
+                                     double k = 0.04 );
+/** @example houghlines.cpp
+An example using the Hough line detector
+![Sample input image](Hough_Lines_Tutorial_Original_Image.jpg) ![Output image](Hough_Lines_Tutorial_Result.jpg)
+*/
+
+/** @brief Finds lines in a binary image using the standard Hough transform.
+
+The function implements the standard or standard multi-scale Hough transform algorithm for line
+detection. See <http://homepages.inf.ed.ac.uk/rbf/HIPR2/hough.htm> for a good explanation of Hough
+transform.
+
+@param image 8-bit, single-channel binary source image. The image may be modified by the function.
+@param lines Output vector of lines. Each line is represented by a two-element vector
+\f$(\rho, \theta)\f$ . \f$\rho\f$ is the distance from the coordinate origin \f$(0,0)\f$ (top-left corner of
+the image). \f$\theta\f$ is the line rotation angle in radians (
+\f$0 \sim \textrm{vertical line}, \pi/2 \sim \textrm{horizontal line}\f$ ).
+@param rho Distance resolution of the accumulator in pixels.
+@param theta Angle resolution of the accumulator in radians.
+@param threshold Accumulator threshold parameter. Only those lines are returned that get enough
+votes ( \f$>\texttt{threshold}\f$ ).
+@param srn For the multi-scale Hough transform, it is a divisor for the distance resolution rho .
+The coarse accumulator distance resolution is rho and the accurate accumulator resolution is
+rho/srn . If both srn=0 and stn=0 , the classical Hough transform is used. Otherwise, both these
+parameters should be positive.
+@param stn For the multi-scale Hough transform, it is a divisor for the distance resolution theta.
+@param min_theta For standard and multi-scale Hough transform, minimum angle to check for lines.
+Must fall between 0 and max_theta.
+@param max_theta For standard and multi-scale Hough transform, maximum angle to check for lines.
+Must fall between min_theta and CV_PI.
+ */
+CV_EXPORTS_W void HoughLines( InputArray image, OutputArray lines,
+                              double rho, double theta, int threshold,
+                              double srn = 0, double stn = 0,
+                              double min_theta = 0, double max_theta = CV_PI );
+
+/** @brief Finds line segments in a binary image using the probabilistic Hough transform.
+
+The function implements the probabilistic Hough transform algorithm for line detection, described
+in @cite Matas00
+
+See the line detection example below:
+
+@code
+    #include <opencv2/imgproc.hpp>
+    #include <opencv2/highgui.hpp>
+
+    using namespace cv;
+    using namespace std;
+
+    int main(int argc, char** argv)
+    {
+        Mat src, dst, color_dst;
+        if( argc != 2 || !(src=imread(argv[1], 0)).data)
+            return -1;
+
+        Canny( src, dst, 50, 200, 3 );
+        cvtColor( dst, color_dst, COLOR_GRAY2BGR );
+
+    #if 0
+        vector<Vec2f> lines;
+        HoughLines( dst, lines, 1, CV_PI/180, 100 );
+
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            float rho = lines[i][0];
+            float theta = lines[i][1];
+            double a = cos(theta), b = sin(theta);
+            double x0 = a*rho, y0 = b*rho;
+            Point pt1(cvRound(x0 + 1000*(-b)),
+                      cvRound(y0 + 1000*(a)));
+            Point pt2(cvRound(x0 - 1000*(-b)),
+                      cvRound(y0 - 1000*(a)));
+            line( color_dst, pt1, pt2, Scalar(0,0,255), 3, 8 );
+        }
+    #else
+        vector<Vec4i> lines;
+        HoughLinesP( dst, lines, 1, CV_PI/180, 80, 30, 10 );
+        for( size_t i = 0; i < lines.size(); i++ )
+        {
+            line( color_dst, Point(lines[i][0], lines[i][1]),
+                Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+        }
+    #endif
+        namedWindow( "Source", 1 );
+        imshow( "Source", src );
+
+        namedWindow( "Detected Lines", 1 );
+        imshow( "Detected Lines", color_dst );
+
+        waitKey(0);
+        return 0;
+    }
+@endcode
+This is a sample picture the function parameters have been tuned for:
+
+![image](pics/building.jpg)
+
+And this is the output of the above program in case of the probabilistic Hough transform:
+
+![image](pics/houghp.png)
+
+@param image 8-bit, single-channel binary source image. The image may be modified by the function.
+@param lines Output vector of lines. Each line is represented by a 4-element vector
+\f$(x_1, y_1, x_2, y_2)\f$ , where \f$(x_1,y_1)\f$ and \f$(x_2, y_2)\f$ are the ending points of each detected
+line segment.
+@param rho Distance resolution of the accumulator in pixels.
+@param theta Angle resolution of the accumulator in radians.
+@param threshold Accumulator threshold parameter. Only those lines are returned that get enough
+votes ( \f$>\texttt{threshold}\f$ ).
+@param minLineLength Minimum line length. Line segments shorter than that are rejected.
+@param maxLineGap Maximum allowed gap between points on the same line to link them.
+
+@sa LineSegmentDetector
+ */
+CV_EXPORTS_W void HoughLinesP( InputArray image, OutputArray lines,
+                               double rho, double theta, int threshold,
+                               double minLineLength = 0, double maxLineGap = 0 );
+
+/** @brief Finds lines in a set of points using the standard Hough transform.
+
+The function finds lines in a set of points using a modification of the Hough transform.
+@include snippets/imgproc_HoughLinesPointSet.cpp
+@param _point Input vector of points. Each vector must be encoded as a Point vector \f$(x,y)\f$. Type must be CV_32FC2 or CV_32SC2.
+@param _lines Output vector of found lines. Each vector is encoded as a vector<Vec3d> \f$(votes, rho, theta)\f$.
+The larger the value of 'votes', the higher the reliability of the Hough line.
+@param lines_max Max count of hough lines.
+@param threshold Accumulator threshold parameter. Only those lines are returned that get enough
+votes ( \f$>\texttt{threshold}\f$ )
+@param min_rho Minimum Distance value of the accumulator in pixels.
+@param max_rho Maximum Distance value of the accumulator in pixels.
+@param rho_step Distance resolution of the accumulator in pixels.
+@param min_theta Minimum angle value of the accumulator in radians.
+@param max_theta Maximum angle value of the accumulator in radians.
+@param theta_step Angle resolution of the accumulator in radians.
+ */
+CV_EXPORTS_W void HoughLinesPointSet( InputArray _point, OutputArray _lines, int lines_max, int threshold,
+                                      double min_rho, double max_rho, double rho_step,
+                                      double min_theta, double max_theta, double theta_step );
+
+/** @example houghcircles.cpp
+An example using the Hough circle detector
+*/
+
+/** @brief Finds circles in a grayscale image using the Hough transform.
+
+The function finds circles in a grayscale image using a modification of the Hough transform.
+
+Example: :
+@code
+    #include <opencv2/imgproc.hpp>
+    #include <opencv2/highgui.hpp>
+    #include <math.h>
+
+    using namespace cv;
+    using namespace std;
+
+    int main(int argc, char** argv)
+    {
+        Mat img, gray;
+        if( argc != 2 || !(img=imread(argv[1], 1)).data)
+            return -1;
+        cvtColor(img, gray, COLOR_BGR2GRAY);
+        // smooth it, otherwise a lot of false circles may be detected
+        GaussianBlur( gray, gray, Size(9, 9), 2, 2 );
+        vector<Vec3f> circles;
+        HoughCircles(gray, circles, HOUGH_GRADIENT,
+                     2, gray.rows/4, 200, 100 );
+        for( size_t i = 0; i < circles.size(); i++ )
+        {
+             Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+             int radius = cvRound(circles[i][2]);
+             // draw the circle center
+             circle( img, center, 3, Scalar(0,255,0), -1, 8, 0 );
+             // draw the circle outline
+             circle( img, center, radius, Scalar(0,0,255), 3, 8, 0 );
+        }
+        namedWindow( "circles", 1 );
+        imshow( "circles", img );
+
+        waitKey(0);
+        return 0;
+    }
+@endcode
+
+@note Usually the function detects the centers of circles well. However, it may fail to find correct
+radii. You can assist to the function by specifying the radius range ( minRadius and maxRadius ) if
+you know it. Or, you may set maxRadius to a negative number to return centers only without radius
+search, and find the correct radius using an additional procedure.
+
+@param image 8-bit, single-channel, grayscale input image.
+@param circles Output vector of found circles. Each vector is encoded as a 3-element
+floating-point vector \f$(x, y, radius)\f$ .
+@param method Detection method, see #HoughModes. Currently, the only implemented method is #HOUGH_GRADIENT
+@param dp Inverse ratio of the accumulator resolution to the image resolution. For example, if
+dp=1 , the accumulator has the same resolution as the input image. If dp=2 , the accumulator has
+half as big width and height.
+@param minDist Minimum distance between the centers of the detected circles. If the parameter is
+too small, multiple neighbor circles may be falsely detected in addition to a true one. If it is
+too large, some circles may be missed.
+@param param1 First method-specific parameter. In case of #HOUGH_GRADIENT , it is the higher
+threshold of the two passed to the Canny edge detector (the lower one is twice smaller).
+@param param2 Second method-specific parameter. In case of #HOUGH_GRADIENT , it is the
+accumulator threshold for the circle centers at the detection stage. The smaller it is, the more
+false circles may be detected. Circles, corresponding to the larger accumulator values, will be
+returned first.
+@param minRadius Minimum circle radius.
+@param maxRadius Maximum circle radius. If <= 0, uses the maximum image dimension. If < 0, returns
+centers without finding the radius.
+
+@sa fitEllipse, minEnclosingCircle
+ */
+CV_EXPORTS_W void HoughCircles( InputArray image, OutputArray circles,
+                               int method, double dp, double minDist,
+                               double param1 = 100, double param2 = 100,
+                               int minRadius = 0, int maxRadius = 0 );
+
+//! @} imgproc_feature
+
+//! @addtogroup imgproc_filter
+//! @{
+
+/** @example morphology2.cpp
+Advanced morphology Transformations sample code
+![Sample screenshot](Morphology_2_Tutorial_Result.jpg)
+Check @ref tutorial_opening_closing_hats "the corresponding tutorial" for more details
+*/
+
+/** @brief Erodes an image by using a specific structuring element.
+
+The function erodes the source image using the specified structuring element that determines the
+shape of a pixel neighborhood over which the minimum is taken:
+
+\f[\texttt{dst} (x,y) =  \min _{(x',y'):  \, \texttt{element} (x',y') \ne0 } \texttt{src} (x+x',y+y')\f]
+
+The function supports the in-place mode. Erosion can be applied several ( iterations ) times. In
+case of multi-channel images, each channel is processed independently.
+
+@param src input image; the number of channels can be arbitrary, but the depth should be one of
+CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
+@param dst output image of the same size and type as src.
+@param kernel structuring element used for erosion; if `element=Mat()`, a `3 x 3` rectangular
+structuring element is used. Kernel can be created using #getStructuringElement.
+@param anchor position of the anchor within the element; default value (-1, -1) means that the
+anchor is at the element center.
+@param iterations number of times erosion is applied.
+@param borderType pixel extrapolation method, see #BorderTypes
+@param borderValue border value in case of a constant border
+@sa  dilate, morphologyEx, getStructuringElement
+ */
+CV_EXPORTS_W void erode( InputArray src, OutputArray dst, InputArray kernel,
+                         Point anchor = Point(-1,-1), int iterations = 1,
+                         int borderType = BORDER_CONSTANT,
+                         const Scalar& borderValue = morphologyDefaultBorderValue() );
+
+/** @example Morphology_1.cpp
+Erosion and Dilation sample code
+![Sample Screenshot-Erosion](Morphology_1_Tutorial_Erosion_Result.jpg)![Sample Screenshot-Dilation](Morphology_1_Tutorial_Dilation_Result.jpg)
+Check @ref tutorial_erosion_dilatation "the corresponding tutorial" for more details
+ */
+/** @brief Dilates an image by using a specific structuring element.
+
+The function dilates the source image using the specified structuring element that determines the
+shape of a pixel neighborhood over which the maximum is taken:
+\f[\texttt{dst} (x,y) =  \max _{(x',y'):  \, \texttt{element} (x',y') \ne0 } \texttt{src} (x+x',y+y')\f]
+
+The function supports the in-place mode. Dilation can be applied several ( iterations ) times. In
+case of multi-channel images, each channel is processed independently.
+
+@param src input image; the number of channels can be arbitrary, but the depth should be one of
+CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
+@param dst output image of the same size and type as src.
+@param kernel structuring element used for dilation; if elemenat=Mat(), a 3 x 3 rectangular
+structuring element is used. Kernel can be created using #getStructuringElement
+@param anchor position of the anchor within the element; default value (-1, -1) means that the
+anchor is at the element center.
+@param iterations number of times dilation is applied.
+@param borderType pixel extrapolation method, see #BorderTypes
+@param borderValue border value in case of a constant border
+@sa  erode, morphologyEx, getStructuringElement
+ */
+CV_EXPORTS_W void dilate( InputArray src, OutputArray dst, InputArray kernel,
+                          Point anchor = Point(-1,-1), int iterations = 1,
+                          int borderType = BORDER_CONSTANT,
+                          const Scalar& borderValue = morphologyDefaultBorderValue() );
+
+/** @brief Performs advanced morphological transformations.
+
+The function cv::morphologyEx can perform advanced morphological transformations using an erosion and dilation as
+basic operations.
+
+Any of the operations can be done in-place. In case of multi-channel images, each channel is
+processed independently.
+
+@param src Source image. The number of channels can be arbitrary. The depth should be one of
+CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
+@param dst Destination image of the same size and type as source image.
+@param op Type of a morphological operation, see #MorphTypes
+@param kernel Structuring element. It can be created using #getStructuringElement.
+@param anchor Anchor position with the kernel. Negative values mean that the anchor is at the
+kernel center.
+@param iterations Number of times erosion and dilation are applied.
+@param borderType Pixel extrapolation method, see #BorderTypes
+@param borderValue Border value in case of a constant border. The default value has a special
+meaning.
+@sa  dilate, erode, getStructuringElement
+@note The number of iterations is the number of times erosion or dilatation operation will be applied.
+For instance, an opening operation (#MORPH_OPEN) with two iterations is equivalent to apply
+successively: erode -> erode -> dilate -> dilate (and not erode -> dilate -> erode -> dilate).
+ */
+CV_EXPORTS_W void morphologyEx( InputArray src, OutputArray dst,
+                                int op, InputArray kernel,
+                                Point anchor = Point(-1,-1), int iterations = 1,
+                                int borderType = BORDER_CONSTANT,
+                                const Scalar& borderValue = morphologyDefaultBorderValue() );
+
+//! @} imgproc_filter
+
+//! @addtogroup imgproc_transform
+//! @{
+
+/** @brief Resizes an image.
+
+The function resize resizes the image src down to or up to the specified size. Note that the
+initial dst type or size are not taken into account. Instead, the size and type are derived from
+the `src`,`dsize`,`fx`, and `fy`. If you want to resize src so that it fits the pre-created dst,
+you may call the function as follows:
+@code
+    // explicitly specify dsize=dst.size(); fx and fy will be computed from that.
+    resize(src, dst, dst.size(), 0, 0, interpolation);
+@endcode
+If you want to decimate the image by factor of 2 in each direction, you can call the function this
+way:
+@code
+    // specify fx and fy and let the function compute the destination image size.
+    resize(src, dst, Size(), 0.5, 0.5, interpolation);
+@endcode
+To shrink an image, it will generally look best with #INTER_AREA interpolation, whereas to
+enlarge an image, it will generally look best with c#INTER_CUBIC (slow) or #INTER_LINEAR
+(faster but still looks OK).
+
+@param src input image.
+@param dst output image; it has the size dsize (when it is non-zero) or the size computed from
+src.size(), fx, and fy; the type of dst is the same as of src.
+@param dsize output image size; if it equals zero, it is computed as:
+ \f[\texttt{dsize = Size(round(fx*src.cols), round(fy*src.rows))}\f]
+ Either dsize or both fx and fy must be non-zero.
+@param fx scale factor along the horizontal axis; when it equals 0, it is computed as
+\f[\texttt{(double)dsize.width/src.cols}\f]
+@param fy scale factor along the vertical axis; when it equals 0, it is computed as
+\f[\texttt{(double)dsize.height/src.rows}\f]
+@param interpolation interpolation method, see #InterpolationFlags
+
+@sa  warpAffine, warpPerspective, remap
+ */
+CV_EXPORTS_W void resize( InputArray src, OutputArray dst,
+                          Size dsize, double fx = 0, double fy = 0,
+                          int interpolation = INTER_LINEAR );
+
+/** @brief Applies an affine transformation to an image.
+
+The function warpAffine transforms the source image using the specified matrix:
+
+\f[\texttt{dst} (x,y) =  \texttt{src} ( \texttt{M} _{11} x +  \texttt{M} _{12} y +  \texttt{M} _{13}, \texttt{M} _{21} x +  \texttt{M} _{22} y +  \texttt{M} _{23})\f]
+
+when the flag #WARP_INVERSE_MAP is set. Otherwise, the transformation is first inverted
+with #invertAffineTransform and then put in the formula above instead of M. The function cannot
+operate in-place.
+
+@param src input image.
+@param dst output image that has the size dsize and the same type as src .
+@param M \f$2\times 3\f$ transformation matrix.
+@param dsize size of the output image.
+@param flags combination of interpolation methods (see #InterpolationFlags) and the optional
+flag #WARP_INVERSE_MAP that means that M is the inverse transformation (
+\f$\texttt{dst}\rightarrow\texttt{src}\f$ ).
+@param borderMode pixel extrapolation method (see #BorderTypes); when
+borderMode=#BORDER_TRANSPARENT, it means that the pixels in the destination image corresponding to
+the "outliers" in the source image are not modified by the function.
+@param borderValue value used in case of a constant border; by default, it is 0.
+
+@sa  warpPerspective, resize, remap, getRectSubPix, transform
+ */
+CV_EXPORTS_W void warpAffine( InputArray src, OutputArray dst,
+                              InputArray M, Size dsize,
+                              int flags = INTER_LINEAR,
+                              int borderMode = BORDER_CONSTANT,
+                              const Scalar& borderValue = Scalar());
+
+/** @example warpPerspective_demo.cpp
+An example program shows using cv::findHomography and cv::warpPerspective for image warping
+ */
+/** @brief Applies a perspective transformation to an image.
+
+The function warpPerspective transforms the source image using the specified matrix:
+
+\f[\texttt{dst} (x,y) =  \texttt{src} \left ( \frac{M_{11} x + M_{12} y + M_{13}}{M_{31} x + M_{32} y + M_{33}} ,
+     \frac{M_{21} x + M_{22} y + M_{23}}{M_{31} x + M_{32} y + M_{33}} \right )\f]
+
+when the flag #WARP_INVERSE_MAP is set. Otherwise, the transformation is first inverted with invert
+and then put in the formula above instead of M. The function cannot operate in-place.
+
+@param src input image.
+@param dst output image that has the size dsize and the same type as src .
+@param M \f$3\times 3\f$ transformation matrix.
+@param dsize size of the output image.
+@param flags combination of interpolation methods (#INTER_LINEAR or #INTER_NEAREST) and the
+optional flag #WARP_INVERSE_MAP, that sets M as the inverse transformation (
+\f$\texttt{dst}\rightarrow\texttt{src}\f$ ).
+@param borderMode pixel extrapolation method (#BORDER_CONSTANT or #BORDER_REPLICATE).
+@param borderValue value used in case of a constant border; by default, it equals 0.
+
+@sa  warpAffine, resize, remap, getRectSubPix, perspectiveTransform
+ */
+CV_EXPORTS_W void warpPerspective( InputArray src, OutputArray dst,
+                                   InputArray M, Size dsize,
+                                   int flags = INTER_LINEAR,
+                                   int borderMode = BORDER_CONSTANT,
+                                   const Scalar& borderValue = Scalar());
+
+/** @brief Applies a generic geometrical transformation to an image.
+
+The function remap transforms the source image using the specified map:
+
+\f[\texttt{dst} (x,y) =  \texttt{src} (map_x(x,y),map_y(x,y))\f]
+
+where values of pixels with non-integer coordinates are computed using one of available
+interpolation methods. \f$map_x\f$ and \f$map_y\f$ can be encoded as separate floating-point maps
+in \f$map_1\f$ and \f$map_2\f$ respectively, or interleaved floating-point maps of \f$(x,y)\f$ in
+\f$map_1\f$, or fixed-point maps created by using convertMaps. The reason you might want to
+convert from floating to fixed-point representations of a map is that they can yield much faster
+(\~2x) remapping operations. In the converted case, \f$map_1\f$ contains pairs (cvFloor(x),
+cvFloor(y)) and \f$map_2\f$ contains indices in a table of interpolation coefficients.
+
+This function cannot operate in-place.
+
+@param src Source image.
+@param dst Destination image. It has the same size as map1 and the same type as src .
+@param map1 The first map of either (x,y) points or just x values having the type CV_16SC2 ,
+CV_32FC1, or CV_32FC2. See convertMaps for details on converting a floating point
+representation to fixed-point for speed.
+@param map2 The second map of y values having the type CV_16UC1, CV_32FC1, or none (empty map
+if map1 is (x,y) points), respectively.
+@param interpolation Interpolation method (see #InterpolationFlags). The method #INTER_AREA is
+not supported by this function.
+@param borderMode Pixel extrapolation method (see #BorderTypes). When
+borderMode=#BORDER_TRANSPARENT, it means that the pixels in the destination image that
+corresponds to the "outliers" in the source image are not modified by the function.
+@param borderValue Value used in case of a constant border. By default, it is 0.
+@note
+Due to current implementation limitations the size of an input and output images should be less than 32767x32767.
+ */
+CV_EXPORTS_W void remap( InputArray src, OutputArray dst,
+                         InputArray map1, InputArray map2,
+                         int interpolation, int borderMode = BORDER_CONSTANT,
+                         const Scalar& borderValue = Scalar());
+
+/** @brief Converts image transformation maps from one representation to another.
+
+The function converts a pair of maps for remap from one representation to another. The following
+options ( (map1.type(), map2.type()) \f$\rightarrow\f$ (dstmap1.type(), dstmap2.type()) ) are
+supported:
+
+- \f$\texttt{(CV_32FC1, CV_32FC1)} \rightarrow \texttt{(CV_16SC2, CV_16UC1)}\f$. This is the
+most frequently used conversion operation, in which the original floating-point maps (see remap )
+are converted to a more compact and much faster fixed-point representation. The first output array
+contains the rounded coordinates and the second array (created only when nninterpolation=false )
+contains indices in the interpolation tables.
+
+- \f$\texttt{(CV_32FC2)} \rightarrow \texttt{(CV_16SC2, CV_16UC1)}\f$. The same as above but
+the original maps are stored in one 2-channel matrix.
+
+- Reverse conversion. Obviously, the reconstructed floating-point maps will not be exactly the same
+as the originals.
+
+@param map1 The first input map of type CV_16SC2, CV_32FC1, or CV_32FC2 .
+@param map2 The second input map of type CV_16UC1, CV_32FC1, or none (empty matrix),
+respectively.
+@param dstmap1 The first output map that has the type dstmap1type and the same size as src .
+@param dstmap2 The second output map.
+@param dstmap1type Type of the first output map that should be CV_16SC2, CV_32FC1, or
+CV_32FC2 .
+@param nninterpolation Flag indicating whether the fixed-point maps are used for the
+nearest-neighbor or for a more complex interpolation.
+
+@sa  remap, undistort, initUndistortRectifyMap
+ */
+CV_EXPORTS_W void convertMaps( InputArray map1, InputArray map2,
+                               OutputArray dstmap1, OutputArray dstmap2,
+                               int dstmap1type, bool nninterpolation = false );
+
+/** @brief Calculates an affine matrix of 2D rotation.
+
+The function calculates the following matrix:
+
+\f[\begin{bmatrix} \alpha &  \beta & (1- \alpha )  \cdot \texttt{center.x} -  \beta \cdot \texttt{center.y} \\ - \beta &  \alpha &  \beta \cdot \texttt{center.x} + (1- \alpha )  \cdot \texttt{center.y} \end{bmatrix}\f]
+
+where
+
+\f[\begin{array}{l} \alpha =  \texttt{scale} \cdot \cos \texttt{angle} , \\ \beta =  \texttt{scale} \cdot \sin \texttt{angle} \end{array}\f]
+
+The transformation maps the rotation center to itself. If this is not the target, adjust the shift.
+
+@param center Center of the rotation in the source image.
+@param angle Rotation angle in degrees. Positive values mean counter-clockwise rotation (the
+coordinate origin is assumed to be the top-left corner).
+@param scale Isotropic scale factor.
+
+@sa  getAffineTransform, warpAffine, transform
+ */
+CV_EXPORTS_W Mat getRotationMatrix2D( Point2f center, double angle, double scale );
+
+//! returns 3x3 perspective transformation for the corresponding 4 point pairs.
+CV_EXPORTS Mat getPerspectiveTransform( const Point2f src[], const Point2f dst[] );
+
+/** @brief Calculates an affine transform from three pairs of the corresponding points.
+
+The function calculates the \f$2 \times 3\f$ matrix of an affine transform so that:
+
+\f[\begin{bmatrix} x'_i \\ y'_i \end{bmatrix} = \texttt{map_matrix} \cdot \begin{bmatrix} x_i \\ y_i \\ 1 \end{bmatrix}\f]
+
+where
+
+\f[dst(i)=(x'_i,y'_i), src(i)=(x_i, y_i), i=0,1,2\f]
+
+@param src Coordinates of triangle vertices in the source image.
+@param dst Coordinates of the corresponding triangle vertices in the destination image.
+
+@sa  warpAffine, transform
+ */
+CV_EXPORTS Mat getAffineTransform( const Point2f src[], const Point2f dst[] );
+
+/** @brief Inverts an affine transformation.
+
+The function computes an inverse affine transformation represented by \f$2 \times 3\f$ matrix M:
+
+\f[\begin{bmatrix} a_{11} & a_{12} & b_1  \\ a_{21} & a_{22} & b_2 \end{bmatrix}\f]
+
+The result is also a \f$2 \times 3\f$ matrix of the same type as M.
+
+@param M Original affine transformation.
+@param iM Output reverse affine transformation.
+ */
+CV_EXPORTS_W void invertAffineTransform( InputArray M, OutputArray iM );
+
+/** @brief Calculates a perspective transform from four pairs of the corresponding points.
+
+The function calculates the \f$3 \times 3\f$ matrix of a perspective transform so that:
+
+\f[\begin{bmatrix} t_i x'_i \\ t_i y'_i \\ t_i \end{bmatrix} = \texttt{map_matrix} \cdot \begin{bmatrix} x_i \\ y_i \\ 1 \end{bmatrix}\f]
+
+where
+
+\f[dst(i)=(x'_i,y'_i), src(i)=(x_i, y_i), i=0,1,2,3\f]
+
+@param src Coordinates of quadrangle vertices in the source image.
+@param dst Coordinates of the corresponding quadrangle vertices in the destination image.
+
+@sa  findHomography, warpPerspective, perspectiveTransform
+ */
+CV_EXPORTS_W Mat getPerspectiveTransform( InputArray src, InputArray dst );
+
+CV_EXPORTS_W Mat getAffineTransform( InputArray src, InputArray dst );
+
+/** @brief Retrieves a pixel rectangle from an image with sub-pixel accuracy.
+
+The function getRectSubPix extracts pixels from src:
+
+\f[patch(x, y) = src(x +  \texttt{center.x} - ( \texttt{dst.cols} -1)*0.5, y +  \texttt{center.y} - ( \texttt{dst.rows} -1)*0.5)\f]
+
+where the values of the pixels at non-integer coordinates are retrieved using bilinear
+interpolation. Every channel of multi-channel images is processed independently. Also
+the image should be a single channel or three channel image. While the center of the
+rectangle must be inside the image, parts of the rectangle may be outside.
+
+@param image Source image.
+@param patchSize Size of the extracted patch.
+@param center Floating point coordinates of the center of the extracted rectangle within the
+source image. The center must be inside the image.
+@param patch Extracted patch that has the size patchSize and the same number of channels as src .
+@param patchType Depth of the extracted pixels. By default, they have the same depth as src .
+
+@sa  warpAffine, warpPerspective
+ */
+CV_EXPORTS_W void getRectSubPix( InputArray image, Size patchSize,
+                                 Point2f center, OutputArray patch, int patchType = -1 );
+
+/** @example polar_transforms.cpp
+An example using the cv::linearPolar and cv::logPolar operations
+*/
+
+/** @brief Remaps an image to semilog-polar coordinates space.
+
+Transform the source image using the following transformation (See @ref polar_remaps_reference_image "Polar remaps reference image"):
+\f[\begin{array}{l}
+  dst( \rho , \phi ) = src(x,y) \\
+  dst.size() \leftarrow src.size()
+\end{array}\f]
+
+where
+\f[\begin{array}{l}
+  I = (dx,dy) = (x - center.x,y - center.y) \\
+  \rho = M \cdot log_e(\texttt{magnitude} (I)) ,\\
+  \phi = Ky \cdot \texttt{angle} (I)_{0..360 deg} \\
+\end{array}\f]
+
+and
+\f[\begin{array}{l}
+  M = src.cols / log_e(maxRadius) \\
+  Ky = src.rows / 360 \\
+\end{array}\f]
+
+The function emulates the human "foveal" vision and can be used for fast scale and
+rotation-invariant template matching, for object tracking and so forth.
+@param src Source image
+@param dst Destination image. It will have same size and type as src.
+@param center The transformation center; where the output precision is maximal
+@param M Magnitude scale parameter. It determines the radius of the bounding circle to transform too.
+@param flags A combination of interpolation methods, see #InterpolationFlags
+
+@note
+-   The function can not operate in-place.
+-   To calculate magnitude and angle in degrees #cartToPolar is used internally thus angles are measured from 0 to 360 with accuracy about 0.3 degrees.
+*/
+CV_EXPORTS_W void logPolar( InputArray src, OutputArray dst,
+                            Point2f center, double M, int flags );
+
+/** @brief Remaps an image to polar coordinates space.
+
+@anchor polar_remaps_reference_image
+![Polar remaps reference](pics/polar_remap_doc.png)
+
+Transform the source image using the following transformation:
+\f[\begin{array}{l}
+  dst( \rho , \phi ) = src(x,y) \\
+  dst.size() \leftarrow src.size()
+\end{array}\f]
+
+where
+\f[\begin{array}{l}
+  I = (dx,dy) = (x - center.x,y - center.y) \\
+  \rho = Kx \cdot \texttt{magnitude} (I) ,\\
+  \phi = Ky \cdot \texttt{angle} (I)_{0..360 deg}
+\end{array}\f]
+
+and
+\f[\begin{array}{l}
+  Kx = src.cols / maxRadius \\
+  Ky = src.rows / 360
+\end{array}\f]
+
+
+@param src Source image
+@param dst Destination image. It will have same size and type as src.
+@param center The transformation center;
+@param maxRadius The radius of the bounding circle to transform. It determines the inverse magnitude scale parameter too.
+@param flags A combination of interpolation methods, see #InterpolationFlags
+
+@note
+-   The function can not operate in-place.
+-   To calculate magnitude and angle in degrees #cartToPolar is used internally thus angles are measured from 0 to 360 with accuracy about 0.3 degrees.
+
+*/
+CV_EXPORTS_W void linearPolar( InputArray src, OutputArray dst,
+                               Point2f center, double maxRadius, int flags );
+
+//! @} imgproc_transform
+
+//! @addtogroup imgproc_misc
+//! @{
+
+/** @overload */
+CV_EXPORTS_W void integral( InputArray src, OutputArray sum, int sdepth = -1 );
+
+/** @overload */
+CV_EXPORTS_AS(integral2) void integral( InputArray src, OutputArray sum,
+                                        OutputArray sqsum, int sdepth = -1, int sqdepth = -1 );
+
+/** @brief Calculates the integral of an image.
+
+The function calculates one or more integral images for the source image as follows:
+
+\f[\texttt{sum} (X,Y) =  \sum _{x<X,y<Y}  \texttt{image} (x,y)\f]
+
+\f[\texttt{sqsum} (X,Y) =  \sum _{x<X,y<Y}  \texttt{image} (x,y)^2\f]
+
+\f[\texttt{tilted} (X,Y) =  \sum _{y<Y,abs(x-X+1) \leq Y-y-1}  \texttt{image} (x,y)\f]
+
+Using these integral images, you can calculate sum, mean, and standard deviation over a specific
+up-right or rotated rectangular region of the image in a constant time, for example:
+
+\f[\sum _{x_1 \leq x < x_2,  \, y_1  \leq y < y_2}  \texttt{image} (x,y) =  \texttt{sum} (x_2,y_2)- \texttt{sum} (x_1,y_2)- \texttt{sum} (x_2,y_1)+ \texttt{sum} (x_1,y_1)\f]
+
+It makes possible to do a fast blurring or fast block correlation with a variable window size, for
+example. In case of multi-channel images, sums for each channel are accumulated independently.
+
+As a practical example, the next figure shows the calculation of the integral of a straight
+rectangle Rect(3,3,3,2) and of a tilted rectangle Rect(5,1,2,3) . The selected pixels in the
+original image are shown, as well as the relative pixels in the integral images sum and tilted .
+
+![integral calculation example](pics/integral.png)
+
+@param src input image as \f$W \times H\f$, 8-bit or floating-point (32f or 64f).
+@param sum integral image as \f$(W+1)\times (H+1)\f$ , 32-bit integer or floating-point (32f or 64f).
+@param sqsum integral image for squared pixel values; it is \f$(W+1)\times (H+1)\f$, double-precision
+floating-point (64f) array.
+@param tilted integral for the image rotated by 45 degrees; it is \f$(W+1)\times (H+1)\f$ array with
+the same data type as sum.
+@param sdepth desired depth of the integral and the tilted integral images, CV_32S, CV_32F, or
+CV_64F.
+@param sqdepth desired depth of the integral image of squared pixel values, CV_32F or CV_64F.
+ */
+CV_EXPORTS_AS(integral3) void integral( InputArray src, OutputArray sum,
+                                        OutputArray sqsum, OutputArray tilted,
+                                        int sdepth = -1, int sqdepth = -1 );
+
+//! @} imgproc_misc
+
+//! @addtogroup imgproc_motion
+//! @{
+
+/** @brief Adds an image to the accumulator image.
+
+The function adds src or some of its elements to dst :
+
+\f[\texttt{dst} (x,y)  \leftarrow \texttt{dst} (x,y) +  \texttt{src} (x,y)  \quad \text{if} \quad \texttt{mask} (x,y)  \ne 0\f]
+
+The function supports multi-channel images. Each channel is processed independently.
+
+The function cv::accumulate can be used, for example, to collect statistics of a scene background
+viewed by a still camera and for the further foreground-background segmentation.
+
+@param src Input image of type CV_8UC(n), CV_16UC(n), CV_32FC(n) or CV_64FC(n), where n is a positive integer.
+@param dst %Accumulator image with the same number of channels as input image, and a depth of CV_32F or CV_64F.
+@param mask Optional operation mask.
+
+@sa  accumulateSquare, accumulateProduct, accumulateWeighted
+ */
+CV_EXPORTS_W void accumulate( InputArray src, InputOutputArray dst,
+                              InputArray mask = noArray() );
+
+/** @brief Adds the square of a source image to the accumulator image.
+
+The function adds the input image src or its selected region, raised to a power of 2, to the
+accumulator dst :
+
+\f[\texttt{dst} (x,y)  \leftarrow \texttt{dst} (x,y) +  \texttt{src} (x,y)^2  \quad \text{if} \quad \texttt{mask} (x,y)  \ne 0\f]
+
+The function supports multi-channel images. Each channel is processed independently.
+
+@param src Input image as 1- or 3-channel, 8-bit or 32-bit floating point.
+@param dst %Accumulator image with the same number of channels as input image, 32-bit or 64-bit
+floating-point.
+@param mask Optional operation mask.
+
+@sa  accumulateSquare, accumulateProduct, accumulateWeighted
+ */
+CV_EXPORTS_W void accumulateSquare( InputArray src, InputOutputArray dst,
+                                    InputArray mask = noArray() );
+
+/** @brief Adds the per-element product of two input images to the accumulator image.
+
+The function adds the product of two images or their selected regions to the accumulator dst :
+
+\f[\texttt{dst} (x,y)  \leftarrow \texttt{dst} (x,y) +  \texttt{src1} (x,y)  \cdot \texttt{src2} (x,y)  \quad \text{if} \quad \texttt{mask} (x,y)  \ne 0\f]
+
+The function supports multi-channel images. Each channel is processed independently.
+
+@param src1 First input image, 1- or 3-channel, 8-bit or 32-bit floating point.
+@param src2 Second input image of the same type and the same size as src1 .
+@param dst %Accumulator image with the same number of channels as input images, 32-bit or 64-bit
+floating-point.
+@param mask Optional operation mask.
+
+@sa  accumulate, accumulateSquare, accumulateWeighted
+ */
+CV_EXPORTS_W void accumulateProduct( InputArray src1, InputArray src2,
+                                     InputOutputArray dst, InputArray mask=noArray() );
+
+/** @brief Updates a running average.
+
+The function calculates the weighted sum of the input image src and the accumulator dst so that dst
+becomes a running average of a frame sequence:
+
+\f[\texttt{dst} (x,y)  \leftarrow (1- \texttt{alpha} )  \cdot \texttt{dst} (x,y) +  \texttt{alpha} \cdot \texttt{src} (x,y)  \quad \text{if} \quad \texttt{mask} (x,y)  \ne 0\f]
+
+That is, alpha regulates the update speed (how fast the accumulator "forgets" about earlier images).
+The function supports multi-channel images. Each channel is processed independently.
+
+@param src Input image as 1- or 3-channel, 8-bit or 32-bit floating point.
+@param dst %Accumulator image with the same number of channels as input image, 32-bit or 64-bit
+floating-point.
+@param alpha Weight of the input image.
+@param mask Optional operation mask.
+
+@sa  accumulate, accumulateSquare, accumulateProduct
+ */
+CV_EXPORTS_W void accumulateWeighted( InputArray src, InputOutputArray dst,
+                                      double alpha, InputArray mask = noArray() );
+
+/** @brief The function is used to detect translational shifts that occur between two images.
+
+The operation takes advantage of the Fourier shift theorem for detecting the translational shift in
+the frequency domain. It can be used for fast image registration as well as motion estimation. For
+more information please see <http://en.wikipedia.org/wiki/Phase_correlation>
+
+Calculates the cross-power spectrum of two supplied source arrays. The arrays are padded if needed
+with getOptimalDFTSize.
+
+The function performs the following equations:
+- First it applies a Hanning window (see <http://en.wikipedia.org/wiki/Hann_function>) to each
+image to remove possible edge effects. This window is cached until the array size changes to speed
+up processing time.
+- Next it computes the forward DFTs of each source array:
+\f[\mathbf{G}_a = \mathcal{F}\{src_1\}, \; \mathbf{G}_b = \mathcal{F}\{src_2\}\f]
+where \f$\mathcal{F}\f$ is the forward DFT.
+- It then computes the cross-power spectrum of each frequency domain array:
+\f[R = \frac{ \mathbf{G}_a \mathbf{G}_b^*}{|\mathbf{G}_a \mathbf{G}_b^*|}\f]
+- Next the cross-correlation is converted back into the time domain via the inverse DFT:
+\f[r = \mathcal{F}^{-1}\{R\}\f]
+- Finally, it computes the peak location and computes a 5x5 weighted centroid around the peak to
+achieve sub-pixel accuracy.
+\f[(\Delta x, \Delta y) = \texttt{weightedCentroid} \{\arg \max_{(x, y)}\{r\}\}\f]
+- If non-zero, the response parameter is computed as the sum of the elements of r within the 5x5
+centroid around the peak location. It is normalized to a maximum of 1 (meaning there is a single
+peak) and will be smaller when there are multiple peaks.
+
+@param src1 Source floating point array (CV_32FC1 or CV_64FC1)
+@param src2 Source floating point array (CV_32FC1 or CV_64FC1)
+@param window Floating point array with windowing coefficients to reduce edge effects (optional).
+@param response Signal power within the 5x5 centroid around the peak, between 0 and 1 (optional).
+@returns detected phase shift (sub-pixel) between the two arrays.
+
+@sa dft, getOptimalDFTSize, idft, mulSpectrums createHanningWindow
+ */
+CV_EXPORTS_W Point2d phaseCorrelate(InputArray src1, InputArray src2,
+                                    InputArray window = noArray(), CV_OUT double* response = 0);
+
+/** @brief This function computes a Hanning window coefficients in two dimensions.
+
+See (http://en.wikipedia.org/wiki/Hann_function) and (http://en.wikipedia.org/wiki/Window_function)
+for more information.
+
+An example is shown below:
+@code
+    // create hanning window of size 100x100 and type CV_32F
+    Mat hann;
+    createHanningWindow(hann, Size(100, 100), CV_32F);
+@endcode
+@param dst Destination array to place Hann coefficients in
+@param winSize The window size specifications (both width and height must be > 1)
+@param type Created array type
+ */
+CV_EXPORTS_W void createHanningWindow(OutputArray dst, Size winSize, int type);
+
+//! @} imgproc_motion
+
+//! @addtogroup imgproc_misc
+//! @{
+
+/** @brief Applies a fixed-level threshold to each array element.
+
+The function applies fixed-level thresholding to a multiple-channel array. The function is typically
+used to get a bi-level (binary) image out of a grayscale image ( #compare could be also used for
+this purpose) or for removing a noise, that is, filtering out pixels with too small or too large
+values. There are several types of thresholding supported by the function. They are determined by
+type parameter.
+
+Also, the special values #THRESH_OTSU or #THRESH_TRIANGLE may be combined with one of the
+above values. In these cases, the function determines the optimal threshold value using the Otsu's
+or Triangle algorithm and uses it instead of the specified thresh.
+
+@note Currently, the Otsu's and Triangle methods are implemented only for 8-bit single-channel images.
+
+@param src input array (multiple-channel, 8-bit or 32-bit floating point).
+@param dst output array of the same size  and type and the same number of channels as src.
+@param thresh threshold value.
+@param maxval maximum value to use with the #THRESH_BINARY and #THRESH_BINARY_INV thresholding
+types.
+@param type thresholding type (see #ThresholdTypes).
+@return the computed threshold value if Otsu's or Triangle methods used.
+
+@sa  adaptiveThreshold, findContours, compare, min, max
+ */
+CV_EXPORTS_W double threshold( InputArray src, OutputArray dst,
+                               double thresh, double maxval, int type );
+
+
+/** @brief Applies an adaptive threshold to an array.
+
+The function transforms a grayscale image to a binary image according to the formulae:
+-   **THRESH_BINARY**
+    \f[dst(x,y) =  \fork{\texttt{maxValue}}{if \(src(x,y) > T(x,y)\)}{0}{otherwise}\f]
+-   **THRESH_BINARY_INV**
+    \f[dst(x,y) =  \fork{0}{if \(src(x,y) > T(x,y)\)}{\texttt{maxValue}}{otherwise}\f]
+where \f$T(x,y)\f$ is a threshold calculated individually for each pixel (see adaptiveMethod parameter).
+
+The function can process the image in-place.
+
+@param src Source 8-bit single-channel image.
+@param dst Destination image of the same size and the same type as src.
+@param maxValue Non-zero value assigned to the pixels for which the condition is satisfied
+@param adaptiveMethod Adaptive thresholding algorithm to use, see #AdaptiveThresholdTypes.
+The #BORDER_REPLICATE | #BORDER_ISOLATED is used to process boundaries.
+@param thresholdType Thresholding type that must be either #THRESH_BINARY or #THRESH_BINARY_INV,
+see #ThresholdTypes.
+@param blockSize Size of a pixel neighborhood that is used to calculate a threshold value for the
+pixel: 3, 5, 7, and so on.
+@param C Constant subtracted from the mean or weighted mean (see the details below). Normally, it
+is positive but may be zero or negative as well.
+
+@sa  threshold, blur, GaussianBlur
+ */
+CV_EXPORTS_W void adaptiveThreshold( InputArray src, OutputArray dst,
+                                     double maxValue, int adaptiveMethod,
+                                     int thresholdType, int blockSize, double C );
+
+//! @} imgproc_misc
+
+//! @addtogroup imgproc_filter
+//! @{
+
+/** @example Pyramids.cpp
+An example using pyrDown and pyrUp functions
+ */
+/** @brief Blurs an image and downsamples it.
+
+By default, size of the output image is computed as `Size((src.cols+1)/2, (src.rows+1)/2)`, but in
+any case, the following conditions should be satisfied:
+
+\f[\begin{array}{l} | \texttt{dstsize.width} *2-src.cols| \leq 2 \\ | \texttt{dstsize.height} *2-src.rows| \leq 2 \end{array}\f]
+
+The function performs the downsampling step of the Gaussian pyramid construction. First, it
+convolves the source image with the kernel:
+
+\f[\frac{1}{256} \begin{bmatrix} 1 & 4 & 6 & 4 & 1  \\ 4 & 16 & 24 & 16 & 4  \\ 6 & 24 & 36 & 24 & 6  \\ 4 & 16 & 24 & 16 & 4  \\ 1 & 4 & 6 & 4 & 1 \end{bmatrix}\f]
+
+Then, it downsamples the image by rejecting even rows and columns.
+
+@param src input image.
+@param dst output image; it has the specified size and the same type as src.
+@param dstsize size of the output image.
+@param borderType Pixel extrapolation method, see #BorderTypes (#BORDER_CONSTANT isn't supported)
+ */
+CV_EXPORTS_W void pyrDown( InputArray src, OutputArray dst,
+                           const Size& dstsize = Size(), int borderType = BORDER_DEFAULT );
+
+/** @brief Upsamples an image and then blurs it.
+
+By default, size of the output image is computed as `Size(src.cols\*2, (src.rows\*2)`, but in any
+case, the following conditions should be satisfied:
+
+\f[\begin{array}{l} | \texttt{dstsize.width} -src.cols*2| \leq  ( \texttt{dstsize.width}   \mod  2)  \\ | \texttt{dstsize.height} -src.rows*2| \leq  ( \texttt{dstsize.height}   \mod  2) \end{array}\f]
+
+The function performs the upsampling step of the Gaussian pyramid construction, though it can
+actually be used to construct the Laplacian pyramid. First, it upsamples the source image by
+injecting even zero rows and columns and then convolves the result with the same kernel as in
+pyrDown multiplied by 4.
+
+@param src input image.
+@param dst output image. It has the specified size and the same type as src .
+@param dstsize size of the output image.
+@param borderType Pixel extrapolation method, see #BorderTypes (only #BORDER_DEFAULT is supported)
+ */
+CV_EXPORTS_W void pyrUp( InputArray src, OutputArray dst,
+                         const Size& dstsize = Size(), int borderType = BORDER_DEFAULT );
+
+/** @brief Constructs the Gaussian pyramid for an image.
+
+The function constructs a vector of images and builds the Gaussian pyramid by recursively applying
+pyrDown to the previously built pyramid layers, starting from `dst[0]==src`.
+
+@param src Source image. Check pyrDown for the list of supported types.
+@param dst Destination vector of maxlevel+1 images of the same type as src. dst[0] will be the
+same as src. dst[1] is the next pyramid layer, a smoothed and down-sized src, and so on.
+@param maxlevel 0-based index of the last (the smallest) pyramid layer. It must be non-negative.
+@param borderType Pixel extrapolation method, see #BorderTypes (#BORDER_CONSTANT isn't supported)
+ */
+CV_EXPORTS void buildPyramid( InputArray src, OutputArrayOfArrays dst,
+                              int maxlevel, int borderType = BORDER_DEFAULT );
+
+//! @} imgproc_filter
+
+//! @addtogroup imgproc_transform
+//! @{
+
+/** @brief Transforms an image to compensate for lens distortion.
+
+The function transforms an image to compensate radial and tangential lens distortion.
+
+The function is simply a combination of #initUndistortRectifyMap (with unity R ) and #remap
+(with bilinear interpolation). See the former function for details of the transformation being
+performed.
+
+Those pixels in the destination image, for which there is no correspondent pixels in the source
+image, are filled with zeros (black color).
+
+A particular subset of the source image that will be visible in the corrected image can be regulated
+by newCameraMatrix. You can use #getOptimalNewCameraMatrix to compute the appropriate
+newCameraMatrix depending on your requirements.
+
+The camera matrix and the distortion parameters can be determined using #calibrateCamera. If
+the resolution of images is different from the resolution used at the calibration stage, \f$f_x,
+f_y, c_x\f$ and \f$c_y\f$ need to be scaled accordingly, while the distortion coefficients remain
+the same.
+
+@param src Input (distorted) image.
+@param dst Output (corrected) image that has the same size and type as src .
+@param cameraMatrix Input camera matrix \f$A = \vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ .
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6[, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$
+of 4, 5, 8, 12 or 14 elements. If the vector is NULL/empty, the zero distortion coefficients are assumed.
+@param newCameraMatrix Camera matrix of the distorted image. By default, it is the same as
+cameraMatrix but you may additionally scale and shift the result by using a different matrix.
+ */
+CV_EXPORTS_W void undistort( InputArray src, OutputArray dst,
+                             InputArray cameraMatrix,
+                             InputArray distCoeffs,
+                             InputArray newCameraMatrix = noArray() );
+
+/** @brief Computes the undistortion and rectification transformation map.
+
+The function computes the joint undistortion and rectification transformation and represents the
+result in the form of maps for remap. The undistorted image looks like original, as if it is
+captured with a camera using the camera matrix =newCameraMatrix and zero distortion. In case of a
+monocular camera, newCameraMatrix is usually equal to cameraMatrix, or it can be computed by
+#getOptimalNewCameraMatrix for a better control over scaling. In case of a stereo camera,
+newCameraMatrix is normally set to P1 or P2 computed by #stereoRectify .
+
+Also, this new camera is oriented differently in the coordinate space, according to R. That, for
+example, helps to align two heads of a stereo camera so that the epipolar lines on both images
+become horizontal and have the same y- coordinate (in case of a horizontally aligned stereo camera).
+
+The function actually builds the maps for the inverse mapping algorithm that is used by remap. That
+is, for each pixel \f$(u, v)\f$ in the destination (corrected and rectified) image, the function
+computes the corresponding coordinates in the source image (that is, in the original image from
+camera). The following process is applied:
+\f[
+\begin{array}{l}
+x  \leftarrow (u - {c'}_x)/{f'}_x  \\
+y  \leftarrow (v - {c'}_y)/{f'}_y  \\
+{[X\,Y\,W]} ^T  \leftarrow R^{-1}*[x \, y \, 1]^T  \\
+x'  \leftarrow X/W  \\
+y'  \leftarrow Y/W  \\
+r^2  \leftarrow x'^2 + y'^2 \\
+x''  \leftarrow x' \frac{1 + k_1 r^2 + k_2 r^4 + k_3 r^6}{1 + k_4 r^2 + k_5 r^4 + k_6 r^6}
++ 2p_1 x' y' + p_2(r^2 + 2 x'^2)  + s_1 r^2 + s_2 r^4\\
+y''  \leftarrow y' \frac{1 + k_1 r^2 + k_2 r^4 + k_3 r^6}{1 + k_4 r^2 + k_5 r^4 + k_6 r^6}
++ p_1 (r^2 + 2 y'^2) + 2 p_2 x' y' + s_3 r^2 + s_4 r^4 \\
+s\vecthree{x'''}{y'''}{1} =
+\vecthreethree{R_{33}(\tau_x, \tau_y)}{0}{-R_{13}((\tau_x, \tau_y)}
+{0}{R_{33}(\tau_x, \tau_y)}{-R_{23}(\tau_x, \tau_y)}
+{0}{0}{1} R(\tau_x, \tau_y) \vecthree{x''}{y''}{1}\\
+map_x(u,v)  \leftarrow x''' f_x + c_x  \\
+map_y(u,v)  \leftarrow y''' f_y + c_y
+\end{array}
+\f]
+where \f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6[, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$
+are the distortion coefficients.
+
+In case of a stereo camera, this function is called twice: once for each camera head, after
+stereoRectify, which in its turn is called after #stereoCalibrate. But if the stereo camera
+was not calibrated, it is still possible to compute the rectification transformations directly from
+the fundamental matrix using #stereoRectifyUncalibrated. For each camera, the function computes
+homography H as the rectification transformation in a pixel domain, not a rotation matrix R in 3D
+space. R can be computed from H as
+\f[\texttt{R} = \texttt{cameraMatrix} ^{-1} \cdot \texttt{H} \cdot \texttt{cameraMatrix}\f]
+where cameraMatrix can be chosen arbitrarily.
+
+@param cameraMatrix Input camera matrix \f$A=\vecthreethree{f_x}{0}{c_x}{0}{f_y}{c_y}{0}{0}{1}\f$ .
+@param distCoeffs Input vector of distortion coefficients
+\f$(k_1, k_2, p_1, p_2[, k_3[, k_4, k_5, k_6[, s_1, s_2, s_3, s_4[, \tau_x, \tau_y]]]])\f$
+of 4, 5, 8, 12 or 14 elements. If the vector is NULL/empty, the zero distortion coefficients are assumed.
+@param R Optional rectification transformation in the object space (3x3 matrix). R1 or R2 ,
+computed by #stereoRectify can be passed here. If the matrix is empty, the identity transformation
+is assumed. In cvInitUndistortMap R assumed to be an identity matrix.
+@param newCameraMatrix New camera matrix \f$A'=\vecthreethree{f_x'}{0}{c_x'}{0}{f_y'}{c_y'}{0}{0}{1}\f$.
+@param size Undistorted image size.
+@param m1type Type of the first output map that can be CV_32FC1, CV_32FC2 or CV_16SC2, see #convertMaps
+@param map1 The first output map.
+@param map2 The second output map.
+ */
+CV_EXPORTS_W void initUndistortRectifyMap( InputArray cameraMatrix, InputArray distCoeffs,
+                           InputArray R, InputArray newCameraMatrix,
+                           Size size, int m1type, OutputArray map1, OutputArray map2 );
+
+//! initializes maps for #remap for wide-angle
+CV_EXPORTS_W float initWideAngleProjMap( InputArray cameraMatrix, InputArray distCoeffs,
+                                         Size imageSize, int destImageWidth,
+                                         int m1type, OutputArray map1, OutputArray map2,
+                                         int projType = PROJ_SPHERICAL_EQRECT, double alpha = 0);
+
+/** @brief Returns the default new camera matrix.
+
+The function returns the camera matrix that is either an exact copy of the input cameraMatrix (when
+centerPrinicipalPoint=false ), or the modified one (when centerPrincipalPoint=true).
+
+In the latter case, the new camera matrix will be:
+
+\f[\begin{bmatrix} f_x && 0 && ( \texttt{imgSize.width} -1)*0.5  \\ 0 && f_y && ( \texttt{imgSize.height} -1)*0.5  \\ 0 && 0 && 1 \end{bmatrix} ,\f]
+
+where \f$f_x\f$ and \f$f_y\f$ are \f$(0,0)\f$ and \f$(1,1)\f$ elements of cameraMatrix, respectively.
+
+By default, the undistortion functions in OpenCV (see #initUndistortRectifyMap, #undistort) do not
+move the principal point. However, when you work with stereo, it is important to move the principal
+points in both views to the same y-coordinate (which is required by most of stereo correspondence
+algorithms), and may be to the same x-coordinate too. So, you can form the new camera matrix for
+each view where the principal points are located at the center.
+
+@param cameraMatrix Input camera matrix.
+@param imgsize Camera view image size in pixels.
+@param centerPrincipalPoint Location of the principal point in the new camera matrix. The
+parameter indicates whether this location should be at the image center or not.
+ */
+CV_EXPORTS_W Mat getDefaultNewCameraMatrix( InputArray cameraMatrix, Size imgsize = Size(),
+                                            bool centerPrincipalPoint = false );
+
+/** @brief Computes the ideal point coordinates from the observed point coordinates.
+
+The function is similar to #undistort and #initUndistortRectifyMap but it operates on a
+sparse set of points instead of a raster image. Also the function performs a reverse transformation
+to projectPoints. In case of a 3D object, it does not reconstruct its 3D coordinates, but for a
+planar object, it does, up to a translation vector, if the proper R is specified.
+
+For each observed point coordinate \f$(u, v)\f$ the function computes:
+\f[
+\begin{array}{l}
+x^{"}  \leftarrow (u - c_x)/f_x  \\
+y^{"}  \leftarrow (v - c_y)/f_y  \\
+(x',y') = undistort(x^{"},y^{"}, \texttt{distCoeffs}) \\
+{[X\,Y\,W]} ^T  \leftarrow R*[x' \, y' \, 1]^T  \\
+x  \leftarrow X/W  \\
