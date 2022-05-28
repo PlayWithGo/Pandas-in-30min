@@ -156,4 +156,44 @@ CV_EXPORTS_W void groupRectangles(CV_IN_OUT std::vector<Rect>& rectList, CV_OUT 
 CV_EXPORTS   void groupRectangles(std::vector<Rect>& rectList, int groupThreshold,
                                   double eps, std::vector<int>* weights, std::vector<double>* levelWeights );
 /** @overload */
-CV_EXPORTS   void groupRectangles(std:
+CV_EXPORTS   void groupRectangles(std::vector<Rect>& rectList, std::vector<int>& rejectLevels,
+                                  std::vector<double>& levelWeights, int groupThreshold, double eps = 0.2);
+/** @overload */
+CV_EXPORTS   void groupRectangles_meanshift(std::vector<Rect>& rectList, std::vector<double>& foundWeights,
+                                            std::vector<double>& foundScales,
+                                            double detectThreshold = 0.0, Size winDetSize = Size(64, 128));
+
+template<> CV_EXPORTS void DefaultDeleter<CvHaarClassifierCascade>::operator ()(CvHaarClassifierCascade* obj) const;
+
+enum { CASCADE_DO_CANNY_PRUNING    = 1,
+       CASCADE_SCALE_IMAGE         = 2,
+       CASCADE_FIND_BIGGEST_OBJECT = 4,
+       CASCADE_DO_ROUGH_SEARCH     = 8
+     };
+
+class CV_EXPORTS_W BaseCascadeClassifier : public Algorithm
+{
+public:
+    virtual ~BaseCascadeClassifier();
+    virtual bool empty() const = 0;
+    virtual bool load( const String& filename ) = 0;
+    virtual void detectMultiScale( InputArray image,
+                           CV_OUT std::vector<Rect>& objects,
+                           double scaleFactor,
+                           int minNeighbors, int flags,
+                           Size minSize, Size maxSize ) = 0;
+
+    virtual void detectMultiScale( InputArray image,
+                           CV_OUT std::vector<Rect>& objects,
+                           CV_OUT std::vector<int>& numDetections,
+                           double scaleFactor,
+                           int minNeighbors, int flags,
+                           Size minSize, Size maxSize ) = 0;
+
+    virtual void detectMultiScale( InputArray image,
+                                   CV_OUT std::vector<Rect>& objects,
+                                   CV_OUT std::vector<int>& rejectLevels,
+                                   CV_OUT std::vector<double>& levelWeights,
+                                   double scaleFactor,
+                                   int minNeighbors, int flags,
+                                   Size minSi
