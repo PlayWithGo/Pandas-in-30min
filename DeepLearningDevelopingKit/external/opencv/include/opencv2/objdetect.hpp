@@ -117,4 +117,43 @@ namespace cv
 ///////////////////////////// Object Detection ////////////////////////////
 
 //! class for grouping object candidates, detected by Cascade Classifier, HOG etc.
-//! instance of the class is to be passed to cv::partition (see cxopera
+//! instance of the class is to be passed to cv::partition (see cxoperations.hpp)
+class CV_EXPORTS SimilarRects
+{
+public:
+    SimilarRects(double _eps) : eps(_eps) {}
+    inline bool operator()(const Rect& r1, const Rect& r2) const
+    {
+        double delta = eps * ((std::min)(r1.width, r2.width) + (std::min)(r1.height, r2.height)) * 0.5;
+        return std::abs(r1.x - r2.x) <= delta &&
+            std::abs(r1.y - r2.y) <= delta &&
+            std::abs(r1.x + r1.width - r2.x - r2.width) <= delta &&
+            std::abs(r1.y + r1.height - r2.y - r2.height) <= delta;
+    }
+    double eps;
+};
+
+/** @brief Groups the object candidate rectangles.
+
+@param rectList Input/output vector of rectangles. Output vector includes retained and grouped
+rectangles. (The Python list is not modified in place.)
+@param groupThreshold Minimum possible number of rectangles minus 1. The threshold is used in a
+group of rectangles to retain it.
+@param eps Relative difference between sides of the rectangles to merge them into a group.
+
+The function is a wrapper for the generic function partition . It clusters all the input rectangles
+using the rectangle equivalence criteria that combines rectangles with similar sizes and similar
+locations. The similarity is defined by eps. When eps=0 , no clustering is done at all. If
+\f$\texttt{eps}\rightarrow +\inf\f$ , all the rectangles are put in one cluster. Then, the small
+clusters containing less than or equal to groupThreshold rectangles are rejected. In each other
+cluster, the average rectangle is computed and put into the output rectangle list.
+ */
+CV_EXPORTS   void groupRectangles(std::vector<Rect>& rectList, int groupThreshold, double eps = 0.2);
+/** @overload */
+CV_EXPORTS_W void groupRectangles(CV_IN_OUT std::vector<Rect>& rectList, CV_OUT std::vector<int>& weights,
+                                  int groupThreshold, double eps = 0.2);
+/** @overload */
+CV_EXPORTS   void groupRectangles(std::vector<Rect>& rectList, int groupThreshold,
+                                  double eps, std::vector<int>* weights, std::vector<double>* levelWeights );
+/** @overload */
+CV_EXPORTS   void groupRectangles(std:
