@@ -196,4 +196,59 @@ public:
                                    CV_OUT std::vector<double>& levelWeights,
                                    double scaleFactor,
                                    int minNeighbors, int flags,
-                                   Size minSi
+                                   Size minSize, Size maxSize,
+                                   bool outputRejectLevels ) = 0;
+
+    virtual bool isOldFormatCascade() const = 0;
+    virtual Size getOriginalWindowSize() const = 0;
+    virtual int getFeatureType() const = 0;
+    virtual void* getOldCascade() = 0;
+
+    class CV_EXPORTS MaskGenerator
+    {
+    public:
+        virtual ~MaskGenerator() {}
+        virtual Mat generateMask(const Mat& src)=0;
+        virtual void initializeMask(const Mat& /*src*/) { }
+    };
+    virtual void setMaskGenerator(const Ptr<MaskGenerator>& maskGenerator) = 0;
+    virtual Ptr<MaskGenerator> getMaskGenerator() = 0;
+};
+
+/** @example facedetect.cpp
+This program demonstrates usage of the Cascade classifier class
+\image html Cascade_Classifier_Tutorial_Result_Haar.jpg "Sample screenshot" width=321 height=254
+*/
+/** @brief Cascade classifier class for object detection.
+ */
+class CV_EXPORTS_W CascadeClassifier
+{
+public:
+    CV_WRAP CascadeClassifier();
+    /** @brief Loads a classifier from a file.
+
+    @param filename Name of the file from which the classifier is loaded.
+     */
+    CV_WRAP CascadeClassifier(const String& filename);
+    ~CascadeClassifier();
+    /** @brief Checks whether the classifier has been loaded.
+    */
+    CV_WRAP bool empty() const;
+    /** @brief Loads a classifier from a file.
+
+    @param filename Name of the file from which the classifier is loaded. The file may contain an old
+    HAAR classifier trained by the haartraining application or a new cascade classifier trained by the
+    traincascade application.
+     */
+    CV_WRAP bool load( const String& filename );
+    /** @brief Reads a classifier from a FileStorage node.
+
+    @note The file may contain a new cascade classifier (trained traincascade application) only.
+     */
+    CV_WRAP bool read( const FileNode& node );
+
+    /** @brief Detects objects of different sizes in the input image. The detected objects are returned as a list
+    of rectangles.
+
+    @param image Matrix of the type CV_8U containing an image where objects are detected.
+    @param objects Vector of rectangles where each r
