@@ -251,4 +251,38 @@ public:
     of rectangles.
 
     @param image Matrix of the type CV_8U containing an image where objects are detected.
-    @param objects Vector of rectangles where each r
+    @param objects Vector of rectangles where each rectangle contains the detected object, the
+    rectangles may be partially outside the original image.
+    @param scaleFactor Parameter specifying how much the image size is reduced at each image scale.
+    @param minNeighbors Parameter specifying how many neighbors each candidate rectangle should have
+    to retain it.
+    @param flags Parameter with the same meaning for an old cascade as in the function
+    cvHaarDetectObjects. It is not used for a new cascade.
+    @param minSize Minimum possible object size. Objects smaller than that are ignored.
+    @param maxSize Maximum possible object size. Objects larger than that are ignored. If `maxSize == minSize` model is evaluated on single scale.
+
+    The function is parallelized with the TBB library.
+
+    @note
+       -   (Python) A face detection example using cascade classifiers can be found at
+            opencv_source_code/samples/python/facedetect.py
+    */
+    CV_WRAP void detectMultiScale( InputArray image,
+                          CV_OUT std::vector<Rect>& objects,
+                          double scaleFactor = 1.1,
+                          int minNeighbors = 3, int flags = 0,
+                          Size minSize = Size(),
+                          Size maxSize = Size() );
+
+    /** @overload
+    @param image Matrix of the type CV_8U containing an image where objects are detected.
+    @param objects Vector of rectangles where each rectangle contains the detected object, the
+    rectangles may be partially outside the original image.
+    @param numDetections Vector of detection numbers for the corresponding objects. An object's number
+    of detections is the number of neighboring positively classified rectangles that were joined
+    together to form the object.
+    @param scaleFactor Parameter specifying how much the image size is reduced at each image scale.
+    @param minNeighbors Parameter specifying how many neighbors each candidate rectangle should have
+    to retain it.
+    @param flags Parameter with the same meaning for an old cascade as in the function
+    cvHaarDetectObjects. I
