@@ -321,4 +321,65 @@ public:
                                   double scaleFactor = 1.1,
                                   int minNeighbors = 3, int flags = 0,
                                   Size minSize = Size(),
-                            
+                                  Size maxSize = Size(),
+                                  bool outputRejectLevels = false );
+
+    CV_WRAP bool isOldFormatCascade() const;
+    CV_WRAP Size getOriginalWindowSize() const;
+    CV_WRAP int getFeatureType() const;
+    void* getOldCascade();
+
+    CV_WRAP static bool convert(const String& oldcascade, const String& newcascade);
+
+    void setMaskGenerator(const Ptr<BaseCascadeClassifier::MaskGenerator>& maskGenerator);
+    Ptr<BaseCascadeClassifier::MaskGenerator> getMaskGenerator();
+
+    Ptr<BaseCascadeClassifier> cc;
+};
+
+CV_EXPORTS Ptr<BaseCascadeClassifier::MaskGenerator> createFaceDetectionMaskGenerator();
+
+//////////////// HOG (Histogram-of-Oriented-Gradients) Descriptor and Object Detector //////////////
+
+//! struct for detection region of interest (ROI)
+struct DetectionROI
+{
+   //! scale(size) of the bounding box
+   double scale;
+   //! set of requested locations to be evaluated
+   std::vector<cv::Point> locations;
+   //! vector that will contain confidence values for each location
+   std::vector<double> confidences;
+};
+
+/**@brief Implementation of HOG (Histogram of Oriented Gradients) descriptor and object detector.
+
+the HOG descriptor algorithm introduced by Navneet Dalal and Bill Triggs @cite Dalal2005 .
+
+useful links:
+
+https://hal.inria.fr/inria-00548512/document/
+
+https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+
+https://software.intel.com/en-us/ipp-dev-reference-histogram-of-oriented-gradients-hog-descriptor
+
+http://www.learnopencv.com/histogram-of-oriented-gradients
+
+http://www.learnopencv.com/handwritten-digits-classification-an-opencv-c-python-tutorial
+
+ */
+struct CV_EXPORTS_W HOGDescriptor
+{
+public:
+    enum { L2Hys = 0 //!< Default histogramNormType
+         };
+    enum { DEFAULT_NLEVELS = 64 //!< Default nlevels value.
+         };
+    /**@brief Creates the HOG descriptor and detector with default params.
+
+    aqual to HOGDescriptor(Size(64,128), Size(16,16), Size(8,8), Size(8,8), 9, 1 )
+    */
+    CV_WRAP HOGDescriptor() : winSize(64,128), blockSize(16,16), blockStride(8,8),
+        cellSize(8,8), nbins(9), derivAperture(1), winSigma(-1),
+        histogramNormType(HOGDescrip
