@@ -427,4 +427,64 @@ public:
         d.copyTo(*this);
     }
 
-    /**@brief Default destruc
+    /**@brief Default destructor.
+    */
+    virtual ~HOGDescriptor() {}
+
+    /**@brief Returns the number of coefficients required for the classification.
+    */
+    CV_WRAP size_t getDescriptorSize() const;
+
+    /** @brief Checks if detector size equal to descriptor size.
+    */
+    CV_WRAP bool checkDetectorSize() const;
+
+    /** @brief Returns winSigma value
+    */
+    CV_WRAP double getWinSigma() const;
+
+    /**@example peopledetect.cpp
+    */
+    /**@brief Sets coefficients for the linear SVM classifier.
+    @param _svmdetector coefficients for the linear SVM classifier.
+    */
+    CV_WRAP virtual void setSVMDetector(InputArray _svmdetector);
+
+    /** @brief Reads HOGDescriptor parameters from a file node.
+    @param fn File node
+    */
+    virtual bool read(FileNode& fn);
+
+    /** @brief Stores HOGDescriptor parameters in a file storage.
+    @param fs File storage
+    @param objname Object name
+    */
+    virtual void write(FileStorage& fs, const String& objname) const;
+
+    /** @brief loads coefficients for the linear SVM classifier from a file
+    @param filename Name of the file to read.
+    @param objname The optional name of the node to read (if empty, the first top-level node will be used).
+    */
+    CV_WRAP virtual bool load(const String& filename, const String& objname = String());
+
+    /** @brief saves coefficients for the linear SVM classifier to a file
+    @param filename File name
+    @param objname Object name
+    */
+    CV_WRAP virtual void save(const String& filename, const String& objname = String()) const;
+
+    /** @brief clones the HOGDescriptor
+    @param c cloned HOGDescriptor
+    */
+    virtual void copyTo(HOGDescriptor& c) const;
+
+    /**@example train_HOG.cpp
+    */
+    /** @brief Computes HOG descriptors of given image.
+    @param img Matrix of the type CV_8U containing an image where HOG features will be calculated.
+    @param descriptors Matrix of the type CV_32F
+    @param winStride Window stride. It must be a multiple of block stride.
+    @param padding Padding
+    @param locations Vector of Point
+    */
+    CV_WRAP virtual void compute(
