@@ -382,4 +382,49 @@ public:
     */
     CV_WRAP HOGDescriptor() : winSize(64,128), blockSize(16,16), blockStride(8,8),
         cellSize(8,8), nbins(9), derivAperture(1), winSigma(-1),
-        histogramNormType(HOGDescrip
+        histogramNormType(HOGDescriptor::L2Hys), L2HysThreshold(0.2), gammaCorrection(true),
+        free_coef(-1.f), nlevels(HOGDescriptor::DEFAULT_NLEVELS), signedGradient(false)
+    {}
+
+    /** @overload
+    @param _winSize sets winSize with given value.
+    @param _blockSize sets blockSize with given value.
+    @param _blockStride sets blockStride with given value.
+    @param _cellSize sets cellSize with given value.
+    @param _nbins sets nbins with given value.
+    @param _derivAperture sets derivAperture with given value.
+    @param _winSigma sets winSigma with given value.
+    @param _histogramNormType sets histogramNormType with given value.
+    @param _L2HysThreshold sets L2HysThreshold with given value.
+    @param _gammaCorrection sets gammaCorrection with given value.
+    @param _nlevels sets nlevels with given value.
+    @param _signedGradient sets signedGradient with given value.
+    */
+    CV_WRAP HOGDescriptor(Size _winSize, Size _blockSize, Size _blockStride,
+                  Size _cellSize, int _nbins, int _derivAperture=1, double _winSigma=-1,
+                  int _histogramNormType=HOGDescriptor::L2Hys,
+                  double _L2HysThreshold=0.2, bool _gammaCorrection=false,
+                  int _nlevels=HOGDescriptor::DEFAULT_NLEVELS, bool _signedGradient=false)
+    : winSize(_winSize), blockSize(_blockSize), blockStride(_blockStride), cellSize(_cellSize),
+    nbins(_nbins), derivAperture(_derivAperture), winSigma(_winSigma),
+    histogramNormType(_histogramNormType), L2HysThreshold(_L2HysThreshold),
+    gammaCorrection(_gammaCorrection), free_coef(-1.f), nlevels(_nlevels), signedGradient(_signedGradient)
+    {}
+
+    /** @overload
+    @param filename the file name containing  HOGDescriptor properties and coefficients of the trained classifier
+    */
+    CV_WRAP HOGDescriptor(const String& filename)
+    {
+        load(filename);
+    }
+
+    /** @overload
+    @param d the HOGDescriptor which cloned to create a new one.
+    */
+    HOGDescriptor(const HOGDescriptor& d)
+    {
+        d.copyTo(*this);
+    }
+
+    /**@brief Default destruc
