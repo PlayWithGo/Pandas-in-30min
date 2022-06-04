@@ -515,4 +515,34 @@ public:
     @param hitThreshold Threshold for the distance between features and SVM classifying plane.
     Usually it is 0 and should be specified in the detector coefficients (as the last free coefficient).
     But if the free coefficient is omitted (which is allowed), you can specify it manually here.
-    @para
+    @param winStride Window stride. It must be a multiple of block stride.
+    @param padding Padding
+    @param searchLocations Vector of Point includes locations to search.
+    */
+    virtual void detect(const Mat& img, CV_OUT std::vector<Point>& foundLocations,
+                        double hitThreshold = 0, Size winStride = Size(),
+                        Size padding = Size(),
+                        const std::vector<Point>& searchLocations=std::vector<Point>()) const;
+
+    /** @brief Detects objects of different sizes in the input image. The detected objects are returned as a list
+    of rectangles.
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param foundLocations Vector of rectangles where each rectangle contains the detected object.
+    @param foundWeights Vector that will contain confidence values for each detected object.
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane.
+    Usually it is 0 and should be specified in the detector coefficients (as the last free coefficient).
+    But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+    @param winStride Window stride. It must be a multiple of block stride.
+    @param padding Padding
+    @param scale Coefficient of the detection window increase.
+    @param finalThreshold Final threshold
+    @param useMeanshiftGrouping indicates grouping algorithm
+    */
+    CV_WRAP virtual void detectMultiScale(InputArray img, CV_OUT std::vector<Rect>& foundLocations,
+                                  CV_OUT std::vector<double>& foundWeights, double hitThreshold = 0,
+                                  Size winStride = Size(), Size padding = Size(), double scale = 1.05,
+                                  double finalThreshold = 2.0,bool useMeanshiftGrouping = false) const;
+
+    /** @brief Detects objects of different sizes in the input image. The detected objects are returned as a list
+    of rectangles.
+    @param img Matrix of the type CV_8U o
