@@ -487,4 +487,32 @@ public:
     @param padding Padding
     @param locations Vector of Point
     */
-    CV_WRAP virtual void compute(
+    CV_WRAP virtual void compute(InputArray img,
+                         CV_OUT std::vector<float>& descriptors,
+                         Size winStride = Size(), Size padding = Size(),
+                         const std::vector<Point>& locations = std::vector<Point>()) const;
+
+    /** @brief Performs object detection without a multi-scale window.
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param foundLocations Vector of point where each point contains left-top corner point of detected object boundaries.
+    @param weights Vector that will contain confidence values for each detected object.
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane.
+    Usually it is 0 and should be specified in the detector coefficients (as the last free coefficient).
+    But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+    @param winStride Window stride. It must be a multiple of block stride.
+    @param padding Padding
+    @param searchLocations Vector of Point includes set of requested locations to be evaluated.
+    */
+    CV_WRAP virtual void detect(const Mat& img, CV_OUT std::vector<Point>& foundLocations,
+                        CV_OUT std::vector<double>& weights,
+                        double hitThreshold = 0, Size winStride = Size(),
+                        Size padding = Size(),
+                        const std::vector<Point>& searchLocations = std::vector<Point>()) const;
+
+    /** @brief Performs object detection without a multi-scale window.
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param foundLocations Vector of point where each point contains left-top corner point of detected object boundaries.
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane.
+    Usually it is 0 and should be specified in the detector coefficients (as the last free coefficient).
+    But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+    @para
