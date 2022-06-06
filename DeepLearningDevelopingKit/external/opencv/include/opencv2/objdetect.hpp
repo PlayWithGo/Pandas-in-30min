@@ -545,4 +545,40 @@ public:
 
     /** @brief Detects objects of different sizes in the input image. The detected objects are returned as a list
     of rectangles.
-    @param img Matrix of the type CV_8U o
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param foundLocations Vector of rectangles where each rectangle contains the detected object.
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane.
+    Usually it is 0 and should be specified in the detector coefficients (as the last free coefficient).
+    But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+    @param winStride Window stride. It must be a multiple of block stride.
+    @param padding Padding
+    @param scale Coefficient of the detection window increase.
+    @param finalThreshold Final threshold
+    @param useMeanshiftGrouping indicates grouping algorithm
+    */
+    virtual void detectMultiScale(InputArray img, CV_OUT std::vector<Rect>& foundLocations,
+                                  double hitThreshold = 0, Size winStride = Size(),
+                                  Size padding = Size(), double scale = 1.05,
+                                  double finalThreshold = 2.0, bool useMeanshiftGrouping = false) const;
+
+    /** @brief  Computes gradients and quantized gradient orientations.
+    @param img Matrix contains the image to be computed
+    @param grad Matrix of type CV_32FC2 contains computed gradients
+    @param angleOfs Matrix of type CV_8UC2 contains quantized gradient orientations
+    @param paddingTL Padding from top-left
+    @param paddingBR Padding from bottom-right
+    */
+    CV_WRAP virtual void computeGradient(const Mat& img, CV_OUT Mat& grad, CV_OUT Mat& angleOfs,
+                                 Size paddingTL = Size(), Size paddingBR = Size()) const;
+
+    /** @brief Returns coefficients of the classifier trained for people detection (for 64x128 windows).
+    */
+    CV_WRAP static std::vector<float> getDefaultPeopleDetector();
+
+    /**@example hog.cpp
+    */
+    /** @brief Returns coefficients of the classifier trained for people detection (for 48x96 windows).
+    */
+    CV_WRAP static std::vector<float> getDaimlerPeopleDetector();
+
+    //! Detection window size. Align to block
