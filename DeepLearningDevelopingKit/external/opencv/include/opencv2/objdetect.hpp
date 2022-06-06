@@ -581,4 +581,60 @@ public:
     */
     CV_WRAP static std::vector<float> getDaimlerPeopleDetector();
 
-    //! Detection window size. Align to block
+    //! Detection window size. Align to block size and block stride. Default value is Size(64,128).
+    CV_PROP Size winSize;
+
+    //! Block size in pixels. Align to cell size. Default value is Size(16,16).
+    CV_PROP Size blockSize;
+
+    //! Block stride. It must be a multiple of cell size. Default value is Size(8,8).
+    CV_PROP Size blockStride;
+
+    //! Cell size. Default value is Size(8,8).
+    CV_PROP Size cellSize;
+
+    //! Number of bins used in the calculation of histogram of gradients. Default value is 9.
+    CV_PROP int nbins;
+
+    //! not documented
+    CV_PROP int derivAperture;
+
+    //! Gaussian smoothing window parameter.
+    CV_PROP double winSigma;
+
+    //! histogramNormType
+    CV_PROP int histogramNormType;
+
+    //! L2-Hys normalization method shrinkage.
+    CV_PROP double L2HysThreshold;
+
+    //! Flag to specify whether the gamma correction preprocessing is required or not.
+    CV_PROP bool gammaCorrection;
+
+    //! coefficients for the linear SVM classifier.
+    CV_PROP std::vector<float> svmDetector;
+
+    //! coefficients for the linear SVM classifier used when OpenCL is enabled
+    UMat oclSvmDetector;
+
+    //! not documented
+    float free_coef;
+
+    //! Maximum number of detection window increases. Default value is 64
+    CV_PROP int nlevels;
+
+    //! Indicates signed gradient will be used or not
+    CV_PROP bool signedGradient;
+
+    /** @brief evaluate specified ROI and return confidence value for each location
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param locations Vector of Point
+    @param foundLocations Vector of Point where each Point is detected object's top-left point.
+    @param confidences confidences
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane. Usually
+    it is 0 and should be specified in the detector coefficients (as the last free coefficient). But if
+    the free coefficient is omitted (which is allowed), you can specify it manually here
+    @param winStride winStride
+    @param padding padding
+    */
+    virtual void detectROI(const cv::Mat& img, const std::vector<cv::Point> &loc
