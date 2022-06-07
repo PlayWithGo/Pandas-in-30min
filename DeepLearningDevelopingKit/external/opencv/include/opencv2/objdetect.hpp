@@ -637,4 +637,32 @@ public:
     @param winStride winStride
     @param padding padding
     */
-    virtual void detectROI(const cv::Mat& img, const std::vector<cv::Point> &loc
+    virtual void detectROI(const cv::Mat& img, const std::vector<cv::Point> &locations,
+                                   CV_OUT std::vector<cv::Point>& foundLocations, CV_OUT std::vector<double>& confidences,
+                                   double hitThreshold = 0, cv::Size winStride = Size(),
+                                   cv::Size padding = Size()) const;
+
+    /** @brief evaluate specified ROI and return confidence value for each location in multiple scales
+    @param img Matrix of the type CV_8U or CV_8UC3 containing an image where objects are detected.
+    @param foundLocations Vector of rectangles where each rectangle contains the detected object.
+    @param locations Vector of DetectionROI
+    @param hitThreshold Threshold for the distance between features and SVM classifying plane. Usually it is 0 and should be specified
+    in the detector coefficients (as the last free coefficient). But if the free coefficient is omitted (which is allowed), you can specify it manually here.
+    @param groupThreshold Minimum possible number of rectangles minus 1. The threshold is used in a group of rectangles to retain it.
+    */
+    virtual void detectMultiScaleROI(const cv::Mat& img,
+                                     CV_OUT std::vector<cv::Rect>& foundLocations,
+                                     std::vector<DetectionROI>& locations,
+                                     double hitThreshold = 0,
+                                     int groupThreshold = 0) const;
+
+    /** @brief read/parse Dalal's alt model file
+    @param modelfile Path of Dalal's alt model file.
+    */
+    void readALTModel(String modelfile);
+
+    /** @brief Groups the object candidate rectangles.
+    @param rectList  Input/output vector of rectangles. Output vector includes retained and grouped rectangles. (The Python list is not modified in place.)
+    @param weights Input/output vector of weights of rectangles. Output vector includes weights of retained and grouped rectangles. (The Python list is not modified in place.)
+    @param groupThreshold Minimum possible number of rectangles minus 1. The threshold is used in a group of rectangles to retain it.
+  
