@@ -665,4 +665,19 @@ public:
     @param rectList  Input/output vector of rectangles. Output vector includes retained and grouped rectangles. (The Python list is not modified in place.)
     @param weights Input/output vector of weights of rectangles. Output vector includes weights of retained and grouped rectangles. (The Python list is not modified in place.)
     @param groupThreshold Minimum possible number of rectangles minus 1. The threshold is used in a group of rectangles to retain it.
-  
+    @param eps Relative difference between sides of the rectangles to merge them into a group.
+    */
+    void groupRectangles(std::vector<cv::Rect>& rectList, std::vector<double>& weights, int groupThreshold, double eps) const;
+};
+
+//! @} objdetect
+
+}
+
+#include "opencv2/objdetect/detection_based_tracker.hpp"
+
+#ifndef DISABLE_OPENCV_24_COMPATIBILITY
+#include "opencv2/objdetect/objdetect_c.h"
+#endif
+
+#endif
