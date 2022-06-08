@@ -34,41 +34,4 @@
 // indirect, incidental, special, exemplary, or consequential damages
 // (including, but not limited to, procurement of substitute goods or services;
 // loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
-//
-//M*/
-
-#ifndef OPENCV_PHOTO_C_H
-#define OPENCV_PHOTO_C_H
-
-#include "opencv2/core/core_c.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** @addtogroup photo_c
-  @{
-  */
-
-/* Inpainting algorithms */
-enum InpaintingModes
-{
-    CV_INPAINT_NS      =0,
-    CV_INPAINT_TELEA   =1
-};
-
-
-/* Inpaints the selected region in the image */
-CVAPI(void) cvInpaint( const CvArr* src, const CvArr* inpaint_mask,
-                       CvArr* dst, double inpaintRange, int flags );
-
-/** @} */
-
-#ifdef __cplusplus
-} //extern "C"
-#endif
-
-#endif //OPENCV_PHOTO_C_H
+// and on any theory of lia
