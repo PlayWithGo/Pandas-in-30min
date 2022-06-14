@@ -144,4 +144,36 @@ optimizations. Noise expected to be a gaussian white noise
 
 @param src Input 8-bit or 16-bit (only with NORM_L1) 1-channel,
 2-channel, 3-channel or 4-channel image.
-@param dst Output
+@param dst Output image with the same size and type as src .
+@param templateWindowSize Size in pixels of the template patch that is used to compute weights.
+Should be odd. Recommended value 7 pixels
+@param searchWindowSize Size in pixels of the window that is used to compute weighted average for
+given pixel. Should be odd. Affect performance linearly: greater searchWindowsSize - greater
+denoising time. Recommended value 21 pixels
+@param h Array of parameters regulating filter strength, either one
+parameter applied to all channels or one per channel in dst. Big h value
+perfectly removes noise but also removes image details, smaller h
+value preserves details but also preserves some noise
+@param normType Type of norm used for weight calculation. Can be either NORM_L2 or NORM_L1
+
+This function expected to be applied to grayscale images. For colored images look at
+fastNlMeansDenoisingColored. Advanced usage of this functions can be manual denoising of colored
+image in different colorspaces. Such approach is used in fastNlMeansDenoisingColored by converting
+image to CIELAB colorspace and then separately denoise L and AB components with different h
+parameter.
+ */
+CV_EXPORTS_W void fastNlMeansDenoising( InputArray src, OutputArray dst,
+                                        const std::vector<float>& h,
+                                        int templateWindowSize = 7, int searchWindowSize = 21,
+                                        int normType = NORM_L2);
+
+/** @brief Modification of fastNlMeansDenoising function for colored images
+
+@param src Input 8-bit 3-channel image.
+@param dst Output image with the same size and type as src .
+@param templateWindowSize Size in pixels of the template patch that is used to compute weights.
+Should be odd. Recommended value 7 pixels
+@param searchWindowSize Size in pixels of the window that is used to compute weighted average for
+given pixel. Should be odd. Affect performance linearly: greater searchWindowsSize - greater
+denoising time. Recommended value 21 pixels
+@param h Parameter regulating filter strength for luminance component. Bigger h value perfect
