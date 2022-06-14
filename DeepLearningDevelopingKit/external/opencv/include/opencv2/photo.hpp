@@ -105,4 +105,43 @@ objects from still images or video. See <http://en.wikipedia.org/wiki/Inpainting
 
 @note
    -   An example using the inpainting technique can be found at
-        opencv_source_code/sampl
+        opencv_source_code/samples/cpp/inpaint.cpp
+    -   (Python) An example using the inpainting technique can be found at
+        opencv_source_code/samples/python/inpaint.py
+ */
+CV_EXPORTS_W void inpaint( InputArray src, InputArray inpaintMask,
+        OutputArray dst, double inpaintRadius, int flags );
+
+//! @addtogroup photo_denoise
+//! @{
+
+/** @brief Perform image denoising using Non-local Means Denoising algorithm
+<http://www.ipol.im/pub/algo/bcm_non_local_means_denoising/> with several computational
+optimizations. Noise expected to be a gaussian white noise
+
+@param src Input 8-bit 1-channel, 2-channel, 3-channel or 4-channel image.
+@param dst Output image with the same size and type as src .
+@param templateWindowSize Size in pixels of the template patch that is used to compute weights.
+Should be odd. Recommended value 7 pixels
+@param searchWindowSize Size in pixels of the window that is used to compute weighted average for
+given pixel. Should be odd. Affect performance linearly: greater searchWindowsSize - greater
+denoising time. Recommended value 21 pixels
+@param h Parameter regulating filter strength. Big h value perfectly removes noise but also
+removes image details, smaller h value preserves details but also preserves some noise
+
+This function expected to be applied to grayscale images. For colored images look at
+fastNlMeansDenoisingColored. Advanced usage of this functions can be manual denoising of colored
+image in different colorspaces. Such approach is used in fastNlMeansDenoisingColored by converting
+image to CIELAB colorspace and then separately denoise L and AB components with different h
+parameter.
+ */
+CV_EXPORTS_W void fastNlMeansDenoising( InputArray src, OutputArray dst, float h = 3,
+        int templateWindowSize = 7, int searchWindowSize = 21);
+
+/** @brief Perform image denoising using Non-local Means Denoising algorithm
+<http://www.ipol.im/pub/algo/bcm_non_local_means_denoising/> with several computational
+optimizations. Noise expected to be a gaussian white noise
+
+@param src Input 8-bit or 16-bit (only with NORM_L1) 1-channel,
+2-channel, 3-channel or 4-channel image.
+@param dst Output
