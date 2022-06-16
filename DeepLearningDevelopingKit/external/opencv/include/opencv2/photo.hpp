@@ -212,4 +212,36 @@ denoising time. Recommended value 21 pixels
 perfectly removes noise but also removes image details, smaller h
 value preserves details but also preserves some noise
  */
-CV_EXPORTS_W void fastNlMeansDenoisingMulti( InputArrayOfArra
+CV_EXPORTS_W void fastNlMeansDenoisingMulti( InputArrayOfArrays srcImgs, OutputArray dst,
+        int imgToDenoiseIndex, int temporalWindowSize,
+        float h = 3, int templateWindowSize = 7, int searchWindowSize = 21);
+
+/** @brief Modification of fastNlMeansDenoising function for images sequence where consecutive images have been
+captured in small period of time. For example video. This version of the function is for grayscale
+images or for manual manipulation with colorspaces. For more details see
+<http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.131.6394>
+
+@param srcImgs Input 8-bit or 16-bit (only with NORM_L1) 1-channel,
+2-channel, 3-channel or 4-channel images sequence. All images should
+have the same type and size.
+@param imgToDenoiseIndex Target image to denoise index in srcImgs sequence
+@param temporalWindowSize Number of surrounding images to use for target image denoising. Should
+be odd. Images from imgToDenoiseIndex - temporalWindowSize / 2 to
+imgToDenoiseIndex - temporalWindowSize / 2 from srcImgs will be used to denoise
+srcImgs[imgToDenoiseIndex] image.
+@param dst Output image with the same size and type as srcImgs images.
+@param templateWindowSize Size in pixels of the template patch that is used to compute weights.
+Should be odd. Recommended value 7 pixels
+@param searchWindowSize Size in pixels of the window that is used to compute weighted average for
+given pixel. Should be odd. Affect performance linearly: greater searchWindowsSize - greater
+denoising time. Recommended value 21 pixels
+@param h Array of parameters regulating filter strength, either one
+parameter applied to all channels or one per channel in dst. Big h value
+perfectly removes noise but also removes image details, smaller h
+value preserves details but also preserves some noise
+@param normType Type of norm used for weight calculation. Can be either NORM_L2 or NORM_L1
+ */
+CV_EXPORTS_W void fastNlMeansDenoisingMulti( InputArrayOfArrays srcImgs, OutputArray dst,
+                                             int imgToDenoiseIndex, int temporalWindowSize,
+                                             const std::vector<float>& h,
+                                             int templateWindow
