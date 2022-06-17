@@ -277,4 +277,33 @@ CV_EXPORTS_W void fastNlMeansDenoisingColoredMulti( InputArrayOfArrays srcImgs, 
 
 /** @brief Primal-dual algorithm is an algorithm for solving special types of variational problems (that is,
 finding a function to minimize some functional). As the image denoising, in particular, may be seen
-as the variational problem, primal-dual algorithm then can be use
+as the variational problem, primal-dual algorithm then can be used to perform denoising and this is
+exactly what is implemented.
+
+It should be noted, that this implementation was taken from the July 2013 blog entry
+@cite MA13 , which also contained (slightly more general) ready-to-use source code on Python.
+Subsequently, that code was rewritten on C++ with the usage of openCV by Vadim Pisarevsky at the end
+of July 2013 and finally it was slightly adapted by later authors.
+
+Although the thorough discussion and justification of the algorithm involved may be found in
+@cite ChambolleEtAl, it might make sense to skim over it here, following @cite MA13 . To begin
+with, we consider the 1-byte gray-level images as the functions from the rectangular domain of
+pixels (it may be seen as set
+\f$\left\{(x,y)\in\mathbb{N}\times\mathbb{N}\mid 1\leq x\leq n,\;1\leq y\leq m\right\}\f$ for some
+\f$m,\;n\in\mathbb{N}\f$) into \f$\{0,1,\dots,255\}\f$. We shall denote the noised images as \f$f_i\f$ and with
+this view, given some image \f$x\f$ of the same size, we may measure how bad it is by the formula
+
+\f[\left\|\left\|\nabla x\right\|\right\| + \lambda\sum_i\left\|\left\|x-f_i\right\|\right\|\f]
+
+\f$\|\|\cdot\|\|\f$ here denotes \f$L_2\f$-norm and as you see, the first addend states that we want our
+image to be smooth (ideally, having zero gradient, thus being constant) and the second states that
+we want our result to be close to the observations we've got. If we treat \f$x\f$ as a function, this is
+exactly the functional what we seek to minimize and here the Primal-Dual algorithm comes into play.
+
+@param observations This array should contain one or more noised versions of the image that is to
+be restored.
+@param result Here the denoised image will be stored. There is no need to do pre-allocation of
+storage space, as it will be automatically allocated, if necessary.
+@param lambda Corresponds to \f$\lambda\f$ in the formulas above. As it is enlarged, the smooth
+(blurred) images are treated more favorably than detailed (but maybe more noised) ones. Roughly
+speaki
