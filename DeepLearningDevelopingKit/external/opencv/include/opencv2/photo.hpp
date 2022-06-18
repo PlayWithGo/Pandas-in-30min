@@ -306,4 +306,66 @@ be restored.
 storage space, as it will be automatically allocated, if necessary.
 @param lambda Corresponds to \f$\lambda\f$ in the formulas above. As it is enlarged, the smooth
 (blurred) images are treated more favorably than detailed (but maybe more noised) ones. Roughly
-speaki
+speaking, as it becomes smaller, the result will be more blur but more sever outliers will be
+removed.
+@param niters Number of iterations that the algorithm will run. Of course, as more iterations as
+better, but it is hard to quantitatively refine this statement, so just use the default and
+increase it if the results are poor.
+ */
+CV_EXPORTS_W void denoise_TVL1(const std::vector<Mat>& observations,Mat& result, double lambda=1.0, int niters=30);
+
+//! @} photo_denoise
+
+//! @addtogroup photo_hdr
+//! @{
+
+enum { LDR_SIZE = 256 };
+
+/** @brief Base class for tonemapping algorithms - tools that are used to map HDR image to 8-bit range.
+ */
+class CV_EXPORTS_W Tonemap : public Algorithm
+{
+public:
+    /** @brief Tonemaps image
+
+    @param src source image - 32-bit 3-channel Mat
+    @param dst destination image - 32-bit 3-channel Mat with values in [0, 1] range
+     */
+    CV_WRAP virtual void process(InputArray src, OutputArray dst) = 0;
+
+    CV_WRAP virtual float getGamma() const = 0;
+    CV_WRAP virtual void setGamma(float gamma) = 0;
+};
+
+/** @brief Creates simple linear mapper with gamma correction
+
+@param gamma positive value for gamma correction. Gamma value of 1.0 implies no correction, gamma
+equal to 2.2f is suitable for most displays.
+Generally gamma \> 1 brightens the image and gamma \< 1 darkens it.
+ */
+CV_EXPORTS_W Ptr<Tonemap> createTonemap(float gamma = 1.0f);
+
+/** @brief Adaptive logarithmic mapping is a fast global tonemapping algorithm that scales the image in
+logarithmic domain.
+
+Since it's a global operator the same function is applied to all the pixels, it is controlled by the
+bias parameter.
+
+Optional saturation enhancement is possible as described in @cite FL02 .
+
+For more information see @cite DM03 .
+ */
+class CV_EXPORTS_W TonemapDrago : public Tonemap
+{
+public:
+
+    CV_WRAP virtual float getSaturation() const = 0;
+    CV_WRAP virtual void setSaturation(float saturation) = 0;
+
+    CV_WRAP virtual float getBias() const = 0;
+    CV_WRAP virtual void setBias(float bias) = 0;
+};
+
+/** @brief Creates TonemapDrago object
+
+@param gamma gamma value for gamma
