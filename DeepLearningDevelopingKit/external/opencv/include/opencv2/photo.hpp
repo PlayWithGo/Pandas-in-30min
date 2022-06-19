@@ -416,4 +416,57 @@ createTonemapDurand(float gamma = 1.0f, float contrast = 4.0f, float saturation 
 
 /** @brief This is a global tonemapping operator that models human visual system.
 
-Mapping function is controlled by adaptation parameter, that is computed using li
+Mapping function is controlled by adaptation parameter, that is computed using light adaptation and
+color adaptation.
+
+For more information see @cite RD05 .
+ */
+class CV_EXPORTS_W TonemapReinhard : public Tonemap
+{
+public:
+    CV_WRAP virtual float getIntensity() const = 0;
+    CV_WRAP virtual void setIntensity(float intensity) = 0;
+
+    CV_WRAP virtual float getLightAdaptation() const = 0;
+    CV_WRAP virtual void setLightAdaptation(float light_adapt) = 0;
+
+    CV_WRAP virtual float getColorAdaptation() const = 0;
+    CV_WRAP virtual void setColorAdaptation(float color_adapt) = 0;
+};
+
+/** @brief Creates TonemapReinhard object
+
+@param gamma gamma value for gamma correction. See createTonemap
+@param intensity result intensity in [-8, 8] range. Greater intensity produces brighter results.
+@param light_adapt light adaptation in [0, 1] range. If 1 adaptation is based only on pixel
+value, if 0 it's global, otherwise it's a weighted mean of this two cases.
+@param color_adapt chromatic adaptation in [0, 1] range. If 1 channels are treated independently,
+if 0 adaptation level is the same for each channel.
+ */
+CV_EXPORTS_W Ptr<TonemapReinhard>
+createTonemapReinhard(float gamma = 1.0f, float intensity = 0.0f, float light_adapt = 1.0f, float color_adapt = 0.0f);
+
+/** @brief This algorithm transforms image to contrast using gradients on all levels of gaussian pyramid,
+transforms contrast values to HVS response and scales the response. After this the image is
+reconstructed from new contrast values.
+
+For more information see @cite MM06 .
+ */
+class CV_EXPORTS_W TonemapMantiuk : public Tonemap
+{
+public:
+    CV_WRAP virtual float getScale() const = 0;
+    CV_WRAP virtual void setScale(float scale) = 0;
+
+    CV_WRAP virtual float getSaturation() const = 0;
+    CV_WRAP virtual void setSaturation(float saturation) = 0;
+};
+
+/** @brief Creates TonemapMantiuk object
+
+@param gamma gamma value for gamma correction. See createTonemap
+@param scale contrast scale factor. HVS response is multiplied by this parameter, thus compressing
+dynamic range. Values from 0.6 to 0.9 produce best results.
+@param saturation saturation enhancement value. See createTonemapDrago
+ */
+CV_EXPORTS_W P
