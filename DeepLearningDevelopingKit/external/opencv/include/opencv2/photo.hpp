@@ -469,4 +469,59 @@ public:
 dynamic range. Values from 0.6 to 0.9 produce best results.
 @param saturation saturation enhancement value. See createTonemapDrago
  */
-CV_EXPORTS_W P
+CV_EXPORTS_W Ptr<TonemapMantiuk>
+createTonemapMantiuk(float gamma = 1.0f, float scale = 0.7f, float saturation = 1.0f);
+
+/** @brief The base class for algorithms that align images of the same scene with different exposures
+ */
+class CV_EXPORTS_W AlignExposures : public Algorithm
+{
+public:
+    /** @brief Aligns images
+
+    @param src vector of input images
+    @param dst vector of aligned images
+    @param times vector of exposure time values for each image
+    @param response 256x1 matrix with inverse camera response function for each pixel value, it should
+    have the same number of channels as images.
+     */
+    CV_WRAP virtual void process(InputArrayOfArrays src, std::vector<Mat>& dst,
+                                 InputArray times, InputArray response) = 0;
+};
+
+/** @brief This algorithm converts images to median threshold bitmaps (1 for pixels brighter than median
+luminance and 0 otherwise) and than aligns the resulting bitmaps using bit operations.
+
+It is invariant to exposure, so exposure values and camera response are not necessary.
+
+In this implementation new image regions are filled with zeros.
+
+For more information see @cite GW03 .
+ */
+class CV_EXPORTS_W AlignMTB : public AlignExposures
+{
+public:
+    CV_WRAP virtual void process(InputArrayOfArrays src, std::vector<Mat>& dst,
+                                 InputArray times, InputArray response) = 0;
+
+    /** @brief Short version of process, that doesn't take extra arguments.
+
+    @param src vector of input images
+    @param dst vector of aligned images
+     */
+    CV_WRAP virtual void process(InputArrayOfArrays src, std::vector<Mat>& dst) = 0;
+
+    /** @brief Calculates shift between two images, i. e. how to shift the second image to correspond it with the
+    first.
+
+    @param img0 first image
+    @param img1 second image
+     */
+    CV_WRAP virtual Point calculateShift(InputArray img0, InputArray img1) = 0;
+    /** @brief Helper function, that shift Mat filling new regions with zeros.
+
+    @param src input image
+    @param dst result image
+    @param shift shift value
+     */
+    CV_WRAP virtual void shiftMat(InputA
