@@ -524,4 +524,59 @@ public:
     @param dst result image
     @param shift shift value
      */
-    CV_WRAP virtual void shiftMat(InputA
+    CV_WRAP virtual void shiftMat(InputArray src, OutputArray dst, const Point shift) = 0;
+    /** @brief Computes median threshold and exclude bitmaps of given image.
+
+    @param img input image
+    @param tb median threshold bitmap
+    @param eb exclude bitmap
+     */
+    CV_WRAP virtual void computeBitmaps(InputArray img, OutputArray tb, OutputArray eb) = 0;
+
+    CV_WRAP virtual int getMaxBits() const = 0;
+    CV_WRAP virtual void setMaxBits(int max_bits) = 0;
+
+    CV_WRAP virtual int getExcludeRange() const = 0;
+    CV_WRAP virtual void setExcludeRange(int exclude_range) = 0;
+
+    CV_WRAP virtual bool getCut() const = 0;
+    CV_WRAP virtual void setCut(bool value) = 0;
+};
+
+/** @brief Creates AlignMTB object
+
+@param max_bits logarithm to the base 2 of maximal shift in each dimension. Values of 5 and 6 are
+usually good enough (31 and 63 pixels shift respectively).
+@param exclude_range range for exclusion bitmap that is constructed to suppress noise around the
+median value.
+@param cut if true cuts images, otherwise fills the new regions with zeros.
+ */
+CV_EXPORTS_W Ptr<AlignMTB> createAlignMTB(int max_bits = 6, int exclude_range = 4, bool cut = true);
+
+/** @brief The base class for camera response calibration algorithms.
+ */
+class CV_EXPORTS_W CalibrateCRF : public Algorithm
+{
+public:
+    /** @brief Recovers inverse camera response.
+
+    @param src vector of input images
+    @param dst 256x1 matrix with inverse camera response function
+    @param times vector of exposure time values for each image
+     */
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst, InputArray times) = 0;
+};
+
+/** @brief Inverse camera response function is extracted for each brightness value by minimizing an objective
+function as linear system. Objective function is constructed using pixel values on the same position
+in all images, extra term is added to make the result smoother.
+
+For more information see @cite DM97 .
+ */
+class CV_EXPORTS_W CalibrateDebevec : public CalibrateCRF
+{
+public:
+    CV_WRAP virtual float getLambda() const = 0;
+    CV_WRAP virtual void setLambda(float lambda) = 0;
+
+  
