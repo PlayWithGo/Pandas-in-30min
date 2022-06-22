@@ -579,4 +579,59 @@ public:
     CV_WRAP virtual float getLambda() const = 0;
     CV_WRAP virtual void setLambda(float lambda) = 0;
 
-  
+    CV_WRAP virtual int getSamples() const = 0;
+    CV_WRAP virtual void setSamples(int samples) = 0;
+
+    CV_WRAP virtual bool getRandom() const = 0;
+    CV_WRAP virtual void setRandom(bool random) = 0;
+};
+
+/** @brief Creates CalibrateDebevec object
+
+@param samples number of pixel locations to use
+@param lambda smoothness term weight. Greater values produce smoother results, but can alter the
+response.
+@param random if true sample pixel locations are chosen at random, otherwise they form a
+rectangular grid.
+ */
+CV_EXPORTS_W Ptr<CalibrateDebevec> createCalibrateDebevec(int samples = 70, float lambda = 10.0f, bool random = false);
+
+/** @brief Inverse camera response function is extracted for each brightness value by minimizing an objective
+function as linear system. This algorithm uses all image pixels.
+
+For more information see @cite RB99 .
+ */
+class CV_EXPORTS_W CalibrateRobertson : public CalibrateCRF
+{
+public:
+    CV_WRAP virtual int getMaxIter() const = 0;
+    CV_WRAP virtual void setMaxIter(int max_iter) = 0;
+
+    CV_WRAP virtual float getThreshold() const = 0;
+    CV_WRAP virtual void setThreshold(float threshold) = 0;
+
+    CV_WRAP virtual Mat getRadiance() const = 0;
+};
+
+/** @brief Creates CalibrateRobertson object
+
+@param max_iter maximal number of Gauss-Seidel solver iterations.
+@param threshold target difference between results of two successive steps of the minimization.
+ */
+CV_EXPORTS_W Ptr<CalibrateRobertson> createCalibrateRobertson(int max_iter = 30, float threshold = 0.01f);
+
+/** @brief The base class algorithms that can merge exposure sequence to a single image.
+ */
+class CV_EXPORTS_W MergeExposures : public Algorithm
+{
+public:
+    /** @brief Merges images.
+
+    @param src vector of input images
+    @param dst result image
+    @param times vector of exposure time values for each image
+    @param response 256x1 matrix with inverse camera response function for each pixel value, it should
+    have the same number of channels as images.
+     */
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst,
+                                 In
