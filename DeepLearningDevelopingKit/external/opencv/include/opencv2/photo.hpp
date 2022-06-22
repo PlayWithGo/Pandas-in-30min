@@ -634,4 +634,60 @@ public:
     have the same number of channels as images.
      */
     CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst,
-                                 In
+                                 InputArray times, InputArray response) = 0;
+};
+
+/** @brief The resulting HDR image is calculated as weighted average of the exposures considering exposure
+values and camera response.
+
+For more information see @cite DM97 .
+ */
+class CV_EXPORTS_W MergeDebevec : public MergeExposures
+{
+public:
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst,
+                                 InputArray times, InputArray response) = 0;
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst, InputArray times) = 0;
+};
+
+/** @brief Creates MergeDebevec object
+ */
+CV_EXPORTS_W Ptr<MergeDebevec> createMergeDebevec();
+
+/** @brief Pixels are weighted using contrast, saturation and well-exposedness measures, than images are
+combined using laplacian pyramids.
+
+The resulting image weight is constructed as weighted average of contrast, saturation and
+well-exposedness measures.
+
+The resulting image doesn't require tonemapping and can be converted to 8-bit image by multiplying
+by 255, but it's recommended to apply gamma correction and/or linear tonemapping.
+
+For more information see @cite MK07 .
+ */
+class CV_EXPORTS_W MergeMertens : public MergeExposures
+{
+public:
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst,
+                                 InputArray times, InputArray response) = 0;
+    /** @brief Short version of process, that doesn't take extra arguments.
+
+    @param src vector of input images
+    @param dst result image
+     */
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst) = 0;
+
+    CV_WRAP virtual float getContrastWeight() const = 0;
+    CV_WRAP virtual void setContrastWeight(float contrast_weiht) = 0;
+
+    CV_WRAP virtual float getSaturationWeight() const = 0;
+    CV_WRAP virtual void setSaturationWeight(float saturation_weight) = 0;
+
+    CV_WRAP virtual float getExposureWeight() const = 0;
+    CV_WRAP virtual void setExposureWeight(float exposure_weight) = 0;
+};
+
+/** @brief Creates MergeMertens object
+
+@param contrast_weight contrast measure weight. See MergeMertens.
+@param saturation_weight saturation me
