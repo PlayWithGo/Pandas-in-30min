@@ -690,4 +690,57 @@ public:
 /** @brief Creates MergeMertens object
 
 @param contrast_weight contrast measure weight. See MergeMertens.
-@param saturation_weight saturation me
+@param saturation_weight saturation measure weight
+@param exposure_weight well-exposedness measure weight
+ */
+CV_EXPORTS_W Ptr<MergeMertens>
+createMergeMertens(float contrast_weight = 1.0f, float saturation_weight = 1.0f, float exposure_weight = 0.0f);
+
+/** @brief The resulting HDR image is calculated as weighted average of the exposures considering exposure
+values and camera response.
+
+For more information see @cite RB99 .
+ */
+class CV_EXPORTS_W MergeRobertson : public MergeExposures
+{
+public:
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst,
+                                 InputArray times, InputArray response) = 0;
+    CV_WRAP virtual void process(InputArrayOfArrays src, OutputArray dst, InputArray times) = 0;
+};
+
+/** @brief Creates MergeRobertson object
+ */
+CV_EXPORTS_W Ptr<MergeRobertson> createMergeRobertson();
+
+//! @} photo_hdr
+
+/** @brief Transforms a color image to a grayscale image. It is a basic tool in digital printing, stylized
+black-and-white photograph rendering, and in many single channel image processing applications
+@cite CL12 .
+
+@param src Input 8-bit 3-channel image.
+@param grayscale Output 8-bit 1-channel image.
+@param color_boost Output 8-bit 3-channel image.
+
+This function is to be applied on color images.
+ */
+CV_EXPORTS_W void decolor( InputArray src, OutputArray grayscale, OutputArray color_boost);
+
+//! @addtogroup photo_clone
+//! @{
+
+/** @example cloning_demo.cpp
+An example using seamlessClone function
+*/
+/** @brief Image editing tasks concern either global changes (color/intensity corrections, filters,
+deformations) or local changes concerned to a selection. Here we are interested in achieving local
+changes, ones that are restricted to a region manually selected (ROI), in a seamless and effortless
+manner. The extent of the changes ranges from slight distortions to complete replacement by novel
+content @cite PM03 .
+
+@param src Input 8-bit 3-channel image.
+@param dst Input 8-bit 3-channel image.
+@param mask Input 8-bit 1 or 3-channel image.
+@param p Point in dst image where object is placed.
+@param blend Output image with the same size and type as dst.
