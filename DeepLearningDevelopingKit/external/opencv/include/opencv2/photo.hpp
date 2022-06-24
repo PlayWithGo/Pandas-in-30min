@@ -744,3 +744,46 @@ content @cite PM03 .
 @param mask Input 8-bit 1 or 3-channel image.
 @param p Point in dst image where object is placed.
 @param blend Output image with the same size and type as dst.
+@param flags Cloning method that could be one of the following:
+-   **NORMAL_CLONE** The power of the method is fully expressed when inserting objects with
+complex outlines into a new background
+-   **MIXED_CLONE** The classic method, color-based selection and alpha masking might be time
+consuming and often leaves an undesirable halo. Seamless cloning, even averaged with the
+original image, is not effective. Mixed seamless cloning based on a loose selection proves
+effective.
+-   **MONOCHROME_TRANSFER** Monochrome transfer allows the user to easily replace certain features of
+one object by alternative features.
+ */
+CV_EXPORTS_W void seamlessClone( InputArray src, InputArray dst, InputArray mask, Point p,
+        OutputArray blend, int flags);
+
+/** @brief Given an original color image, two differently colored versions of this image can be mixed
+seamlessly.
+
+@param src Input 8-bit 3-channel image.
+@param mask Input 8-bit 1 or 3-channel image.
+@param dst Output image with the same size and type as src .
+@param red_mul R-channel multiply factor.
+@param green_mul G-channel multiply factor.
+@param blue_mul B-channel multiply factor.
+
+Multiplication factor is between .5 to 2.5.
+ */
+CV_EXPORTS_W void colorChange(InputArray src, InputArray mask, OutputArray dst, float red_mul = 1.0f,
+        float green_mul = 1.0f, float blue_mul = 1.0f);
+
+/** @brief Applying an appropriate non-linear transformation to the gradient field inside the selection and
+then integrating back with a Poisson solver, modifies locally the apparent illumination of an image.
+
+@param src Input 8-bit 3-channel image.
+@param mask Input 8-bit 1 or 3-channel image.
+@param dst Output image with the same size and type as src.
+@param alpha Value ranges between 0-2.
+@param beta Value ranges between 0-2.
+
+This is useful to highlight under-exposed foreground objects or to reduce specular reflections.
+ */
+CV_EXPORTS_W void illuminationChange(InputArray src, InputArray mask, OutputArray dst,
+        float alpha = 0.2f, float beta = 0.4f);
+
+/** @brief By retaining only t
