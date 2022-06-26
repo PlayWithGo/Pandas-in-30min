@@ -786,4 +786,60 @@ This is useful to highlight under-exposed foreground objects or to reduce specul
 CV_EXPORTS_W void illuminationChange(InputArray src, InputArray mask, OutputArray dst,
         float alpha = 0.2f, float beta = 0.4f);
 
-/** @brief By retaining only t
+/** @brief By retaining only the gradients at edge locations, before integrating with the Poisson solver, one
+washes out the texture of the selected region, giving its contents a flat aspect. Here Canny Edge
+Detector is used.
+
+@param src Input 8-bit 3-channel image.
+@param mask Input 8-bit 1 or 3-channel image.
+@param dst Output image with the same size and type as src.
+@param low_threshold Range from 0 to 100.
+@param high_threshold Value \> 100.
+@param kernel_size The size of the Sobel kernel to be used.
+
+**NOTE:**
+
+The algorithm assumes that the color of the source image is close to that of the destination. This
+assumption means that when the colors don't match, the source image color gets tinted toward the
+color of the destination image.
+ */
+CV_EXPORTS_W void textureFlattening(InputArray src, InputArray mask, OutputArray dst,
+        float low_threshold = 30, float high_threshold = 45,
+        int kernel_size = 3);
+
+//! @} photo_clone
+
+//! @addtogroup photo_render
+//! @{
+
+/** @brief Filtering is the fundamental operation in image and video processing. Edge-preserving smoothing
+filters are used in many different applications @cite EM11 .
+
+@param src Input 8-bit 3-channel image.
+@param dst Output 8-bit 3-channel image.
+@param flags Edge preserving filters:
+-   **RECURS_FILTER** = 1
+-   **NORMCONV_FILTER** = 2
+@param sigma_s Range between 0 to 200.
+@param sigma_r Range between 0 to 1.
+ */
+CV_EXPORTS_W void edgePreservingFilter(InputArray src, OutputArray dst, int flags = 1,
+        float sigma_s = 60, float sigma_r = 0.4f);
+
+/** @brief This filter enhances the details of a particular image.
+
+@param src Input 8-bit 3-channel image.
+@param dst Output image with the same size and type as src.
+@param sigma_s Range between 0 to 200.
+@param sigma_r Range between 0 to 1.
+ */
+CV_EXPORTS_W void detailEnhance(InputArray src, OutputArray dst, float sigma_s = 10,
+        float sigma_r = 0.15f);
+
+/** @example npr_demo.cpp
+An example using non-photorealistic line drawing functions
+*/
+/** @brief Pencil-like non-photorealistic line drawing
+
+@param src Input 8-bit 3-channel image.
+@param 
