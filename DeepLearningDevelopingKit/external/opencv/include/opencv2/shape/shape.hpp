@@ -7,11 +7,12 @@
 //  copy or use the software.
 //
 //
-//                           License Agreement
+//                          License Agreement
 //                For Open Source Computer Vision Library
 //
 // Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
-// Copyright (C) 2009-2012, Willow Garage Inc., all rights reserved.
+// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
+// Copyright (C) 2013, OpenCV Foundation, all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -32,41 +33,4 @@
 // warranties of merchantability and fitness for a particular purpose are disclaimed.
 // In no event shall the Intel Corporation or contributors be liable for any direct,
 // indirect, incidental, special, exemplary, or consequential damages
-// (including, but not limited to, procurement of substitute goods or services;
-// loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
-//
-//M*/
-
-#ifndef OPENCV_EMD_L1_HPP
-#define OPENCV_EMD_L1_HPP
-
-#include "opencv2/core.hpp"
-
-namespace cv
-{
-/****************************************************************************************\
-*                                   EMDL1 Function                                      *
-\****************************************************************************************/
-
-//! @addtogroup shape
-//! @{
-
-/** @brief Computes the "minimal work" distance between two weighted point configurations base on the papers
-"EMD-L1: An efficient and Robust Algorithm for comparing histogram-based descriptors", by Haibin
-Ling and Kazunori Okuda; and "The Earth Mover's Distance is the Mallows Distance: Some Insights from
-Statistics", by Elizaveta Levina and Peter Bickel.
-
-@param signature1 First signature, a single column floating-point matrix. Each row is the value of
-the histogram in each bin.
-@param signature2 Second signature of the same format and size as signature1.
- */
-CV_EXPORTS float EMDL1(InputArray signature1, InputArray signature2);
-
-//! @}
-
-}//namespace cv
-
-#endif
+// (including, but not limited to, procurement of substitut
