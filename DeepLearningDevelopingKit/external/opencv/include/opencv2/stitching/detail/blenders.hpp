@@ -90,4 +90,69 @@ public:
     virtual void blend(InputOutputArray dst, InputOutputArray dst_mask);
 
 protected:
-    UMat dst_, 
+    UMat dst_, dst_mask_;
+    Rect dst_roi_;
+};
+
+/** @brief Simple blender which mixes images at its borders.
+ */
+class CV_EXPORTS FeatherBlender : public Blender
+{
+public:
+    FeatherBlender(float sharpness = 0.02f);
+
+    float sharpness() const { return sharpness_; }
+    void setSharpness(float val) { sharpness_ = val; }
+
+    void prepare(Rect dst_roi);
+    void feed(InputArray img, InputArray mask, Point tl);
+    void blend(InputOutputArray dst, InputOutputArray dst_mask);
+
+    //! Creates weight maps for fixed set of source images by their masks and top-left corners.
+    //! Final image can be obtained by simple weighting of the source images.
+    Rect createWeightMaps(const std::vector<UMat> &masks, const std::vector<Point> &corners,
+                          std::vector<UMat> &weight_maps);
+
+private:
+    float sharpness_;
+    UMat weight_map_;
+    UMat dst_weight_map_;
+};
+
+inline FeatherBlender::FeatherBlender(float _sharpness) { setSharpness(_sharpness); }
+
+/** @brief Blender which uses multi-band blending algorithm (see @cite BA83).
+ */
+class CV_EXPORTS MultiBandBlender : public Blender
+{
+public:
+    MultiBandBlender(int try_gpu = false, int num_bands = 5, int weight_type = CV_32F);
+
+    int numBands() const { return actual_num_bands_; }
+    void setNumBands(int val) { actual_num_bands_ = val; }
+
+    void prepare(Rect dst_roi);
+    void feed(InputArray img, InputArray mask, Point tl);
+    void blend(InputOutputArray dst, InputOutputArray dst_mask);
+
+private:
+    int actual_num_bands_, num_bands_;
+    std::vector<UMat> dst_pyr_laplace_;
+    std::vector<UMat> dst_band_weights_;
+    Rect dst_roi_final_;
+    bool can_use_gpu_;
+    int weight_type_; //CV_32F or CV_16S
+#if defined(HAVE_OPENCV_CUDAARITHM) && defined(HAVE_OPENCV_CUDAWARPING)
+    std::vector<cuda::GpuMat> gpu_dst_pyr_laplace_;
+    std::vector<cuda::GpuMat> gpu_dst_band_weights_;
+#endif
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Auxiliary functions
+
+void CV_EXPORTS normalizeUsingWeightMap(InputArray weight, InputOutputArray src);
+
+void CV_EXPORTS createWeightMap(InputArray mask, float sharpness, InputOutputArray weight);
+
