@@ -28,4 +28,66 @@
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
-// any express or
+// any express or implied warranties, including, but not limited to, the implied
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the Intel Corporation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_STITCHING_BLENDERS_HPP
+#define OPENCV_STITCHING_BLENDERS_HPP
+
+#if defined(NO)
+#  warning Detected Apple 'NO' macro definition, it can cause build conflicts. Please, include this header before any Apple headers.
+#endif
+
+#include "opencv2/core.hpp"
+
+namespace cv {
+namespace detail {
+
+//! @addtogroup stitching_blend
+//! @{
+
+/** @brief Base class for all blenders.
+
+Simple blender which puts one image over another
+*/
+class CV_EXPORTS Blender
+{
+public:
+    virtual ~Blender() {}
+
+    enum { NO, FEATHER, MULTI_BAND };
+    static Ptr<Blender> createDefault(int type, bool try_gpu = false);
+
+    /** @brief Prepares the blender for blending.
+
+    @param corners Source images top-left corners
+    @param sizes Source image sizes
+     */
+    void prepare(const std::vector<Point> &corners, const std::vector<Size> &sizes);
+    /** @overload */
+    virtual void prepare(Rect dst_roi);
+    /** @brief Processes the image.
+
+    @param img Source image
+    @param mask Source image mask
+    @param tl Source image top-left corners
+     */
+    virtual void feed(InputArray img, InputArray mask, Point tl);
+    /** @brief Blends and returns the final pano.
+
+    @param dst Final pano
+    @param dst_mask Final pano mask
+     */
+    virtual void blend(InputOutputArray dst, InputOutputArray dst_mask);
+
+protected:
+    UMat dst_, 
