@@ -156,3 +156,16 @@ void CV_EXPORTS normalizeUsingWeightMap(InputArray weight, InputOutputArray src)
 
 void CV_EXPORTS createWeightMap(InputArray mask, float sharpness, InputOutputArray weight);
 
+void CV_EXPORTS createLaplacePyr(InputArray img, int num_levels, std::vector<UMat>& pyr);
+void CV_EXPORTS createLaplacePyrGpu(InputArray img, int num_levels, std::vector<UMat>& pyr);
+
+// Restores source image
+void CV_EXPORTS restoreImageFromLaplacePyr(std::vector<UMat>& pyr);
+void CV_EXPORTS restoreImageFromLaplacePyrGpu(std::vector<UMat>& pyr);
+
+//! @}
+
+} // namespace detail
+} // namespace cv
+
+#endif // OPENCV_STITCHING_BLENDERS_HPP
