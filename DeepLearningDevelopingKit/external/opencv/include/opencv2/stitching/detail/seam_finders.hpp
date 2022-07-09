@@ -1,3 +1,4 @@
+
 /*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
@@ -40,39 +41,67 @@
 //
 //M*/
 
-#ifndef OPENCV_STITCHING_CAMERA_HPP
-#define OPENCV_STITCHING_CAMERA_HPP
+#ifndef OPENCV_STITCHING_SEAM_FINDERS_HPP
+#define OPENCV_STITCHING_SEAM_FINDERS_HPP
 
+#include <set>
 #include "opencv2/core.hpp"
+#include "opencv2/opencv_modules.hpp"
 
 namespace cv {
 namespace detail {
 
-//! @addtogroup stitching
+//! @addtogroup stitching_seam
 //! @{
 
-/** @brief Describes camera parameters.
-
-@note Translation is assumed to be zero during the whole stitching pipeline. :
+/** @brief Base class for a seam estimator.
  */
-struct CV_EXPORTS CameraParams
+class CV_EXPORTS SeamFinder
 {
-    CameraParams();
-    CameraParams(const CameraParams& other);
-    CameraParams& operator =(const CameraParams& other);
-    Mat K() const;
+public:
+    virtual ~SeamFinder() {}
+    /** @brief Estimates seams.
 
-    double focal; // Focal length
-    double aspect; // Aspect ratio
-    double ppx; // Principal point X
-    double ppy; // Principal point Y
-    Mat R; // Rotation
-    Mat t; // Translation
+    @param src Source images
+    @param corners Source image top-left corners
+    @param masks Source image masks to update
+     */
+    virtual void find(const std::vector<UMat> &src, const std::vector<Point> &corners,
+                      std::vector<UMat> &masks) = 0;
 };
 
-//! @}
+/** @brief Stub seam estimator which does nothing.
+ */
+class CV_EXPORTS NoSeamFinder : public SeamFinder
+{
+public:
+    void find(const std::vector<UMat>&, const std::vector<Point>&, std::vector<UMat>&) {}
+};
 
-} // namespace detail
-} // namespace cv
+/** @brief Base class for all pairwise seam estimators.
+ */
+class CV_EXPORTS PairwiseSeamFinder : public SeamFinder
+{
+public:
+    virtual void find(const std::vector<UMat> &src, const std::vector<Point> &corners,
+                      std::vector<UMat> &masks);
 
-#endif // #ifndef OPENCV_STITCHING_CAMERA_HPP
+protected:
+    void run();
+    /** @brief Resolves masks intersection of two specified images in the given ROI.
+
+    @param first First image index
+    @param second Second image index
+    @param roi Region of interest
+     */
+    virtual void findInPair(size_t first, size_t second, Rect roi) = 0;
+
+    std::vector<UMat> images_;
+    std::vector<Size> sizes_;
+    std::vector<Point> corners_;
+    std::vector<UMat> masks_;
+};
+
+/** @brief Voronoi diagram-based seam estimator.
+ */
+class CV_EXPORTS VoronoiSeamFinder : public PairwiseSeamFinder
