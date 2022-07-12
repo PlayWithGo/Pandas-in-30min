@@ -65,4 +65,62 @@ public:
 
     @param pt Source point
     @param K Camera intrinsic parameters
-    @param R 
+    @param R Camera rotation matrix
+    @return Projected point
+     */
+    virtual Point2f warpPoint(const Point2f &pt, InputArray K, InputArray R) = 0;
+
+    /** @brief Builds the projection maps according to the given camera data.
+
+    @param src_size Source image size
+    @param K Camera intrinsic parameters
+    @param R Camera rotation matrix
+    @param xmap Projection map for the x axis
+    @param ymap Projection map for the y axis
+    @return Projected image minimum bounding box
+     */
+    virtual Rect buildMaps(Size src_size, InputArray K, InputArray R, OutputArray xmap, OutputArray ymap) = 0;
+
+    /** @brief Projects the image.
+
+    @param src Source image
+    @param K Camera intrinsic parameters
+    @param R Camera rotation matrix
+    @param interp_mode Interpolation mode
+    @param border_mode Border extrapolation mode
+    @param dst Projected image
+    @return Project image top-left corner
+     */
+    virtual Point warp(InputArray src, InputArray K, InputArray R, int interp_mode, int border_mode,
+                       OutputArray dst) = 0;
+
+    /** @brief Projects the image backward.
+
+    @param src Projected image
+    @param K Camera intrinsic parameters
+    @param R Camera rotation matrix
+    @param interp_mode Interpolation mode
+    @param border_mode Border extrapolation mode
+    @param dst_size Backward-projected image size
+    @param dst Backward-projected image
+     */
+    virtual void warpBackward(InputArray src, InputArray K, InputArray R, int interp_mode, int border_mode,
+                              Size dst_size, OutputArray dst) = 0;
+
+    /**
+    @param src_size Source image bounding box
+    @param K Camera intrinsic parameters
+    @param R Camera rotation matrix
+    @return Projected image minimum bounding box
+     */
+    virtual Rect warpRoi(Size src_size, InputArray K, InputArray R) = 0;
+
+    virtual float getScale() const { return 1.f; }
+    virtual void setScale(float) {}
+};
+
+/** @brief Base class for warping logic implementation.
+ */
+struct CV_EXPORTS ProjectorBase
+{
+    void setCameraParams(InputArray K = Mat::eye(3, 3, CV_32F
