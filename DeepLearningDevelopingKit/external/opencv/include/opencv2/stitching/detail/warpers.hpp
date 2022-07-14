@@ -186,4 +186,58 @@ public:
      */
     PlaneWarper(float scale = 1.f) { projector_.scale = scale; }
 
-    Point2f warpPoint(const Point2f &pt, InputArray K, InputArra
+    Point2f warpPoint(const Point2f &pt, InputArray K, InputArray R);
+    Point2f warpPoint(const Point2f &pt, InputArray K, InputArray R, InputArray T);
+
+    virtual Rect buildMaps(Size src_size, InputArray K, InputArray R, InputArray T, OutputArray xmap, OutputArray ymap);
+    Rect buildMaps(Size src_size, InputArray K, InputArray R, OutputArray xmap, OutputArray ymap);
+
+    Point warp(InputArray src, InputArray K, InputArray R,
+               int interp_mode, int border_mode, OutputArray dst);
+    virtual Point warp(InputArray src, InputArray K, InputArray R, InputArray T, int interp_mode, int border_mode,
+               OutputArray dst);
+
+    Rect warpRoi(Size src_size, InputArray K, InputArray R);
+    Rect warpRoi(Size src_size, InputArray K, InputArray R, InputArray T);
+
+protected:
+    void detectResultRoi(Size src_size, Point &dst_tl, Point &dst_br);
+};
+
+
+/** @brief Affine warper that uses rotations and translations
+
+ Uses affine transformation in homogeneous coordinates to represent both rotation and
+ translation in camera rotation matrix.
+ */
+class CV_EXPORTS AffineWarper : public PlaneWarper
+{
+public:
+    /** @brief Construct an instance of the affine warper class.
+
+    @param scale Projected image scale multiplier
+     */
+    AffineWarper(float scale = 1.f) : PlaneWarper(scale) {}
+
+    Point2f warpPoint(const Point2f &pt, InputArray K, InputArray R);
+    Rect buildMaps(Size src_size, InputArray K, InputArray R, OutputArray xmap, OutputArray ymap);
+    Point warp(InputArray src, InputArray K, InputArray R,
+               int interp_mode, int border_mode, OutputArray dst);
+    Rect warpRoi(Size src_size, InputArray K, InputArray R);
+
+protected:
+    /** @brief Extracts rotation and translation matrices from matrix H representing
+        affine transformation in homogeneous coordinates
+     */
+    void getRTfromHomogeneous(InputArray H, Mat &R, Mat &T);
+};
+
+
+struct CV_EXPORTS SphericalProjector : ProjectorBase
+{
+    void mapForward(float x, float y, float &u, float &v);
+    void mapBackward(float u, float v, float &x, float &y);
+};
+
+
+/** @brief Warper that maps an image onto the unit sphere located at the 
