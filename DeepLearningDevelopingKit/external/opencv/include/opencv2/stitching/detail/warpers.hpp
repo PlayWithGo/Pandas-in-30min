@@ -240,4 +240,62 @@ struct CV_EXPORTS SphericalProjector : ProjectorBase
 };
 
 
-/** @brief Warper that maps an image onto the unit sphere located at the 
+/** @brief Warper that maps an image onto the unit sphere located at the origin.
+
+ Projects image onto unit sphere with origin at (0, 0, 0) and radius scale, measured in pixels.
+ A 360 panorama would therefore have a resulting width of 2 * scale * PI pixels.
+ Poles are located at (0, -1, 0) and (0, 1, 0) points.
+*/
+class CV_EXPORTS SphericalWarper : public RotationWarperBase<SphericalProjector>
+{
+public:
+    /** @brief Construct an instance of the spherical warper class.
+
+    @param scale Radius of the projected sphere, in pixels. An image spanning the
+                 whole sphere will have a width of 2 * scale * PI pixels.
+     */
+    SphericalWarper(float scale) { projector_.scale = scale; }
+
+    Rect buildMaps(Size src_size, InputArray K, InputArray R, OutputArray xmap, OutputArray ymap);
+    Point warp(InputArray src, InputArray K, InputArray R, int interp_mode, int border_mode, OutputArray dst);
+protected:
+    void detectResultRoi(Size src_size, Point &dst_tl, Point &dst_br);
+};
+
+
+struct CV_EXPORTS CylindricalProjector : ProjectorBase
+{
+    void mapForward(float x, float y, float &u, float &v);
+    void mapBackward(float u, float v, float &x, float &y);
+};
+
+
+/** @brief Warper that maps an image onto the x\*x + z\*z = 1 cylinder.
+ */
+class CV_EXPORTS CylindricalWarper : public RotationWarperBase<CylindricalProjector>
+{
+public:
+    /** @brief Construct an instance of the cylindrical warper class.
+
+    @param scale Projected image scale multiplier
+     */
+    CylindricalWarper(float scale) { projector_.scale = scale; }
+
+    Rect buildMaps(Size src_size, InputArray K, InputArray R, OutputArray xmap, OutputArray ymap);
+    Point warp(InputArray src, InputArray K, InputArray R, int interp_mode, int border_mode, OutputArray dst);
+protected:
+    void detectResultRoi(Size src_size, Point &dst_tl, Point &dst_br)
+    {
+        RotationWarperBase<CylindricalProjector>::detectResultRoiByBorder(src_size, dst_tl, dst_br);
+    }
+};
+
+
+struct CV_EXPORTS FisheyeProjector : ProjectorBase
+{
+    void mapForward(float x, float y, float &u, float &v);
+    void mapBackward(float u, float v, float &x, float &y);
+};
+
+
+class CV_EXPORTS FisheyeWarper : public RotationWarperBase<FisheyeProject
