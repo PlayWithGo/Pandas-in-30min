@@ -597,4 +597,20 @@ struct CV_EXPORTS PlanePortraitProjector : ProjectorBase
 class CV_EXPORTS PlanePortraitWarper : public RotationWarperBase<PlanePortraitProjector>
 {
 public:
-    PlanePortraitWarper(float 
+    PlanePortraitWarper(float scale) { projector_.scale = scale; }
+
+protected:
+    void detectResultRoi(Size src_size, Point &dst_tl, Point &dst_br)
+    {
+        RotationWarperBase<PlanePortraitProjector>::detectResultRoiByBorder(src_size, dst_tl, dst_br);
+    }
+};
+
+//! @} stitching_warp
+
+} // namespace detail
+} // namespace cv
+
+#include "warpers_inl.hpp"
+
+#endif // OPENCV_STITCHING_WARPERS_HPP
