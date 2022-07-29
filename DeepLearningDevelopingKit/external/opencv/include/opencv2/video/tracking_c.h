@@ -70,4 +70,41 @@ extern "C" {
    every point at every pyramid level.
    Calculates optical flow between two images for certain set of points (i.e.
    it is a "sparse" optical flow, which is opposite to the previous 3 methods) */
-CVAPI(void)  cvCalcOpticalFlowPyrLK( const CvArr*  prev, const CvArr*  curr
+CVAPI(void)  cvCalcOpticalFlowPyrLK( const CvArr*  prev, const CvArr*  curr,
+                                     CvArr*  prev_pyr, CvArr*  curr_pyr,
+                                     const CvPoint2D32f* prev_features,
+                                     CvPoint2D32f* curr_features,
+                                     int       count,
+                                     CvSize    win_size,
+                                     int       level,
+                                     char*     status,
+                                     float*    track_error,
+                                     CvTermCriteria criteria,
+                                     int       flags );
+
+
+/* Modification of a previous sparse optical flow algorithm to calculate
+   affine flow */
+CVAPI(void)  cvCalcAffineFlowPyrLK( const CvArr*  prev, const CvArr*  curr,
+                                    CvArr*  prev_pyr, CvArr*  curr_pyr,
+                                    const CvPoint2D32f* prev_features,
+                                    CvPoint2D32f* curr_features,
+                                    float* matrices, int  count,
+                                    CvSize win_size, int  level,
+                                    char* status, float* track_error,
+                                    CvTermCriteria criteria, int flags );
+
+/* Estimate rigid transformation between 2 images or 2 point sets */
+CVAPI(int)  cvEstimateRigidTransform( const CvArr* A, const CvArr* B,
+                                      CvMat* M, int full_affine );
+
+/* Estimate optical flow for each pixel using the two-frame G. Farneback algorithm */
+CVAPI(void) cvCalcOpticalFlowFarneback( const CvArr* prev, const CvArr* next,
+                                        CvArr* flow, double pyr_scale, int levels,
+                                        int winsize, int iterations, int poly_n,
+                                        double poly_sigma, int flags );
+
+/********************************* motion templates *************************************/
+
+/****************************************************************************************\
+*        All the motion template functions
