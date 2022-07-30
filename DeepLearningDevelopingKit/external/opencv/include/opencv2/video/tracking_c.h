@@ -139,4 +139,49 @@ CVAPI(CvSeq*)  cvSegmentMotion( const CvArr* mhi, CvArr* seg_mask,
                                 CvMemStorage* storage,
                                 double timestamp, double seg_thresh );
 
-/*******************************************************************************
+/****************************************************************************************\
+*                                       Tracking                                         *
+\****************************************************************************************/
+
+/* Implements CAMSHIFT algorithm - determines object position, size and orientation
+   from the object histogram back project (extension of meanshift) */
+CVAPI(int)  cvCamShift( const CvArr* prob_image, CvRect  window,
+                        CvTermCriteria criteria, CvConnectedComp* comp,
+                        CvBox2D* box CV_DEFAULT(NULL) );
+
+/* Implements MeanShift algorithm - determines object position
+   from the object histogram back project */
+CVAPI(int)  cvMeanShift( const CvArr* prob_image, CvRect  window,
+                         CvTermCriteria criteria, CvConnectedComp* comp );
+
+/*
+standard Kalman filter (in G. Welch' and G. Bishop's notation):
+
+  x(k)=A*x(k-1)+B*u(k)+w(k)  p(w)~N(0,Q)
+  z(k)=H*x(k)+v(k),   p(v)~N(0,R)
+*/
+typedef struct CvKalman
+{
+    int MP;                     /* number of measurement vector dimensions */
+    int DP;                     /* number of state vector dimensions */
+    int CP;                     /* number of control vector dimensions */
+
+    /* backward compatibility fields */
+#if 1
+    float* PosterState;         /* =state_pre->data.fl */
+    float* PriorState;          /* =state_post->data.fl */
+    float* DynamMatr;           /* =transition_matrix->data.fl */
+    float* MeasurementMatr;     /* =measurement_matrix->data.fl */
+    float* MNCovariance;        /* =measurement_noise_cov->data.fl */
+    float* PNCovariance;        /* =process_noise_cov->data.fl */
+    float* KalmGainMatr;        /* =gain->data.fl */
+    float* PriorErrorCovariance;/* =error_cov_pre->data.fl */
+    float* PosterErrorCovariance;/* =error_cov_post->data.fl */
+    float* Temp1;               /* temp1->data.fl */
+    float* Temp2;               /* temp2->data.fl */
+#endif
+
+    CvMat* state_pre;           /* predicted state (x'(k)):
+                                    x(k)=A*x(k-1)+B*u(k) */
+    CvMat* state_post;          /* corrected state (x(k)):
+        
