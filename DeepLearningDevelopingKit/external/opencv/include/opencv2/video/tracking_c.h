@@ -184,4 +184,49 @@ typedef struct CvKalman
     CvMat* state_pre;           /* predicted state (x'(k)):
                                     x(k)=A*x(k-1)+B*u(k) */
     CvMat* state_post;          /* corrected state (x(k)):
-        
+                                    x(k)=x'(k)+K(k)*(z(k)-H*x'(k)) */
+    CvMat* transition_matrix;   /* state transition matrix (A) */
+    CvMat* control_matrix;      /* control matrix (B)
+                                   (it is not used if there is no control)*/
+    CvMat* measurement_matrix;  /* measurement matrix (H) */
+    CvMat* process_noise_cov;   /* process noise covariance matrix (Q) */
+    CvMat* measurement_noise_cov; /* measurement noise covariance matrix (R) */
+    CvMat* error_cov_pre;       /* priori error estimate covariance matrix (P'(k)):
+                                    P'(k)=A*P(k-1)*At + Q)*/
+    CvMat* gain;                /* Kalman gain matrix (K(k)):
+                                    K(k)=P'(k)*Ht*inv(H*P'(k)*Ht+R)*/
+    CvMat* error_cov_post;      /* posteriori error estimate covariance matrix (P(k)):
+                                    P(k)=(I-K(k)*H)*P'(k) */
+    CvMat* temp1;               /* temporary matrices */
+    CvMat* temp2;
+    CvMat* temp3;
+    CvMat* temp4;
+    CvMat* temp5;
+} CvKalman;
+
+/* Creates Kalman filter and sets A, B, Q, R and state to some initial values */
+CVAPI(CvKalman*) cvCreateKalman( int dynam_params, int measure_params,
+                                 int control_params CV_DEFAULT(0));
+
+/* Releases Kalman filter state */
+CVAPI(void)  cvReleaseKalman( CvKalman** kalman);
+
+/* Updates Kalman filter by time (predicts future state of the system) */
+CVAPI(const CvMat*)  cvKalmanPredict( CvKalman* kalman,
+                                      const CvMat* control CV_DEFAULT(NULL));
+
+/* Updates Kalman filter by measurement
+   (corrects state of the system and internal matrices) */
+CVAPI(const CvMat*)  cvKalmanCorrect( CvKalman* kalman, const CvMat* measurement );
+
+#define cvKalmanUpdateByTime  cvKalmanPredict
+#define cvKalmanUpdateByMeasurement cvKalmanCorrect
+
+/** @} video_c */
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+
+#endif // OPENCV_TRACKING_C_H
