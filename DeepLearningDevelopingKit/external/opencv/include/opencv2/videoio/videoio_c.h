@@ -27,4 +27,71 @@
 //     derived from this software without specific prior written permission.
 //
 // This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the impli
+// any express or implied warranties, including, but not limited to, the implied
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the Intel Corporation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_VIDEOIO_H
+#define OPENCV_VIDEOIO_H
+
+#include "opencv2/core/core_c.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+/**
+  @addtogroup videoio_c
+  @{
+*/
+
+/****************************************************************************************\
+*                         Working with Video Files and Cameras                           *
+\****************************************************************************************/
+
+/** @brief "black box" capture structure
+
+In C++ use cv::VideoCapture
+*/
+typedef struct CvCapture CvCapture;
+
+/** @brief start capturing frames from video file
+*/
+CVAPI(CvCapture*) cvCreateFileCapture( const char* filename );
+
+/** @brief start capturing frames from video file. allows specifying a preferred API to use
+*/
+CVAPI(CvCapture*) cvCreateFileCaptureWithPreference( const char* filename , int apiPreference);
+
+enum
+{
+    CV_CAP_ANY      =0,     // autodetect
+
+    CV_CAP_MIL      =100,   // MIL proprietary drivers
+
+    CV_CAP_VFW      =200,   // platform native
+    CV_CAP_V4L      =200,
+    CV_CAP_V4L2     =200,
+
+    CV_CAP_FIREWARE =300,   // IEEE 1394 drivers
+    CV_CAP_FIREWIRE =300,
+    CV_CAP_IEEE1394 =300,
+    CV_CAP_DC1394   =300,
+    CV_CAP_CMU1394  =300,
+
+    CV_CAP_STEREO   =400,   // TYZX proprietary drivers
+    CV_CAP_TYZX     =400,
+    CV_TYZX_LEFT    =400,
+    CV_TYZX_RIGHT   =401,
+    CV_TYZX_COLOR   =402,
+    CV_TYZX_Z       =403,
+
+    CV_CAP_QT       =500
