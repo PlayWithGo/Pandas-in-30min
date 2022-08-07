@@ -297,4 +297,22 @@ enum
     CV_CAP_PROP_XI_IMAGE_DATA_FORMAT                            = 435, // Output data format.
     CV_CAP_PROP_XI_SHUTTER_TYPE                                 = 436, // Change sensor shutter type(CMOS sensor).
     CV_CAP_PROP_XI_SENSOR_TAPS                                  = 437, // Number of taps
-    CV_CAP_PROP_XI_AEAG_ROI_OFFSET_X                            = 439, // Autom
+    CV_CAP_PROP_XI_AEAG_ROI_OFFSET_X                            = 439, // Automatic exposure/gain ROI offset X
+    CV_CAP_PROP_XI_AEAG_ROI_OFFSET_Y                            = 440, // Automatic exposure/gain ROI offset Y
+    CV_CAP_PROP_XI_AEAG_ROI_WIDTH                               = 441, // Automatic exposure/gain ROI Width
+    CV_CAP_PROP_XI_AEAG_ROI_HEIGHT                              = 442, // Automatic exposure/gain ROI Height
+    CV_CAP_PROP_XI_BPC                                          = 445, // Correction of bad pixels
+    CV_CAP_PROP_XI_WB_KR                                        = 448, // White balance red coefficient
+    CV_CAP_PROP_XI_WB_KG                                        = 449, // White balance green coefficient
+    CV_CAP_PROP_XI_WB_KB                                        = 450, // White balance blue coefficient
+    CV_CAP_PROP_XI_WIDTH                                        = 451, // Width of the Image provided by the device (in pixels).
+    CV_CAP_PROP_XI_HEIGHT                                       = 452, // Height of the Image provided by the device (in pixels).
+    CV_CAP_PROP_XI_REGION_SELECTOR                              = 589, // Selects Region in Multiple ROI which parameters are set by width, height, ... ,region mode
+    CV_CAP_PROP_XI_REGION_MODE                                  = 595, // Activates/deactivates Region selected by Region Selector
+    CV_CAP_PROP_XI_LIMIT_BANDWIDTH                              = 459, // Set/get bandwidth(datarate)(in Megabits)
+    CV_CAP_PROP_XI_SENSOR_DATA_BIT_DEPTH                        = 460, // Sensor output data bit depth.
+    CV_CAP_PROP_XI_OUTPUT_DATA_BIT_DEPTH                        = 461, // Device output data bit depth.
+    CV_CAP_PROP_XI_IMAGE_DATA_BIT_DEPTH                         = 462, // bitdepth of data returned by function xiGetImage
+    CV_CAP_PROP_XI_OUTPUT_DATA_PACKING                          = 463, // Device output data packing (or grouping) enabled. Packing could be enabled if output_data_bit_depth > 8 and packing capability is available.
+    CV_CAP_PROP_XI_OUTPUT_DATA_PACKING_TYPE                     = 464, // Data packing type. Some cameras supports only specific packing type.
+    CV_CAP_PROP_XI_IS_COOLED      
