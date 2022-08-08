@@ -315,4 +315,23 @@ enum
     CV_CAP_PROP_XI_IMAGE_DATA_BIT_DEPTH                         = 462, // bitdepth of data returned by function xiGetImage
     CV_CAP_PROP_XI_OUTPUT_DATA_PACKING                          = 463, // Device output data packing (or grouping) enabled. Packing could be enabled if output_data_bit_depth > 8 and packing capability is available.
     CV_CAP_PROP_XI_OUTPUT_DATA_PACKING_TYPE                     = 464, // Data packing type. Some cameras supports only specific packing type.
-    CV_CAP_PROP_XI_IS_COOLED      
+    CV_CAP_PROP_XI_IS_COOLED                                    = 465, // Returns 1 for cameras that support cooling.
+    CV_CAP_PROP_XI_COOLING                                      = 466, // Start camera cooling.
+    CV_CAP_PROP_XI_TARGET_TEMP                                  = 467, // Set sensor target temperature for cooling.
+    CV_CAP_PROP_XI_CHIP_TEMP                                    = 468, // Camera sensor temperature
+    CV_CAP_PROP_XI_HOUS_TEMP                                    = 469, // Camera housing tepmerature
+    CV_CAP_PROP_XI_HOUS_BACK_SIDE_TEMP                          = 590, // Camera housing back side tepmerature
+    CV_CAP_PROP_XI_SENSOR_BOARD_TEMP                            = 596, // Camera sensor board temperature
+    CV_CAP_PROP_XI_CMS                                          = 470, // Mode of color management system.
+    CV_CAP_PROP_XI_APPLY_CMS                                    = 471, // Enable applying of CMS profiles to xiGetImage (see XI_PRM_INPUT_CMS_PROFILE, XI_PRM_OUTPUT_CMS_PROFILE).
+    CV_CAP_PROP_XI_IMAGE_IS_COLOR                               = 474, // Returns 1 for color cameras.
+    CV_CAP_PROP_XI_COLOR_FILTER_ARRAY                           = 475, // Returns color filter array type of RAW data.
+    CV_CAP_PROP_XI_GAMMAY                                       = 476, // Luminosity gamma
+    CV_CAP_PROP_XI_GAMMAC                                       = 477, // Chromaticity gamma
+    CV_CAP_PROP_XI_SHARPNESS                                    = 478, // Sharpness Strength
+    CV_CAP_PROP_XI_CC_MATRIX_00                                 = 479, // Color Correction Matrix element [0][0]
+    CV_CAP_PROP_XI_CC_MATRIX_01                                 = 480, // Color Correction Matrix element [0][1]
+    CV_CAP_PROP_XI_CC_MATRIX_02                                 = 481, // Color Correction Matrix element [0][2]
+    CV_CAP_PROP_XI_CC_MATRIX_03                                 = 482, // Color Correction Matrix element [0][3]
+    CV_CAP_PROP_XI_CC_MATRIX_10                                 = 483, // Color Correction Matrix element [1][0]
+    CV_CAP_PROP_XI_
