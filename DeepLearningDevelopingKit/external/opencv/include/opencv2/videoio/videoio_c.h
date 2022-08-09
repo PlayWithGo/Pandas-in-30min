@@ -334,4 +334,22 @@ enum
     CV_CAP_PROP_XI_CC_MATRIX_02                                 = 481, // Color Correction Matrix element [0][2]
     CV_CAP_PROP_XI_CC_MATRIX_03                                 = 482, // Color Correction Matrix element [0][3]
     CV_CAP_PROP_XI_CC_MATRIX_10                                 = 483, // Color Correction Matrix element [1][0]
-    CV_CAP_PROP_XI_
+    CV_CAP_PROP_XI_CC_MATRIX_11                                 = 484, // Color Correction Matrix element [1][1]
+    CV_CAP_PROP_XI_CC_MATRIX_12                                 = 485, // Color Correction Matrix element [1][2]
+    CV_CAP_PROP_XI_CC_MATRIX_13                                 = 486, // Color Correction Matrix element [1][3]
+    CV_CAP_PROP_XI_CC_MATRIX_20                                 = 487, // Color Correction Matrix element [2][0]
+    CV_CAP_PROP_XI_CC_MATRIX_21                                 = 488, // Color Correction Matrix element [2][1]
+    CV_CAP_PROP_XI_CC_MATRIX_22                                 = 489, // Color Correction Matrix element [2][2]
+    CV_CAP_PROP_XI_CC_MATRIX_23                                 = 490, // Color Correction Matrix element [2][3]
+    CV_CAP_PROP_XI_CC_MATRIX_30                                 = 491, // Color Correction Matrix element [3][0]
+    CV_CAP_PROP_XI_CC_MATRIX_31                                 = 492, // Color Correction Matrix element [3][1]
+    CV_CAP_PROP_XI_CC_MATRIX_32                                 = 493, // Color Correction Matrix element [3][2]
+    CV_CAP_PROP_XI_CC_MATRIX_33                                 = 494, // Color Correction Matrix element [3][3]
+    CV_CAP_PROP_XI_DEFAULT_CC_MATRIX                            = 495, // Set default Color Correction Matrix
+    CV_CAP_PROP_XI_TRG_SELECTOR                                 = 498, // Selects the type of trigger.
+    CV_CAP_PROP_XI_ACQ_FRAME_BURST_COUNT                        = 499, // Sets number of frames acquired by burst. This burst is used only if trigger is set to FrameBurstStart
+    CV_CAP_PROP_XI_DEBOUNCE_EN                                  = 507, // Enable/Disable debounce to selected GPI
+    CV_CAP_PROP_XI_DEBOUNCE_T0                                  = 508, // Debounce time (x * 10us)
+    CV_CAP_PROP_XI_DEBOUNCE_T1                                  = 509, // Debounce time (x * 10us)
+    CV_CAP_PROP_XI_DEBOUNCE_POL                                 = 510, // Debounce polarity (pol = 1 t0 - falling edge, t1 - rising edge)
+    CV_CAP_PROP_XI_LENS_MODE      
