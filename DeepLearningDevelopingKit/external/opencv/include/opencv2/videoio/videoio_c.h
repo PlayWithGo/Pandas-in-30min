@@ -352,4 +352,20 @@ enum
     CV_CAP_PROP_XI_DEBOUNCE_T0                                  = 508, // Debounce time (x * 10us)
     CV_CAP_PROP_XI_DEBOUNCE_T1                                  = 509, // Debounce time (x * 10us)
     CV_CAP_PROP_XI_DEBOUNCE_POL                                 = 510, // Debounce polarity (pol = 1 t0 - falling edge, t1 - rising edge)
-    CV_CAP_PROP_XI_LENS_MODE      
+    CV_CAP_PROP_XI_LENS_MODE                                    = 511, // Status of lens control interface. This shall be set to XI_ON before any Lens operations.
+    CV_CAP_PROP_XI_LENS_APERTURE_VALUE                          = 512, // Current lens aperture value in stops. Examples: 2.8, 4, 5.6, 8, 11
+    CV_CAP_PROP_XI_LENS_FOCUS_MOVEMENT_VALUE                    = 513, // Lens current focus movement value to be used by XI_PRM_LENS_FOCUS_MOVE in motor steps.
+    CV_CAP_PROP_XI_LENS_FOCUS_MOVE                              = 514, // Moves lens focus motor by steps set in XI_PRM_LENS_FOCUS_MOVEMENT_VALUE.
+    CV_CAP_PROP_XI_LENS_FOCUS_DISTANCE                          = 515, // Lens focus distance in cm.
+    CV_CAP_PROP_XI_LENS_FOCAL_LENGTH                            = 516, // Lens focal distance in mm.
+    CV_CAP_PROP_XI_LENS_FEATURE_SELECTOR                        = 517, // Selects the current feature which is accessible by XI_PRM_LENS_FEATURE.
+    CV_CAP_PROP_XI_LENS_FEATURE                                 = 518, // Allows access to lens feature value currently selected by XI_PRM_LENS_FEATURE_SELECTOR.
+    CV_CAP_PROP_XI_DEVICE_MODEL_ID                              = 521, // Return device model id
+    CV_CAP_PROP_XI_DEVICE_SN                                    = 522, // Return device serial number
+    CV_CAP_PROP_XI_IMAGE_DATA_FORMAT_RGB32_ALPHA                = 529, // The alpha channel of RGB32 output image format.
+    CV_CAP_PROP_XI_IMAGE_PAYLOAD_SIZE                           = 530, // Buffer size in bytes sufficient for output image returned by xiGetImage
+    CV_CAP_PROP_XI_TRANSPORT_PIXEL_FORMAT                       = 531, // Current format of pixels on transport layer.
+    CV_CAP_PROP_XI_SENSOR_CLOCK_FREQ_HZ                         = 532, // Sensor clock frequency in Hz.
+    CV_CAP_PROP_XI_SENSOR_CLOCK_FREQ_INDEX                      = 533, // Sensor clock frequency index. Sensor with selected frequencies have possibility to set the frequency only by this index.
+    CV_CAP_PROP_XI_SENSOR_OUTPUT_CHANNEL_COUNT                  = 534, // Number of output channels from sensor used for data transfer.
+    CV_CAP_PROP_XI_FRAMERATE                                    = 53
