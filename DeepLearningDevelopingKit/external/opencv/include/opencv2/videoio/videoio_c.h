@@ -442,4 +442,57 @@ enum
     CV_CAP_PROP_INTELPERC_PROFILE_IDX                 = 11002,
     CV_CAP_PROP_INTELPERC_DEPTH_LOW_CONFIDENCE_VALUE  = 11003,
     CV_CAP_PROP_INTELPERC_DEPTH_SATURATION_VALUE      = 11004,
-    CV_CAP_PROP_INTELPERC_DEPTH_CONFIDENCE_THRESH
+    CV_CAP_PROP_INTELPERC_DEPTH_CONFIDENCE_THRESHOLD  = 11005,
+    CV_CAP_PROP_INTELPERC_DEPTH_FOCAL_LENGTH_HORZ     = 11006,
+    CV_CAP_PROP_INTELPERC_DEPTH_FOCAL_LENGTH_VERT     = 11007,
+
+    // Intel PerC streams
+    CV_CAP_INTELPERC_DEPTH_GENERATOR = 1 << 29,
+    CV_CAP_INTELPERC_IMAGE_GENERATOR = 1 << 28,
+    CV_CAP_INTELPERC_GENERATORS_MASK = CV_CAP_INTELPERC_DEPTH_GENERATOR + CV_CAP_INTELPERC_IMAGE_GENERATOR
+};
+
+// Generic camera output modes.
+// Currently, these are supported through the libv4l interface only.
+enum
+{
+    CV_CAP_MODE_BGR  = 0, // BGR24 (default)
+    CV_CAP_MODE_RGB  = 1, // RGB24
+    CV_CAP_MODE_GRAY = 2, // Y8
+    CV_CAP_MODE_YUYV = 3  // YUYV
+};
+
+enum
+{
+    // Data given from depth generator.
+    CV_CAP_OPENNI_DEPTH_MAP                 = 0, // Depth values in mm (CV_16UC1)
+    CV_CAP_OPENNI_POINT_CLOUD_MAP           = 1, // XYZ in meters (CV_32FC3)
+    CV_CAP_OPENNI_DISPARITY_MAP             = 2, // Disparity in pixels (CV_8UC1)
+    CV_CAP_OPENNI_DISPARITY_MAP_32F         = 3, // Disparity in pixels (CV_32FC1)
+    CV_CAP_OPENNI_VALID_DEPTH_MASK          = 4, // CV_8UC1
+
+    // Data given from RGB image generator.
+    CV_CAP_OPENNI_BGR_IMAGE                 = 5,
+    CV_CAP_OPENNI_GRAY_IMAGE                = 6,
+
+    // Data given from IR image generator.
+    CV_CAP_OPENNI_IR_IMAGE                  = 7
+};
+
+// Supported output modes of OpenNI image generator
+enum
+{
+    CV_CAP_OPENNI_VGA_30HZ     = 0,
+    CV_CAP_OPENNI_SXGA_15HZ    = 1,
+    CV_CAP_OPENNI_SXGA_30HZ    = 2,
+    CV_CAP_OPENNI_QVGA_30HZ    = 3,
+    CV_CAP_OPENNI_QVGA_60HZ    = 4
+};
+
+enum
+{
+    CV_CAP_INTELPERC_DEPTH_MAP              = 0, // Each pixel is a 16-bit integer. The value indicates the distance from an object to the camera's XY plane or the Cartesian depth.
+    CV_CAP_INTELPERC_UVDEPTH_MAP            = 1, // Each pixel contains two 32-bit floating point values in the range of 0-1, representing the mapping of depth coordinates to the color coordinates.
+    CV_CAP_INTELPERC_IR_MAP                 = 2, // Each pixel is a 16-bit integer. The value indicates the intensity of the reflected laser beam.
+    CV_CAP_INTELPERC_IMAGE                  = 3
+};
