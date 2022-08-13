@@ -403,4 +403,43 @@ enum
     CV_CAP_PROP_XI_AUTO_BANDWIDTH_CALCULATION                   = 573, // Automatic bandwidth calculation,
     CV_CAP_PROP_XI_FFS_FILE_ID                                  = 594, // File number.
     CV_CAP_PROP_XI_FFS_FILE_SIZE                                = 580, // Size of file.
-    CV_CAP_PROP_XI_FREE_FFS_SIZE                                = 581, // 
+    CV_CAP_PROP_XI_FREE_FFS_SIZE                                = 581, // Size of free camera FFS.
+    CV_CAP_PROP_XI_USED_FFS_SIZE                                = 582, // Size of used camera FFS.
+    CV_CAP_PROP_XI_FFS_ACCESS_KEY                               = 583, // Setting of key enables file operations on some cameras.
+    CV_CAP_PROP_XI_SENSOR_FEATURE_SELECTOR                      = 585, // Selects the current feature which is accessible by XI_PRM_SENSOR_FEATURE_VALUE.
+    CV_CAP_PROP_XI_SENSOR_FEATURE_VALUE                         = 586, // Allows access to sensor feature value currently selected by XI_PRM_SENSOR_FEATURE_SELECTOR.
+
+
+    // Properties for Android cameras
+    CV_CAP_PROP_ANDROID_FLASH_MODE = 8001,
+    CV_CAP_PROP_ANDROID_FOCUS_MODE = 8002,
+    CV_CAP_PROP_ANDROID_WHITE_BALANCE = 8003,
+    CV_CAP_PROP_ANDROID_ANTIBANDING = 8004,
+    CV_CAP_PROP_ANDROID_FOCAL_LENGTH = 8005,
+    CV_CAP_PROP_ANDROID_FOCUS_DISTANCE_NEAR = 8006,
+    CV_CAP_PROP_ANDROID_FOCUS_DISTANCE_OPTIMAL = 8007,
+    CV_CAP_PROP_ANDROID_FOCUS_DISTANCE_FAR = 8008,
+    CV_CAP_PROP_ANDROID_EXPOSE_LOCK = 8009,
+    CV_CAP_PROP_ANDROID_WHITEBALANCE_LOCK = 8010,
+
+    // Properties of cameras available through AVFOUNDATION interface
+    CV_CAP_PROP_IOS_DEVICE_FOCUS = 9001,
+    CV_CAP_PROP_IOS_DEVICE_EXPOSURE = 9002,
+    CV_CAP_PROP_IOS_DEVICE_FLASH = 9003,
+    CV_CAP_PROP_IOS_DEVICE_WHITEBALANCE = 9004,
+    CV_CAP_PROP_IOS_DEVICE_TORCH = 9005,
+
+    // Properties of cameras available through Smartek Giganetix Ethernet Vision interface
+    /* --- Vladimir Litvinenko (litvinenko.vladimir@gmail.com) --- */
+    CV_CAP_PROP_GIGA_FRAME_OFFSET_X = 10001,
+    CV_CAP_PROP_GIGA_FRAME_OFFSET_Y = 10002,
+    CV_CAP_PROP_GIGA_FRAME_WIDTH_MAX = 10003,
+    CV_CAP_PROP_GIGA_FRAME_HEIGH_MAX = 10004,
+    CV_CAP_PROP_GIGA_FRAME_SENS_WIDTH = 10005,
+    CV_CAP_PROP_GIGA_FRAME_SENS_HEIGH = 10006,
+
+    CV_CAP_PROP_INTELPERC_PROFILE_COUNT               = 11001,
+    CV_CAP_PROP_INTELPERC_PROFILE_IDX                 = 11002,
+    CV_CAP_PROP_INTELPERC_DEPTH_LOW_CONFIDENCE_VALUE  = 11003,
+    CV_CAP_PROP_INTELPERC_DEPTH_SATURATION_VALUE      = 11004,
+    CV_CAP_PROP_INTELPERC_DEPTH_CONFIDENCE_THRESH
