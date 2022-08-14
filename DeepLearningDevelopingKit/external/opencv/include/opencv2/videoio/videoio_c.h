@@ -496,3 +496,46 @@ enum
     CV_CAP_INTELPERC_IR_MAP                 = 2, // Each pixel is a 16-bit integer. The value indicates the intensity of the reflected laser beam.
     CV_CAP_INTELPERC_IMAGE                  = 3
 };
+
+// gPhoto2 properties, if propertyId is less than 0 then work on widget with that __additive inversed__ camera setting ID
+// Get IDs by using CAP_PROP_GPHOTO2_WIDGET_ENUMERATE.
+// @see CvCaptureCAM_GPHOTO2 for more info
+enum
+{
+    CV_CAP_PROP_GPHOTO2_PREVIEW           = 17001, // Capture only preview from liveview mode.
+    CV_CAP_PROP_GPHOTO2_WIDGET_ENUMERATE  = 17002, // Readonly, returns (const char *).
+    CV_CAP_PROP_GPHOTO2_RELOAD_CONFIG     = 17003, // Trigger, only by set. Reload camera settings.
+    CV_CAP_PROP_GPHOTO2_RELOAD_ON_CHANGE  = 17004, // Reload all settings on set.
+    CV_CAP_PROP_GPHOTO2_COLLECT_MSGS      = 17005, // Collect messages with details.
+    CV_CAP_PROP_GPHOTO2_FLUSH_MSGS        = 17006, // Readonly, returns (const char *).
+    CV_CAP_PROP_SPEED                     = 17007, // Exposure speed. Can be readonly, depends on camera program.
+    CV_CAP_PROP_APERTURE                  = 17008, // Aperture. Can be readonly, depends on camera program.
+    CV_CAP_PROP_EXPOSUREPROGRAM           = 17009, // Camera exposure program.
+    CV_CAP_PROP_VIEWFINDER                = 17010  // Enter liveview mode.
+};
+
+/** @brief retrieve capture properties
+*/
+CVAPI(double) cvGetCaptureProperty( CvCapture* capture, int property_id );
+/** @brief set capture properties
+*/
+CVAPI(int)    cvSetCaptureProperty( CvCapture* capture, int property_id, double value );
+
+/** @brief Return the type of the capturer (eg, ::CV_CAP_VFW, ::CV_CAP_UNICAP)
+
+It is unknown if created with ::CV_CAP_ANY
+*/
+CVAPI(int)    cvGetCaptureDomain( CvCapture* capture);
+
+/** @brief "black box" video file writer structure
+
+In C++ use cv::VideoWriter
+*/
+typedef struct CvVideoWriter CvVideoWriter;
+
+//! Macro to construct the fourcc code of the codec. Same as CV_FOURCC()
+#define CV_FOURCC_MACRO(c1, c2, c3, c4) (((c1) & 255) + (((c2) & 255) << 8) + (((c3) & 255) << 16) + (((c4) & 255) << 24))
+
+/** @brief Constructs the fourcc code of the codec function
+
+Simply call it with 4 chars fourcc code like `CV_F
