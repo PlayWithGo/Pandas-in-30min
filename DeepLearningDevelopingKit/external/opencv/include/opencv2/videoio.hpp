@@ -55,4 +55,53 @@
   - Tutorials: @ref tutorial_table_of_content_videoio
   @{
     @defgroup videoio_flags_base Flags for video I/O
-    @defg
+    @defgroup videoio_flags_others Additional flags for video I/O API backends
+    @defgroup videoio_c C API for video I/O
+    @defgroup videoio_ios iOS glue for video I/O
+    @defgroup videoio_winrt WinRT glue for video I/O
+  @}
+*/
+
+////////////////////////////////// video io /////////////////////////////////
+
+typedef struct CvCapture CvCapture;
+typedef struct CvVideoWriter CvVideoWriter;
+
+namespace cv
+{
+
+//! @addtogroup videoio
+//! @{
+
+//! @addtogroup videoio_flags_base
+//! @{
+
+
+/** @brief %VideoCapture API backends identifier.
+
+Select preferred API for a capture object.
+To be used in the VideoCapture::VideoCapture() constructor or VideoCapture::open()
+
+@note Backends are available only if they have been built with your OpenCV binaries.
+See @ref videoio_overview for more information.
+*/
+enum VideoCaptureAPIs {
+       CAP_ANY          = 0,            //!< Auto detect == 0
+       CAP_VFW          = 200,          //!< Video For Windows (platform native)
+       CAP_V4L          = 200,          //!< V4L/V4L2 capturing support via libv4l
+       CAP_V4L2         = CAP_V4L,      //!< Same as CAP_V4L
+       CAP_FIREWIRE     = 300,          //!< IEEE 1394 drivers
+       CAP_FIREWARE     = CAP_FIREWIRE, //!< Same as CAP_FIREWIRE
+       CAP_IEEE1394     = CAP_FIREWIRE, //!< Same as CAP_FIREWIRE
+       CAP_DC1394       = CAP_FIREWIRE, //!< Same as CAP_FIREWIRE
+       CAP_CMU1394      = CAP_FIREWIRE, //!< Same as CAP_FIREWIRE
+       CAP_QT           = 500,          //!< QuickTime
+       CAP_UNICAP       = 600,          //!< Unicap drivers
+       CAP_DSHOW        = 700,          //!< DirectShow (via videoInput)
+       CAP_PVAPI        = 800,          //!< PvAPI, Prosilica GigE SDK
+       CAP_OPENNI       = 900,          //!< OpenNI (for Kinect)
+       CAP_OPENNI_ASUS  = 910,          //!< OpenNI (for Asus Xtion)
+       CAP_ANDROID      = 1000,         //!< Android - not used
+       CAP_XIAPI        = 1100,         //!< XIMEA Camera API
+       CAP_AVFOUNDATION = 1200,         //!< AVFoundation framework for iOS (OS X Lion will have the same API)
+       CAP_GIGANETIX    = 1300,    
