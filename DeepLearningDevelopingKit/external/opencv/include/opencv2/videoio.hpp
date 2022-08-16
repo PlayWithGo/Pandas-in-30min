@@ -104,4 +104,35 @@ enum VideoCaptureAPIs {
        CAP_ANDROID      = 1000,         //!< Android - not used
        CAP_XIAPI        = 1100,         //!< XIMEA Camera API
        CAP_AVFOUNDATION = 1200,         //!< AVFoundation framework for iOS (OS X Lion will have the same API)
-       CAP_GIGANETIX    = 1300,    
+       CAP_GIGANETIX    = 1300,         //!< Smartek Giganetix GigEVisionSDK
+       CAP_MSMF         = 1400,         //!< Microsoft Media Foundation (via videoInput)
+       CAP_WINRT        = 1410,         //!< Microsoft Windows Runtime using Media Foundation
+       CAP_INTELPERC    = 1500,         //!< Intel Perceptual Computing SDK
+       CAP_OPENNI2      = 1600,         //!< OpenNI2 (for Kinect)
+       CAP_OPENNI2_ASUS = 1610,         //!< OpenNI2 (for Asus Xtion and Occipital Structure sensors)
+       CAP_GPHOTO2      = 1700,         //!< gPhoto2 connection
+       CAP_GSTREAMER    = 1800,         //!< GStreamer
+       CAP_FFMPEG       = 1900,         //!< Open and record video file or stream using the FFMPEG library
+       CAP_IMAGES       = 2000,         //!< OpenCV Image Sequence (e.g. img_%02d.jpg)
+       CAP_ARAVIS       = 2100,         //!< Aravis SDK
+       CAP_OPENCV_MJPEG = 2200,         //!< Built-in OpenCV MotionJPEG codec
+       CAP_INTEL_MFX    = 2300          //!< Intel MediaSDK
+     };
+
+/** @brief %VideoCapture generic properties identifier.
+
+ Reading / writing properties involves many layers. Some unexpected result might happens along this chain.
+ Effective behaviour depends from device hardware, driver and API Backend.
+ @sa videoio_flags_others, VideoCapture::get(), VideoCapture::set()
+*/
+enum VideoCaptureProperties {
+       CAP_PROP_POS_MSEC       =0, //!< Current position of the video file in milliseconds.
+       CAP_PROP_POS_FRAMES     =1, //!< 0-based index of the frame to be decoded/captured next.
+       CAP_PROP_POS_AVI_RATIO  =2, //!< Relative position of the video file: 0=start of the film, 1=end of the film.
+       CAP_PROP_FRAME_WIDTH    =3, //!< Width of the frames in the video stream.
+       CAP_PROP_FRAME_HEIGHT   =4, //!< Height of the frames in the video stream.
+       CAP_PROP_FPS            =5, //!< Frame rate.
+       CAP_PROP_FOURCC         =6, //!< 4-character code of codec. see VideoWriter::fourcc .
+       CAP_PROP_FRAME_COUNT    =7, //!< Number of frames in the video file.
+       CAP_PROP_FORMAT         =8, //!< Format of the %Mat objects returned by VideoCapture::retrieve().
+   
