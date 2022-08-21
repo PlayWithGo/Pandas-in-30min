@@ -174,3 +174,59 @@ enum VideoCaptureProperties {
 
 
 /** @brief Generic camera output modes identifier.
+@note Currently, these are supported through the libv4l backend only.
+*/
+enum VideoCaptureModes {
+       CAP_MODE_BGR  = 0, //!< BGR24 (default)
+       CAP_MODE_RGB  = 1, //!< RGB24
+       CAP_MODE_GRAY = 2, //!< Y8
+       CAP_MODE_YUYV = 3  //!< YUYV
+     };
+
+/** @brief %VideoWriter generic properties identifier.
+ @sa VideoWriter::get(), VideoWriter::set()
+*/
+enum VideoWriterProperties {
+  VIDEOWRITER_PROP_QUALITY = 1,    //!< Current quality (0..100%) of the encoded videostream. Can be adjusted dynamically in some codecs.
+  VIDEOWRITER_PROP_FRAMEBYTES = 2, //!< (Read-only): Size of just encoded video frame. Note that the encoding order may be different from representation order.
+  VIDEOWRITER_PROP_NSTRIPES = 3    //!< Number of stripes for parallel encoding. -1 for auto detection.
+};
+
+//! @} videoio_flags_base
+
+//! @addtogroup videoio_flags_others
+//! @{
+
+/** @name IEEE 1394 drivers
+    @{
+*/
+
+/** @brief Modes of the IEEE 1394 controlling registers
+(can be: auto, manual, auto single push, absolute Latter allowed with any other mode)
+every feature can have only one mode turned on at a time
+*/
+enum { CAP_PROP_DC1394_OFF                = -4, //!< turn the feature off (not controlled manually nor automatically).
+       CAP_PROP_DC1394_MODE_MANUAL        = -3, //!< set automatically when a value of the feature is set by the user.
+       CAP_PROP_DC1394_MODE_AUTO          = -2,
+       CAP_PROP_DC1394_MODE_ONE_PUSH_AUTO = -1,
+       CAP_PROP_DC1394_MAX                = 31
+     };
+
+//! @} IEEE 1394 drivers
+
+/** @name OpenNI (for Kinect)
+    @{
+*/
+
+//! OpenNI map generators
+enum { CAP_OPENNI_DEPTH_GENERATOR = 1 << 31,
+       CAP_OPENNI_IMAGE_GENERATOR = 1 << 30,
+       CAP_OPENNI_IR_GENERATOR    = 1 << 29,
+       CAP_OPENNI_GENERATORS_MASK = CAP_OPENNI_DEPTH_GENERATOR + CAP_OPENNI_IMAGE_GENERATOR + CAP_OPENNI_IR_GENERATOR
+     };
+
+//! Properties of cameras available through OpenNI backend
+enum { CAP_PROP_OPENNI_OUTPUT_MODE       = 100,
+       CAP_PROP_OPENNI_FRAME_MAX_DEPTH   = 101, //!< In mm
+       CAP_PROP_OPENNI_BASELINE          = 102, //!< In mm
+     
