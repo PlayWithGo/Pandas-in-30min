@@ -259,4 +259,62 @@ enum { CAP_OPENNI_DEPTH_MAP         = 0, //!< Depth values in mm (CV_16UC1)
        CAP_OPENNI_POINT_CLOUD_MAP   = 1, //!< XYZ in meters (CV_32FC3)
        CAP_OPENNI_DISPARITY_MAP     = 2, //!< Disparity in pixels (CV_8UC1)
        CAP_OPENNI_DISPARITY_MAP_32F = 3, //!< Disparity in pixels (CV_32FC1)
-       CAP_OPENNI_VALID_DEPTH_MASK  = 4, //!< CV_8
+       CAP_OPENNI_VALID_DEPTH_MASK  = 4, //!< CV_8UC1
+
+       CAP_OPENNI_BGR_IMAGE         = 5, //!< Data given from RGB image generator
+       CAP_OPENNI_GRAY_IMAGE        = 6, //!< Data given from RGB image generator
+
+       CAP_OPENNI_IR_IMAGE          = 7  //!< Data given from IR image generator
+     };
+
+//! Supported output modes of OpenNI image generator
+enum { CAP_OPENNI_VGA_30HZ  = 0,
+       CAP_OPENNI_SXGA_15HZ = 1,
+       CAP_OPENNI_SXGA_30HZ = 2,
+       CAP_OPENNI_QVGA_30HZ = 3,
+       CAP_OPENNI_QVGA_60HZ = 4
+     };
+
+//! @} OpenNI
+
+/** @name GStreamer
+    @{
+*/
+
+enum { CAP_PROP_GSTREAMER_QUEUE_LENGTH = 200 //!< Default is 1
+     };
+
+//! @} GStreamer
+
+/** @name PvAPI, Prosilica GigE SDK
+    @{
+*/
+
+//! PVAPI
+enum { CAP_PROP_PVAPI_MULTICASTIP           = 300, //!< IP for enable multicast master mode. 0 for disable multicast.
+       CAP_PROP_PVAPI_FRAMESTARTTRIGGERMODE = 301, //!< FrameStartTriggerMode: Determines how a frame is initiated.
+       CAP_PROP_PVAPI_DECIMATIONHORIZONTAL  = 302, //!< Horizontal sub-sampling of the image.
+       CAP_PROP_PVAPI_DECIMATIONVERTICAL    = 303, //!< Vertical sub-sampling of the image.
+       CAP_PROP_PVAPI_BINNINGX              = 304, //!< Horizontal binning factor.
+       CAP_PROP_PVAPI_BINNINGY              = 305, //!< Vertical binning factor.
+       CAP_PROP_PVAPI_PIXELFORMAT           = 306  //!< Pixel format.
+     };
+
+//! PVAPI: FrameStartTriggerMode
+enum { CAP_PVAPI_FSTRIGMODE_FREERUN     = 0,    //!< Freerun
+       CAP_PVAPI_FSTRIGMODE_SYNCIN1     = 1,    //!< SyncIn1
+       CAP_PVAPI_FSTRIGMODE_SYNCIN2     = 2,    //!< SyncIn2
+       CAP_PVAPI_FSTRIGMODE_FIXEDRATE   = 3,    //!< FixedRate
+       CAP_PVAPI_FSTRIGMODE_SOFTWARE    = 4     //!< Software
+     };
+
+//! PVAPI: DecimationHorizontal, DecimationVertical
+enum { CAP_PVAPI_DECIMATION_OFF       = 1,    //!< Off
+       CAP_PVAPI_DECIMATION_2OUTOF4   = 2,    //!< 2 out of 4 decimation
+       CAP_PVAPI_DECIMATION_2OUTOF8   = 4,    //!< 2 out of 8 decimation
+       CAP_PVAPI_DECIMATION_2OUTOF16  = 8     //!< 2 out of 16 decimation
+     };
+
+//! PVAPI: PixelFormat
+enum { CAP_PVAPI_PIXELFORMAT_MONO8    = 1,    //!< Mono8
+       CAP_PVAPI_PIX
