@@ -317,4 +317,34 @@ enum { CAP_PVAPI_DECIMATION_OFF       = 1,    //!< Off
 
 //! PVAPI: PixelFormat
 enum { CAP_PVAPI_PIXELFORMAT_MONO8    = 1,    //!< Mono8
-       CAP_PVAPI_PIX
+       CAP_PVAPI_PIXELFORMAT_MONO16   = 2,    //!< Mono16
+       CAP_PVAPI_PIXELFORMAT_BAYER8   = 3,    //!< Bayer8
+       CAP_PVAPI_PIXELFORMAT_BAYER16  = 4,    //!< Bayer16
+       CAP_PVAPI_PIXELFORMAT_RGB24    = 5,    //!< Rgb24
+       CAP_PVAPI_PIXELFORMAT_BGR24    = 6,    //!< Bgr24
+       CAP_PVAPI_PIXELFORMAT_RGBA32   = 7,    //!< Rgba32
+       CAP_PVAPI_PIXELFORMAT_BGRA32   = 8,    //!< Bgra32
+     };
+
+//! @} PvAPI
+
+/** @name XIMEA Camera API
+    @{
+*/
+
+//! Properties of cameras available through XIMEA SDK backend
+enum { CAP_PROP_XI_DOWNSAMPLING                                 = 400, //!< Change image resolution by binning or skipping.
+       CAP_PROP_XI_DATA_FORMAT                                  = 401, //!< Output data format.
+       CAP_PROP_XI_OFFSET_X                                     = 402, //!< Horizontal offset from the origin to the area of interest (in pixels).
+       CAP_PROP_XI_OFFSET_Y                                     = 403, //!< Vertical offset from the origin to the area of interest (in pixels).
+       CAP_PROP_XI_TRG_SOURCE                                   = 404, //!< Defines source of trigger.
+       CAP_PROP_XI_TRG_SOFTWARE                                 = 405, //!< Generates an internal trigger. PRM_TRG_SOURCE must be set to TRG_SOFTWARE.
+       CAP_PROP_XI_GPI_SELECTOR                                 = 406, //!< Selects general purpose input.
+       CAP_PROP_XI_GPI_MODE                                     = 407, //!< Set general purpose input mode.
+       CAP_PROP_XI_GPI_LEVEL                                    = 408, //!< Get general purpose level.
+       CAP_PROP_XI_GPO_SELECTOR                                 = 409, //!< Selects general purpose output.
+       CAP_PROP_XI_GPO_MODE                                     = 410, //!< Set general purpose output mode.
+       CAP_PROP_XI_LED_SELECTOR                                 = 411, //!< Selects camera signalling LED.
+       CAP_PROP_XI_LED_MODE                                     = 412, //!< Define camera signalling LED functionality.
+       CAP_PROP_XI_MANUAL_WB                                    = 413, //!< Calculates White Balance(must be called during acquisition).
+       CAP_PROP_XI_AUTO_WB 
