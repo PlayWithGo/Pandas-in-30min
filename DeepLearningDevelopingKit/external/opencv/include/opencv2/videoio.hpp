@@ -397,4 +397,21 @@ enum { CAP_PROP_XI_DOWNSAMPLING                                 = 400, //!< Chan
        CAP_PROP_XI_HOUS_TEMP                                    = 469, //!< Camera housing temperature.
        CAP_PROP_XI_HOUS_BACK_SIDE_TEMP                          = 590, //!< Camera housing back side temperature.
        CAP_PROP_XI_SENSOR_BOARD_TEMP                            = 596, //!< Camera sensor board temperature.
-       CAP_PROP_XI_CMS   
+       CAP_PROP_XI_CMS                                          = 470, //!< Mode of color management system.
+       CAP_PROP_XI_APPLY_CMS                                    = 471, //!< Enable applying of CMS profiles to xiGetImage (see XI_PRM_INPUT_CMS_PROFILE, XI_PRM_OUTPUT_CMS_PROFILE).
+       CAP_PROP_XI_IMAGE_IS_COLOR                               = 474, //!< Returns 1 for color cameras.
+       CAP_PROP_XI_COLOR_FILTER_ARRAY                           = 475, //!< Returns color filter array type of RAW data.
+       CAP_PROP_XI_GAMMAY                                       = 476, //!< Luminosity gamma.
+       CAP_PROP_XI_GAMMAC                                       = 477, //!< Chromaticity gamma.
+       CAP_PROP_XI_SHARPNESS                                    = 478, //!< Sharpness Strength.
+       CAP_PROP_XI_CC_MATRIX_00                                 = 479, //!< Color Correction Matrix element [0][0].
+       CAP_PROP_XI_CC_MATRIX_01                                 = 480, //!< Color Correction Matrix element [0][1].
+       CAP_PROP_XI_CC_MATRIX_02                                 = 481, //!< Color Correction Matrix element [0][2].
+       CAP_PROP_XI_CC_MATRIX_03                                 = 482, //!< Color Correction Matrix element [0][3].
+       CAP_PROP_XI_CC_MATRIX_10                                 = 483, //!< Color Correction Matrix element [1][0].
+       CAP_PROP_XI_CC_MATRIX_11                                 = 484, //!< Color Correction Matrix element [1][1].
+       CAP_PROP_XI_CC_MATRIX_12                                 = 485, //!< Color Correction Matrix element [1][2].
+       CAP_PROP_XI_CC_MATRIX_13                                 = 486, //!< Color Correction Matrix element [1][3].
+       CAP_PROP_XI_CC_MATRIX_20                                 = 487, //!< Color Correction Matrix element [2][0].
+       CAP_PROP_XI_CC_MATRIX_21                                 = 488, //!< Color Correction Matrix element [2][1].
+       CAP_PROP_XI_CC_MATRIX_22                             
