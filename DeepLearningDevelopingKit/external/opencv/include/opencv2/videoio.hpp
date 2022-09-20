@@ -414,4 +414,21 @@ enum { CAP_PROP_XI_DOWNSAMPLING                                 = 400, //!< Chan
        CAP_PROP_XI_CC_MATRIX_13                                 = 486, //!< Color Correction Matrix element [1][3].
        CAP_PROP_XI_CC_MATRIX_20                                 = 487, //!< Color Correction Matrix element [2][0].
        CAP_PROP_XI_CC_MATRIX_21                                 = 488, //!< Color Correction Matrix element [2][1].
-       CAP_PROP_XI_CC_MATRIX_22                             
+       CAP_PROP_XI_CC_MATRIX_22                                 = 489, //!< Color Correction Matrix element [2][2].
+       CAP_PROP_XI_CC_MATRIX_23                                 = 490, //!< Color Correction Matrix element [2][3].
+       CAP_PROP_XI_CC_MATRIX_30                                 = 491, //!< Color Correction Matrix element [3][0].
+       CAP_PROP_XI_CC_MATRIX_31                                 = 492, //!< Color Correction Matrix element [3][1].
+       CAP_PROP_XI_CC_MATRIX_32                                 = 493, //!< Color Correction Matrix element [3][2].
+       CAP_PROP_XI_CC_MATRIX_33                                 = 494, //!< Color Correction Matrix element [3][3].
+       CAP_PROP_XI_DEFAULT_CC_MATRIX                            = 495, //!< Set default Color Correction Matrix.
+       CAP_PROP_XI_TRG_SELECTOR                                 = 498, //!< Selects the type of trigger.
+       CAP_PROP_XI_ACQ_FRAME_BURST_COUNT                        = 499, //!< Sets number of frames acquired by burst. This burst is used only if trigger is set to FrameBurstStart.
+       CAP_PROP_XI_DEBOUNCE_EN                                  = 507, //!< Enable/Disable debounce to selected GPI.
+       CAP_PROP_XI_DEBOUNCE_T0                                  = 508, //!< Debounce time (x * 10us).
+       CAP_PROP_XI_DEBOUNCE_T1                                  = 509, //!< Debounce time (x * 10us).
+       CAP_PROP_XI_DEBOUNCE_POL                                 = 510, //!< Debounce polarity (pol = 1 t0 - falling edge, t1 - rising edge).
+       CAP_PROP_XI_LENS_MODE                                    = 511, //!< Status of lens control interface. This shall be set to XI_ON before any Lens operations.
+       CAP_PROP_XI_LENS_APERTURE_VALUE                          = 512, //!< Current lens aperture value in stops. Examples: 2.8, 4, 5.6, 8, 11.
+       CAP_PROP_XI_LENS_FOCUS_MOVEMENT_VALUE                    = 513, //!< Lens current focus movement value to be used by XI_PRM_LENS_FOCUS_MOVE in motor steps.
+       CAP_PROP_XI_LENS_FOCUS_MOVE                              = 514, //!< Moves lens focus motor by steps set in XI_PRM_LENS_FOCUS_MOVEMENT_VALUE.
+       CAP_PROP_XI_LENS_FOCUS_DISTANCE                          = 515, //
