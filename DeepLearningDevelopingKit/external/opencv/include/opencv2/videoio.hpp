@@ -535,4 +535,61 @@ enum { CAP_INTELPERC_DEPTH_GENERATOR = 1 << 29,
      };
 
 enum { CAP_INTELPERC_DEPTH_MAP              = 0, //!< Each pixel is a 16-bit integer. The value indicates the distance from an object to the camera's XY plane or the Cartesian depth.
-       CAP_INTELPERC_UVDEPTH_MAP            = 1, //!< Each pixel contains two 32-bit floating point values in the range of 0-1, representing the map
+       CAP_INTELPERC_UVDEPTH_MAP            = 1, //!< Each pixel contains two 32-bit floating point values in the range of 0-1, representing the mapping of depth coordinates to the color coordinates.
+       CAP_INTELPERC_IR_MAP                 = 2, //!< Each pixel is a 16-bit integer. The value indicates the intensity of the reflected laser beam.
+       CAP_INTELPERC_IMAGE                  = 3
+     };
+
+//! @} Intel Perceptual
+
+/** @name gPhoto2 connection
+    @{
+*/
+
+/** @brief gPhoto2 properties
+
+If `propertyId` is less than 0 then work on widget with that __additive inversed__ camera setting ID
+Get IDs by using CAP_PROP_GPHOTO2_WIDGET_ENUMERATE.
+@see CvCaptureCAM_GPHOTO2 for more info
+*/
+enum { CAP_PROP_GPHOTO2_PREVIEW           = 17001, //!< Capture only preview from liveview mode.
+       CAP_PROP_GPHOTO2_WIDGET_ENUMERATE  = 17002, //!< Readonly, returns (const char *).
+       CAP_PROP_GPHOTO2_RELOAD_CONFIG     = 17003, //!< Trigger, only by set. Reload camera settings.
+       CAP_PROP_GPHOTO2_RELOAD_ON_CHANGE  = 17004, //!< Reload all settings on set.
+       CAP_PROP_GPHOTO2_COLLECT_MSGS      = 17005, //!< Collect messages with details.
+       CAP_PROP_GPHOTO2_FLUSH_MSGS        = 17006, //!< Readonly, returns (const char *).
+       CAP_PROP_SPEED                     = 17007, //!< Exposure speed. Can be readonly, depends on camera program.
+       CAP_PROP_APERTURE                  = 17008, //!< Aperture. Can be readonly, depends on camera program.
+       CAP_PROP_EXPOSUREPROGRAM           = 17009, //!< Camera exposure program.
+       CAP_PROP_VIEWFINDER                = 17010  //!< Enter liveview mode.
+     };
+
+//! @} gPhoto2
+
+
+/** @name Images backend
+    @{
+*/
+
+/** @brief Images backend properties
+
+*/
+enum { CAP_PROP_IMAGES_BASE = 18000,
+       CAP_PROP_IMAGES_LAST = 19000 // excluding
+     };
+
+//! @} Images
+
+//! @} videoio_flags_others
+
+
+class IVideoCapture;
+
+/** @brief Class for video capturing from video files, image sequences or cameras.
+
+The class provides C++ API for capturing video from cameras or for reading video files and image sequences.
+
+Here is how the class can be used:
+@include samples/cpp/videocapture_basic.cpp
+
+@note In @ref videoio_c "C API" the black-box s
