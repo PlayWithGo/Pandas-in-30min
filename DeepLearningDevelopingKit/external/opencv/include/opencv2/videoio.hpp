@@ -592,4 +592,45 @@ The class provides C++ API for capturing video from cameras or for reading video
 Here is how the class can be used:
 @include samples/cpp/videocapture_basic.cpp
 
-@note In @ref videoio_c "C API" the black-box s
+@note In @ref videoio_c "C API" the black-box structure `CvCapture` is used instead of %VideoCapture.
+@note
+-   (C++) A basic sample on using the %VideoCapture interface can be found at
+    `OPENCV_SOURCE_CODE/samples/cpp/videocapture_starter.cpp`
+-   (Python) A basic sample on using the %VideoCapture interface can be found at
+    `OPENCV_SOURCE_CODE/samples/python/video.py`
+-   (Python) A multi threaded video processing sample can be found at
+    `OPENCV_SOURCE_CODE/samples/python/video_threaded.py`
+-   (Python) %VideoCapture sample showcasing some features of the Video4Linux2 backend
+    `OPENCV_SOURCE_CODE/samples/python/video_v4l2.py`
+ */
+class CV_EXPORTS_W VideoCapture
+{
+public:
+    /** @brief Default constructor
+    @note In @ref videoio_c "C API", when you finished working with video, release CvCapture structure with
+    cvReleaseCapture(), or use Ptr\<CvCapture\> that calls cvReleaseCapture() automatically in the
+    destructor.
+     */
+    CV_WRAP VideoCapture();
+
+    /** @overload
+    @brief  Open video file or a capturing device or a IP video stream for video capturing
+
+    Same as VideoCapture(const String& filename, int apiPreference) but using default Capture API backends
+    */
+    CV_WRAP VideoCapture(const String& filename);
+
+    /** @overload
+    @brief  Open video file or a capturing device or a IP video stream for video capturing with API Preference
+
+    @param filename it can be:
+    - name of video file (eg. `video.avi`)
+    - or image sequence (eg. `img_%02d.jpg`, which will read samples like `img_00.jpg, img_01.jpg, img_02.jpg, ...`)
+    - or URL of video stream (eg. `protocol://host:port/script_name?script_params|auth`).
+      Note that each video stream or IP camera feed has its own URL scheme. Please refer to the
+      documentation of source stream to know the right URL.
+    @param apiPreference preferred Capture API backends to use. Can be used to enforce a specific reader
+    implementation if multiple are available: e.g. cv::CAP_FFMPEG or cv::CAP_IMAGES or cv::CAP_DSHOW.
+    @sa The list of supported API backends cv::VideoCaptureAPIs
+    */
+    CV_WRAP VideoCapture(const String& filename, int apiPr
