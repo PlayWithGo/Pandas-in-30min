@@ -686,4 +686,51 @@ public:
 
     /** @brief Returns true if video capturing has been initialized already.
 
-    If the previous call to VideoCapture constructor or VideoCapture::open() succeeded
+    If the previous call to VideoCapture constructor or VideoCapture::open() succeeded, the method returns
+    true.
+     */
+    CV_WRAP virtual bool isOpened() const;
+
+    /** @brief Closes video file or capturing device.
+
+    The method is automatically called by subsequent VideoCapture::open and by VideoCapture
+    destructor.
+
+    The C function also deallocates memory and clears \*capture pointer.
+     */
+    CV_WRAP virtual void release();
+
+    /** @brief Grabs the next frame from video file or capturing device.
+
+    @return `true` (non-zero) in the case of success.
+
+    The method/function grabs the next frame from video file or camera and returns true (non-zero) in
+    the case of success.
+
+    The primary use of the function is in multi-camera environments, especially when the cameras do not
+    have hardware synchronization. That is, you call VideoCapture::grab() for each camera and after that
+    call the slower method VideoCapture::retrieve() to decode and get frame from each camera. This way
+    the overhead on demosaicing or motion jpeg decompression etc. is eliminated and the retrieved frames
+    from different cameras will be closer in time.
+
+    Also, when a connected camera is multi-head (for example, a stereo camera or a Kinect device), the
+    correct way of retrieving data from it is to call VideoCapture::grab() first and then call
+    VideoCapture::retrieve() one or more times with different values of the channel parameter.
+
+    @ref tutorial_kinect_openni
+     */
+    CV_WRAP virtual bool grab();
+
+    /** @brief Decodes and returns the grabbed video frame.
+
+    @param [out] image the video frame is returned here. If no frames has been grabbed the image will be empty.
+    @param flag it could be a frame index or a driver specific flag
+    @return `false` if no frames has been grabbed
+
+    The method decodes and returns the just grabbed frame. If no frames has been grabbed
+    (camera has been disconnected, or there are no more frames in video file), the method returns false
+    and the function returns an empty image (with %cv::Mat, test it with Mat::empty()).
+
+    @sa read()
+
+    @note In @ref videoio_c "C API", functions cvRetrieveFra
