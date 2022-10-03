@@ -733,4 +733,45 @@ public:
 
     @sa read()
 
-    @note In @ref videoio_c "C API", functions cvRetrieveFra
+    @note In @ref videoio_c "C API", functions cvRetrieveFrame() and cv.RetrieveFrame() return image stored inside the video
+    capturing structure. It is not allowed to modify or release the image! You can copy the frame using
+    :ocvcvCloneImage and then do whatever you want with the copy.
+     */
+    CV_WRAP virtual bool retrieve(OutputArray image, int flag = 0);
+
+    /** @brief Stream operator to read the next video frame.
+    @sa read()
+    */
+    virtual VideoCapture& operator >> (CV_OUT Mat& image);
+
+    /** @overload
+    @sa read()
+    */
+    virtual VideoCapture& operator >> (CV_OUT UMat& image);
+
+    /** @brief Grabs, decodes and returns the next video frame.
+
+    @param [out] image the video frame is returned here. If no frames has been grabbed the image will be empty.
+    @return `false` if no frames has been grabbed
+
+    The method/function combines VideoCapture::grab() and VideoCapture::retrieve() in one call. This is the
+    most convenient method for reading video files or capturing data from decode and returns the just
+    grabbed frame. If no frames has been grabbed (camera has been disconnected, or there are no more
+    frames in video file), the method returns false and the function returns empty image (with %cv::Mat, test it with Mat::empty()).
+
+    @note In @ref videoio_c "C API", functions cvRetrieveFrame() and cv.RetrieveFrame() return image stored inside the video
+    capturing structure. It is not allowed to modify or release the image! You can copy the frame using
+    :ocvcvCloneImage and then do whatever you want with the copy.
+     */
+    CV_WRAP virtual bool read(OutputArray image);
+
+    /** @brief Sets a property in the VideoCapture.
+
+    @param propId Property identifier from cv::VideoCaptureProperties (eg. cv::CAP_PROP_POS_MSEC, cv::CAP_PROP_POS_FRAMES, ...)
+    or one from @ref videoio_flags_others
+    @param value Value of the property.
+    @return `true` if the property is supported by backend used by the VideoCapture instance.
+    @note Even if it returns `true` this doesn't ensure that the property
+    value has been accepted by the capture device. See note in VideoCapture::get()
+     */
+    C
