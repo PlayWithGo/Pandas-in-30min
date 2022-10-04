@@ -774,4 +774,64 @@ public:
     @note Even if it returns `true` this doesn't ensure that the property
     value has been accepted by the capture device. See note in VideoCapture::get()
      */
-    C
+    CV_WRAP virtual bool set(int propId, double value);
+
+    /** @brief Returns the specified VideoCapture property
+
+    @param propId Property identifier from cv::VideoCaptureProperties (eg. cv::CAP_PROP_POS_MSEC, cv::CAP_PROP_POS_FRAMES, ...)
+    or one from @ref videoio_flags_others
+    @return Value for the specified property. Value 0 is returned when querying a property that is
+    not supported by the backend used by the VideoCapture instance.
+
+    @note Reading / writing properties involves many layers. Some unexpected result might happens
+    along this chain.
+    @code {.txt}
+    `VideoCapture -> API Backend -> Operating System -> Device Driver -> Device Hardware`
+    @endcode
+    The returned value might be different from what really used by the device or it could be encoded
+    using device dependent rules (eg. steps or percentage). Effective behaviour depends from device
+    driver and API Backend
+
+    */
+    CV_WRAP virtual double get(int propId) const;
+
+    /** @brief Open video file or a capturing device or a IP video stream for video capturing with API Preference
+
+    @overload
+
+    Parameters are same as the constructor VideoCapture(const String& filename, int apiPreference)
+    @return `true` if the file has been successfully opened
+
+    The method first calls VideoCapture::release to close the already opened file or camera.
+    */
+    CV_WRAP virtual bool open(const String& filename, int apiPreference);
+
+protected:
+    Ptr<CvCapture> cap;
+    Ptr<IVideoCapture> icap;
+};
+
+class IVideoWriter;
+
+/** @example videowriter_basic.cpp
+An example using VideoCapture and VideoWriter class
+ */
+/** @brief Video writer class.
+
+The class provides C++ API for writing video files or image sequences.
+ */
+class CV_EXPORTS_W VideoWriter
+{
+public:
+    /** @brief Default constructors
+
+    The constructors/functions initialize video writers.
+    -   On Linux FFMPEG is used to write videos;
+    -   On Windows FFMPEG or VFW is used;
+    -   On MacOSX QTKit is used.
+     */
+    CV_WRAP VideoWriter();
+
+    /** @overload
+    @param filename Name of the output video file.
+    @param fourcc 4-character 
