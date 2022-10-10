@@ -871,4 +871,65 @@ public:
 
     /** @brief Initializes or reinitializes video writer.
 
-    The method opens video writer. Parameters are the same as in the construct
+    The method opens video writer. Parameters are the same as in the constructor
+    VideoWriter::VideoWriter.
+    @return `true` if video writer has been successfully initialized
+
+    The method first calls VideoWriter::release to close the already opened file.
+     */
+    CV_WRAP virtual bool open(const String& filename, int fourcc, double fps,
+                      Size frameSize, bool isColor = true);
+
+    /** @overload
+     */
+    CV_WRAP bool open(const String& filename, int apiPreference, int fourcc, double fps,
+                      Size frameSize, bool isColor = true);
+
+    /** @brief Returns true if video writer has been successfully initialized.
+    */
+    CV_WRAP virtual bool isOpened() const;
+
+    /** @brief Closes the video writer.
+
+    The method is automatically called by subsequent VideoWriter::open and by the VideoWriter
+    destructor.
+     */
+    CV_WRAP virtual void release();
+
+    /** @brief Stream operator to write the next video frame.
+    @sa write
+    */
+    virtual VideoWriter& operator << (const Mat& image);
+
+    /** @brief Writes the next video frame
+
+    @param image The written frame
+
+    The function/method writes the specified image to video file. It must have the same size as has
+    been specified when opening the video writer.
+     */
+    CV_WRAP virtual void write(const Mat& image);
+
+    /** @brief Sets a property in the VideoWriter.
+
+     @param propId Property identifier from cv::VideoWriterProperties (eg. cv::VIDEOWRITER_PROP_QUALITY)
+     or one of @ref videoio_flags_others
+
+     @param value Value of the property.
+     @return  `true` if the property is supported by the backend used by the VideoWriter instance.
+     */
+    CV_WRAP virtual bool set(int propId, double value);
+
+    /** @brief Returns the specified VideoWriter property
+
+     @param propId Property identifier from cv::VideoWriterProperties (eg. cv::VIDEOWRITER_PROP_QUALITY)
+     or one of @ref videoio_flags_others
+
+     @return Value for the specified property. Value 0 is returned when querying a property that is
+     not supported by the backend used by the VideoWriter instance.
+     */
+    CV_WRAP virtual double get(int propId) const;
+
+    /** @brief Concatenates 4 chars to a fourcc code
+
+    @r
