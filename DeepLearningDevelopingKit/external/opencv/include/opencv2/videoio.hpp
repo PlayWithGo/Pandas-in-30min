@@ -932,4 +932,26 @@ public:
 
     /** @brief Concatenates 4 chars to a fourcc code
 
-    @r
+    @return a fourcc code
+
+    This static method constructs the fourcc code of the codec to be used in the constructor
+    VideoWriter::VideoWriter or VideoWriter::open.
+     */
+    CV_WRAP static int fourcc(char c1, char c2, char c3, char c4);
+
+protected:
+    Ptr<CvVideoWriter> writer;
+    Ptr<IVideoWriter> iwriter;
+
+    static Ptr<IVideoWriter> create(const String& filename, int fourcc, double fps,
+                                    Size frameSize, bool isColor = true);
+};
+
+template<> CV_EXPORTS void DefaultDeleter<CvCapture>::operator ()(CvCapture* obj) const;
+template<> CV_EXPORTS void DefaultDeleter<CvVideoWriter>::operator ()(CvVideoWriter* obj) const;
+
+//! @} videoio
+
+} // cv
+
+#endif //OPENCV_VIDEOIO_HPP
