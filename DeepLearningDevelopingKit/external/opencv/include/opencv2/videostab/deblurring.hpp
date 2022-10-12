@@ -26,3 +26,69 @@
 //
 //   * The name of the copyright holders may not be used to endorse or promote products
 //     derived from this software without specific prior written permission.
+//
+// This software is provided by the copyright holders and contributors "as is" and
+// any express or implied warranties, including, but not limited to, the implied
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the Intel Corporation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_VIDEOSTAB_DEBLURRING_HPP
+#define OPENCV_VIDEOSTAB_DEBLURRING_HPP
+
+#include <vector>
+#include "opencv2/core.hpp"
+
+namespace cv
+{
+namespace videostab
+{
+
+//! @addtogroup videostab
+//! @{
+
+CV_EXPORTS float calcBlurriness(const Mat &frame);
+
+class CV_EXPORTS DeblurerBase
+{
+public:
+    DeblurerBase() : radius_(0), frames_(0), motions_(0), blurrinessRates_(0) {}
+
+    virtual ~DeblurerBase() {}
+
+    virtual void setRadius(int val) { radius_ = val; }
+    virtual int radius() const { return radius_; }
+
+    virtual void deblur(int idx, Mat &frame) = 0;
+
+
+    // data from stabilizer
+
+    virtual void setFrames(const std::vector<Mat> &val) { frames_ = &val; }
+    virtual const std::vector<Mat>& frames() const { return *frames_; }
+
+    virtual void setMotions(const std::vector<Mat> &val) { motions_ = &val; }
+    virtual const std::vector<Mat>& motions() const { return *motions_; }
+
+    virtual void setBlurrinessRates(const std::vector<float> &val) { blurrinessRates_ = &val; }
+    virtual const std::vector<float>& blurrinessRates() const { return *blurrinessRates_; }
+
+protected:
+    int radius_;
+    const std::vector<Mat> *frames_;
+    const std::vector<Mat> *motions_;
+    const std::vector<float> *blurrinessRates_;
+};
+
+class CV_EXPORTS NullDeblurer : public DeblurerBase
+{
+public:
+    virtual void deblur(int /*idx*/, Mat &/*frame*/) {}
+};
