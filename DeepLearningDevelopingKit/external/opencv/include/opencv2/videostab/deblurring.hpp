@@ -92,3 +92,25 @@ class CV_EXPORTS NullDeblurer : public DeblurerBase
 public:
     virtual void deblur(int /*idx*/, Mat &/*frame*/) {}
 };
+
+class CV_EXPORTS WeightingDeblurer : public DeblurerBase
+{
+public:
+    WeightingDeblurer();
+
+    void setSensitivity(float val) { sensitivity_ = val; }
+    float sensitivity() const { return sensitivity_; }
+
+    virtual void deblur(int idx, Mat &frame);
+
+private:
+    float sensitivity_;
+    Mat_<float> bSum_, gSum_, rSum_, wSum_;
+};
+
+//! @}
+
+} // namespace videostab
+} // namespace cv
+
+#endif
