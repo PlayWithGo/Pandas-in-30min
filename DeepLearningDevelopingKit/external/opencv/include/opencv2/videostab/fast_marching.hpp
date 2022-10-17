@@ -31,4 +31,77 @@
 // any express or implied warranties, including, but not limited to, the implied
 // warranties of merchantability and fitness for a particular purpose are disclaimed.
 // In no event shall the Intel Corporation or contributors be liable for any direct,
-// in
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_VIDEOSTAB_FAST_MARCHING_HPP
+#define OPENCV_VIDEOSTAB_FAST_MARCHING_HPP
+
+#include <cmath>
+#include <queue>
+#include <algorithm>
+#include "opencv2/core.hpp"
+
+namespace cv
+{
+namespace videostab
+{
+
+//! @addtogroup videostab_marching
+//! @{
+
+/** @brief Describes the Fast Marching Method implementation.
+
+  See http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+ */
+class CV_EXPORTS FastMarchingMethod
+{
+public:
+    FastMarchingMethod() : inf_(1e6f), size_(0) {}
+
+    /** @brief Template method that runs the Fast Marching Method.
+
+    @param mask Image mask. 0 value indicates that the pixel value must be inpainted, 255 indicates
+    that the pixel value is known, other values aren't acceptable.
+    @param inpaint Inpainting functor that overloads void operator ()(int x, int y).
+    @return Inpainting functor.
+     */
+    template <typename Inpaint>
+    Inpaint run(const Mat &mask, Inpaint inpaint);
+
+    /**
+    @return Distance map that's created during working of the method.
+    */
+    Mat distanceMap() const { return dist_; }
+
+private:
+    enum { INSIDE = 0, BAND = 1, KNOWN = 255 };
+
+    struct DXY
+    {
+        float dist;
+        int x, y;
+
+        DXY() : dist(0), x(0), y(0) {}
+        DXY(float _dist, int _x, int _y) : dist(_dist), x(_x), y(_y) {}
+        bool operator <(const DXY &dxy) const { return dist < dxy.dist; }
+    };
+
+    float solve(int x1, int y1, int x2, int y2) const;
+    int& indexOf(const DXY &dxy) { return index_(dxy.y, dxy.x); }
+
+    void heapUp(int idx);
+    void heapDown(int idx);
+    void heapAdd(const DXY &dxy);
+    void heapRemoveMin();
+
+    float inf_;
+
+    cv::Mat_<uchar> flag_; // flag map
+    cv::Ma
