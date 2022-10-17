@@ -104,4 +104,18 @@ private:
     float inf_;
 
     cv::Mat_<uchar> flag_; // flag map
-    cv::Ma
+    cv::Mat_<float> dist_; // distance map
+
+    cv::Mat_<int> index_; // index of point in the narrow band
+    std::vector<DXY> narrowBand_; // narrow band heap
+    int size_; // narrow band size
+};
+
+//! @}
+
+} // namespace videostab
+} // namespace cv
+
+#include "fast_marching_inl.hpp"
+
+#endif
