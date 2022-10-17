@@ -31,4 +31,64 @@
 // any express or implied warranties, including, but not limited to, the implied
 // warranties of merchantability and fitness for a particular purpose are disclaimed.
 // In no event shall the Intel Corporation or contributors be liable for any direct,
-// indir
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_VIDEOSTAB_FRAME_SOURCE_HPP
+#define OPENCV_VIDEOSTAB_FRAME_SOURCE_HPP
+
+#include <vector>
+#include "opencv2/core.hpp"
+
+namespace cv
+{
+namespace videostab
+{
+
+//! @addtogroup videostab
+//! @{
+
+class CV_EXPORTS IFrameSource
+{
+public:
+    virtual ~IFrameSource() {}
+    virtual void reset() = 0;
+    virtual Mat nextFrame() = 0;
+};
+
+class CV_EXPORTS NullFrameSource : public IFrameSource
+{
+public:
+    virtual void reset() {}
+    virtual Mat nextFrame() { return Mat(); }
+};
+
+class CV_EXPORTS VideoFileSource : public IFrameSource
+{
+public:
+    VideoFileSource(const String &path, bool volatileFrame = false);
+
+    virtual void reset();
+    virtual Mat nextFrame();
+
+    int width();
+    int height();
+    int count();
+    double fps();
+
+private:
+    Ptr<IFrameSource> impl;
+};
+
+//! @}
+
+} // namespace videostab
+} // namespace cv
+
+#endif
