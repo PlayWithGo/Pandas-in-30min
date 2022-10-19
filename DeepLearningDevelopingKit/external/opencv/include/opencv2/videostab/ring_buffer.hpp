@@ -1,3 +1,4 @@
+
 /*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
@@ -40,10 +41,11 @@
 //
 //M*/
 
-#ifndef OPENCV_VIDEOSTAB_LOG_HPP
-#define OPENCV_VIDEOSTAB_LOG_HPP
+#ifndef OPENCV_VIDEOSTAB_RING_BUFFER_HPP
+#define OPENCV_VIDEOSTAB_RING_BUFFER_HPP
 
-#include "opencv2/core.hpp"
+#include <vector>
+#include "opencv2/imgproc.hpp"
 
 namespace cv
 {
@@ -53,24 +55,15 @@ namespace videostab
 //! @addtogroup videostab
 //! @{
 
-class CV_EXPORTS ILog
+template <typename T> inline T& at(int idx, std::vector<T> &items)
 {
-public:
-    virtual ~ILog() {}
-    virtual void print(const char *format, ...) = 0;
-};
+    return items[cv::borderInterpolate(idx, static_cast<int>(items.size()), cv::BORDER_WRAP)];
+}
 
-class CV_EXPORTS NullLog : public ILog
+template <typename T> inline const T& at(int idx, const std::vector<T> &items)
 {
-public:
-    virtual void print(const char * /*format*/, ...) {}
-};
-
-class CV_EXPORTS LogToStdout : public ILog
-{
-public:
-    virtual void print(const char *format, ...);
-};
+    return items[cv::borderInterpolate(idx, static_cast<int>(items.size()), cv::BORDER_WRAP)];
+}
 
 //! @}
 

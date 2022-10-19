@@ -1,3 +1,4 @@
+
 /*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
@@ -40,10 +41,12 @@
 //
 //M*/
 
-#ifndef OPENCV_VIDEOSTAB_LOG_HPP
-#define OPENCV_VIDEOSTAB_LOG_HPP
+#ifndef OPENCV_VIDEOSTAB_OUTLIER_REJECTION_HPP
+#define OPENCV_VIDEOSTAB_OUTLIER_REJECTION_HPP
 
+#include <vector>
 #include "opencv2/core.hpp"
+#include "opencv2/videostab/motion_core.hpp"
 
 namespace cv
 {
@@ -53,23 +56,42 @@ namespace videostab
 //! @addtogroup videostab
 //! @{
 
-class CV_EXPORTS ILog
+class CV_EXPORTS IOutlierRejector
 {
 public:
-    virtual ~ILog() {}
-    virtual void print(const char *format, ...) = 0;
+    virtual ~IOutlierRejector() {}
+
+    virtual void process(
+            Size frameSize, InputArray points0, InputArray points1, OutputArray mask) = 0;
 };
 
-class CV_EXPORTS NullLog : public ILog
+class CV_EXPORTS NullOutlierRejector : public IOutlierRejector
 {
 public:
-    virtual void print(const char * /*format*/, ...) {}
+    virtual void process(
+            Size frameSize, InputArray points0, InputArray points1, OutputArray mask);
 };
 
-class CV_EXPORTS LogToStdout : public ILog
+class CV_EXPORTS TranslationBasedLocalOutlierRejector : public IOutlierRejector
 {
 public:
-    virtual void print(const char *format, ...);
+    TranslationBasedLocalOutlierRejector();
+
+    void setCellSize(Size val) { cellSize_ = val; }
+    Size cellSize() const { return cellSize_; }
+
+    void setRansacParams(RansacParams val) { ransacParams_ = val; }
+    RansacParams ransacParams() const { return ransacParams_; }
+
+    virtual void process(
+            Size frameSize, InputArray points0, InputArray points1, OutputArray mask);
+
+private:
+    Size cellSize_;
+    RansacParams ransacParams_;
+
+    typedef std::vector<int> Cell;
+    std::vector<Cell> grid_;
 };
 
 //! @}
