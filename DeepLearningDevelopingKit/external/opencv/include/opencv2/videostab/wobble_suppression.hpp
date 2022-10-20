@@ -18,4 +18,61 @@
 // are permitted provided that the following conditions are met:
 //
 //   * Redistribution's of source code must retain the above copyright notice,
-//     this list of con
+//     this list of conditions and the following disclaimer.
+//
+//   * Redistribution's in binary form must reproduce the above copyright notice,
+//     this list of conditions and the following disclaimer in the documentation
+//     and/or other materials provided with the distribution.
+//
+//   * The name of the copyright holders may not be used to endorse or promote products
+//     derived from this software without specific prior written permission.
+//
+// This software is provided by the copyright holders and contributors "as is" and
+// any express or implied warranties, including, but not limited to, the implied
+// warranties of merchantability and fitness for a particular purpose are disclaimed.
+// In no event shall the Intel Corporation or contributors be liable for any direct,
+// indirect, incidental, special, exemplary, or consequential damages
+// (including, but not limited to, procurement of substitute goods or services;
+// loss of use, data, or profits; or business interruption) however caused
+// and on any theory of liability, whether in contract, strict liability,
+// or tort (including negligence or otherwise) arising in any way out of
+// the use of this software, even if advised of the possibility of such damage.
+//
+//M*/
+
+#ifndef OPENCV_VIDEOSTAB_WOBBLE_SUPPRESSION_HPP
+#define OPENCV_VIDEOSTAB_WOBBLE_SUPPRESSION_HPP
+
+#include <vector>
+#include "opencv2/core.hpp"
+#include "opencv2/core/cuda.hpp"
+#include "opencv2/videostab/global_motion.hpp"
+#include "opencv2/videostab/log.hpp"
+
+namespace cv
+{
+namespace videostab
+{
+
+//! @addtogroup videostab
+//! @{
+
+class CV_EXPORTS WobbleSuppressorBase
+{
+public:
+    WobbleSuppressorBase();
+
+    virtual ~WobbleSuppressorBase() {}
+
+    void setMotionEstimator(Ptr<ImageMotionEstimatorBase> val) { motionEstimator_ = val; }
+    Ptr<ImageMotionEstimatorBase> motionEstimator() const { return motionEstimator_; }
+
+    virtual void suppress(int idx, const Mat &frame, Mat &result) = 0;
+
+
+    // data from stabilizer
+
+    virtual void setFrameCount(int val) { frameCount_ = val; }
+    virtual int frameCount() const { return frameCount_; }
+
+    virtual void setMot
