@@ -75,4 +75,66 @@ public:
     virtual void setFrameCount(int val) { frameCount_ = val; }
     virtual int frameCount() const { return frameCount_; }
 
-    virtual void setMot
+    virtual void setMotions(const std::vector<Mat> &val) { motions_ = &val; }
+    virtual const std::vector<Mat>& motions() const { return *motions_; }
+
+    virtual void setMotions2(const std::vector<Mat> &val) { motions2_ = &val; }
+    virtual const std::vector<Mat>& motions2() const { return *motions2_; }
+
+    virtual void setStabilizationMotions(const std::vector<Mat> &val) { stabilizationMotions_ = &val; }
+    virtual const std::vector<Mat>& stabilizationMotions() const { return *stabilizationMotions_; }
+
+protected:
+    Ptr<ImageMotionEstimatorBase> motionEstimator_;
+    int frameCount_;
+    const std::vector<Mat> *motions_;
+    const std::vector<Mat> *motions2_;
+    const std::vector<Mat> *stabilizationMotions_;
+};
+
+class CV_EXPORTS NullWobbleSuppressor : public WobbleSuppressorBase
+{
+public:
+    virtual void suppress(int idx, const Mat &frame, Mat &result);
+};
+
+class CV_EXPORTS MoreAccurateMotionWobbleSuppressorBase : public WobbleSuppressorBase
+{
+public:
+    virtual void setPeriod(int val) { period_ = val; }
+    virtual int period() const { return period_; }
+
+protected:
+    MoreAccurateMotionWobbleSuppressorBase() { setPeriod(30); }
+
+    int period_;
+};
+
+class CV_EXPORTS MoreAccurateMotionWobbleSuppressor : public MoreAccurateMotionWobbleSuppressorBase
+{
+public:
+    virtual void suppress(int idx, const Mat &frame, Mat &result);
+
+private:
+    Mat_<float> mapx_, mapy_;
+};
+
+#if defined(HAVE_OPENCV_CUDAWARPING)
+class CV_EXPORTS MoreAccurateMotionWobbleSuppressorGpu : public MoreAccurateMotionWobbleSuppressorBase
+{
+public:
+    void suppress(int idx, const cuda::GpuMat &frame, cuda::GpuMat &result);
+    virtual void suppress(int idx, const Mat &frame, Mat &result);
+
+private:
+    cuda::GpuMat frameDevice_, resultDevice_;
+    cuda::GpuMat mapx_, mapy_;
+};
+#endif
+
+//! @}
+
+} // namespace videostab
+} // namespace cv
+
+#endif
