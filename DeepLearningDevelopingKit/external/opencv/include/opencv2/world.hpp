@@ -41,4 +41,18 @@
 //M*/
 
 #ifndef OPENCV_WORLD_HPP
-#
+#define OPENCV_WORLD_HPP
+
+#include "opencv2/core.hpp"
+
+#ifdef __cplusplus
+namespace cv
+{
+
+CV_EXPORTS_W bool initAll();
+
+}
+
+#endif
+
+#endif
