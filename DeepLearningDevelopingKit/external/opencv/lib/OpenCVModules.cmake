@@ -67,4 +67,24 @@ set(_IMPORT_PREFIX)
 foreach(target ${_IMPORT_CHECK_TARGETS} )
   foreach(file ${_IMPORT_CHECK_FILES_FOR_${target}} )
     if(NOT EXISTS "${file}" )
-      message(FATAL_ERROR "The imported target \"${target}\" refere
+      message(FATAL_ERROR "The imported target \"${target}\" references the file
+   \"${file}\"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   \"${CMAKE_CURRENT_LIST_FILE}\"
+but not all the files it references.
+")
+    endif()
+  endforeach()
+  unset(_IMPORT_CHECK_FILES_FOR_${target})
+endforeach()
+unset(_IMPORT_CHECK_TARGETS)
+
+# This file does not depend on other imported targets which have
+# been exported from the same project but in a separate export set.
+
+# Commands beyond this point should not need to know the version.
+set(CMAKE_IMPORT_FILE_VERSION)
+cmake_policy(POP)
