@@ -100,4 +100,47 @@ public:
 
     It does not free memory blocks. And Realloc() only allocate new memory.
 
-    The memory chunks are allocated by B
+    The memory chunks are allocated by BaseAllocator, which is CrtAllocator by default.
+
+    User may also supply a buffer as the first chunk.
+
+    If the user-buffer is full then additional chunks are allocated by BaseAllocator.
+
+    The user-buffer is not deallocated by this allocator.
+
+    \tparam BaseAllocator the allocator type for allocating memory chunks. Default is CrtAllocator.
+    \note implements Allocator concept
+*/
+template <typename BaseAllocator = CrtAllocator>
+class MemoryPoolAllocator {
+public:
+    static const bool kNeedFree = false;    //!< Tell users that no need to call Free() with this allocator. (concept Allocator)
+
+    //! Constructor with chunkSize.
+    /*! \param chunkSize The size of memory chunk. The default is kDefaultChunkSize.
+        \param baseAllocator The allocator for allocating memory chunks.
+    */
+    MemoryPoolAllocator(size_t chunkSize = kDefaultChunkCapacity, BaseAllocator* baseAllocator = 0) : 
+        chunkHead_(0), chunk_capacity_(chunkSize), userBuffer_(0), baseAllocator_(baseAllocator), ownBaseAllocator_(0)
+    {
+    }
+
+    //! Constructor with user-supplied buffer.
+    /*! The user buffer will be used firstly. When it is full, memory pool allocates new chunk with chunk size.
+
+        The user buffer will not be deallocated when this allocator is destructed.
+
+        \param buffer User supplied buffer.
+        \param size Size of the buffer in bytes. It must at least larger than sizeof(ChunkHeader).
+        \param chunkSize The size of memory chunk. The default is kDefaultChunkSize.
+        \param baseAllocator The allocator for allocating memory chunks.
+    */
+    MemoryPoolAllocator(void *buffer, size_t size, size_t chunkSize = kDefaultChunkCapacity, BaseAllocator* baseAllocator = 0) :
+        chunkHead_(0), chunk_capacity_(chunkSize), userBuffer_(buffer), baseAllocator_(baseAllocator), ownBaseAllocator_(0)
+    {
+        RAPIDJSON_ASSERT(buffer != 0);
+        RAPIDJSON_ASSERT(size > sizeof(ChunkHeader));
+        chunkHead_ = reinterpret_cast<ChunkHeader*>(buffer);
+        chunkHead_->capacity = size - sizeof(ChunkHeader);
+        chunkHead_->size = 0;
+        chu
