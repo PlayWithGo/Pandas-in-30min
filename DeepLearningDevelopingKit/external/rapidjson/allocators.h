@@ -143,4 +143,72 @@ public:
         chunkHead_ = reinterpret_cast<ChunkHeader*>(buffer);
         chunkHead_->capacity = size - sizeof(ChunkHeader);
         chunkHead_->size = 0;
-        chu
+        chunkHead_->next = 0;
+    }
+
+    //! Destructor.
+    /*! This deallocates all memory chunks, excluding the user-supplied buffer.
+    */
+    ~MemoryPoolAllocator() {
+        Clear();
+        RAPIDJSON_DELETE(ownBaseAllocator_);
+    }
+
+    //! Deallocates all memory chunks, excluding the user-supplied buffer.
+    void Clear() {
+        while (chunkHead_ && chunkHead_ != userBuffer_) {
+            ChunkHeader* next = chunkHead_->next;
+            baseAllocator_->Free(chunkHead_);
+            chunkHead_ = next;
+        }
+        if (chunkHead_ && chunkHead_ == userBuffer_)
+            chunkHead_->size = 0; // Clear user buffer
+    }
+
+    //! Computes the total capacity of allocated memory chunks.
+    /*! \return total capacity in bytes.
+    */
+    size_t Capacity() const {
+        size_t capacity = 0;
+        for (ChunkHeader* c = chunkHead_; c != 0; c = c->next)
+            capacity += c->capacity;
+        return capacity;
+    }
+
+    //! Computes the memory blocks allocated.
+    /*! \return total used bytes.
+    */
+    size_t Size() const {
+        size_t size = 0;
+        for (ChunkHeader* c = chunkHead_; c != 0; c = c->next)
+            size += c->size;
+        return size;
+    }
+
+    //! Allocates a memory block. (concept Allocator)
+    void* Malloc(size_t size) {
+        if (!size)
+            return NULL;
+
+        size = RAPIDJSON_ALIGN(size);
+        if (chunkHead_ == 0 || chunkHead_->size + size > chunkHead_->capacity)
+            if (!AddChunk(chunk_capacity_ > size ? chunk_capacity_ : size))
+                return NULL;
+
+        void *buffer = reinterpret_cast<char *>(chunkHead_) + RAPIDJSON_ALIGN(sizeof(ChunkHeader)) + chunkHead_->size;
+        chunkHead_->size += size;
+        return buffer;
+    }
+
+    //! Resizes a memory block (concept Allocator)
+    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize) {
+        if (originalPtr == 0)
+            return Malloc(newSize);
+
+        if (newSize == 0)
+            return NULL;
+
+        originalSize = RAPIDJSON_ALIGN(originalSize);
+        newSize = RAPIDJSON_ALIGN(newSize);
+
+        // Do not shrink 
