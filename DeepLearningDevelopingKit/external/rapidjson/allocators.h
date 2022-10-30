@@ -35,4 +35,69 @@ concept Allocator {
     static const bool kNeedFree;    //!< Whether this allocator needs to call Free().
 
     // Allocate a memory block.
-    /
+    // \param size of the memory block in bytes.
+    // \returns pointer to the memory block.
+    void* Malloc(size_t size);
+
+    // Resize a memory block.
+    // \param originalPtr The pointer to current memory block. Null pointer is permitted.
+    // \param originalSize The current size in bytes. (Design issue: since some allocator may not book-keep this, explicitly pass to it can save memory.)
+    // \param newSize the new size in bytes.
+    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize);
+
+    // Free a memory block.
+    // \param pointer to the memory block. Null pointer is permitted.
+    static void Free(void *ptr);
+};
+\endcode
+*/
+
+
+/*! \def RAPIDJSON_ALLOCATOR_DEFUALT_CHUNK_CAPACITY
+    \ingroup RAPIDJSON_CONFIG
+    \brief User-defined kDefaultChunkCapacity definition.
+
+    User can define this as any \c size that is a power of 2.
+*/
+
+#ifndef RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY
+#define RAPIDJSON_ALLOCATOR_DEFAULT_CHUNK_CAPACITY (64 * 1024)
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CrtAllocator
+
+//! C-runtime library allocator.
+/*! This class is just wrapper for standard C library memory routines.
+    \note implements Allocator concept
+*/
+class CrtAllocator {
+public:
+    static const bool kNeedFree = true;
+    void* Malloc(size_t size) { 
+        if (size) //  behavior of malloc(0) is implementation defined.
+            return std::malloc(size);
+        else
+            return NULL; // standardize to returning NULL.
+    }
+    void* Realloc(void* originalPtr, size_t originalSize, size_t newSize) {
+        (void)originalSize;
+        if (newSize == 0) {
+            std::free(originalPtr);
+            return NULL;
+        }
+        return std::realloc(originalPtr, newSize);
+    }
+    static void Free(void *ptr) { std::free(ptr); }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// MemoryPoolAllocator
+
+//! Default memory allocator used by the parser and DOM.
+/*! This allocator allocate memory blocks from pre-allocated memory chunks. 
+
+    It does not free memory blocks. And Realloc() only allocate new memory.
+
+    The memory chunks are allocated by B
