@@ -72,4 +72,7 @@ private:
     };
 };
 
-} // namespace inter
+} // namespace internal
+RAPIDJSON_NAMESPACE_END
+
+#endif // RAPIDJSON_IEEE754_
