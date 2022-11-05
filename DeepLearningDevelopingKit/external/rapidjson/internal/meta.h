@@ -91,4 +91,70 @@ struct IsMoreConst
     : AndExpr<IsSame<typename RemoveConst<CT>::Type, typename RemoveConst<T>::Type>,
               BoolType<IsConst<CT>::Value >= IsConst<T>::Value> >::Type {};
 
-template <typename T> struct IsPointer
+template <typename T> struct IsPointer : FalseType {};
+template <typename T> struct IsPointer<T*> : TrueType {};
+
+///////////////////////////////////////////////////////////////////////////////
+// IsBaseOf
+//
+#if RAPIDJSON_HAS_CXX11_TYPETRAITS
+
+template <typename B, typename D> struct IsBaseOf
+    : BoolType< ::std::is_base_of<B,D>::value> {};
+
+#else // simplified version adopted from Boost
+
+template<typename B, typename D> struct IsBaseOfImpl {
+    RAPIDJSON_STATIC_ASSERT(sizeof(B) != 0);
+    RAPIDJSON_STATIC_ASSERT(sizeof(D) != 0);
+
+    typedef char (&Yes)[1];
+    typedef char (&No) [2];
+
+    template <typename T>
+    static Yes Check(const D*, T);
+    static No  Check(const B*, int);
+
+    struct Host {
+        operator const B*() const;
+        operator const D*();
+    };
+
+    enum { Value = (sizeof(Check(Host(), 0)) == sizeof(Yes)) };
+};
+
+template <typename B, typename D> struct IsBaseOf
+    : OrExpr<IsSame<B, D>, BoolExpr<IsBaseOfImpl<B, D> > >::Type {};
+
+#endif // RAPIDJSON_HAS_CXX11_TYPETRAITS
+
+
+//////////////////////////////////////////////////////////////////////////
+// EnableIf / DisableIf
+//
+template <bool Condition, typename T = void> struct EnableIfCond  { typedef T Type; };
+template <typename T> struct EnableIfCond<false, T> { /* empty */ };
+
+template <bool Condition, typename T = void> struct DisableIfCond { typedef T Type; };
+template <typename T> struct DisableIfCond<true, T> { /* empty */ };
+
+template <typename Condition, typename T = void>
+struct EnableIf : EnableIfCond<Condition::Value, T> {};
+
+template <typename Condition, typename T = void>
+struct DisableIf : DisableIfCond<Condition::Value, T> {};
+
+// SFINAE helpers
+struct SfinaeTag {};
+template <typename T> struct RemoveSfinaeTag;
+template <typename T> struct RemoveSfinaeTag<SfinaeTag&(*)(T)> { typedef T Type; };
+
+#define RAPIDJSON_REMOVEFPTR_(type) \
+    typename ::RAPIDJSON_NAMESPACE::internal::RemoveSfinaeTag \
+        < ::RAPIDJSON_NAMESPACE::internal::SfinaeTag&(*) type>::Type
+
+#define RAPIDJSON_ENABLEIF(cond) \
+    typename ::RAPIDJSON_NAMESPACE::internal::EnableIf \
+        <RAPIDJSON_REMOVEFPTR_(cond)>::Type * = NULL
+
+#define RAPIDJSON
