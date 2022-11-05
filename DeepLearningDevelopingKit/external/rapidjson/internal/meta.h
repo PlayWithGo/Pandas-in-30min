@@ -157,4 +157,30 @@ template <typename T> struct RemoveSfinaeTag<SfinaeTag&(*)(T)> { typedef T Type;
     typename ::RAPIDJSON_NAMESPACE::internal::EnableIf \
         <RAPIDJSON_REMOVEFPTR_(cond)>::Type * = NULL
 
-#define RAPIDJSON
+#define RAPIDJSON_DISABLEIF(cond) \
+    typename ::RAPIDJSON_NAMESPACE::internal::DisableIf \
+        <RAPIDJSON_REMOVEFPTR_(cond)>::Type * = NULL
+
+#define RAPIDJSON_ENABLEIF_RETURN(cond,returntype) \
+    typename ::RAPIDJSON_NAMESPACE::internal::EnableIf \
+        <RAPIDJSON_REMOVEFPTR_(cond), \
+         RAPIDJSON_REMOVEFPTR_(returntype)>::Type
+
+#define RAPIDJSON_DISABLEIF_RETURN(cond,returntype) \
+    typename ::RAPIDJSON_NAMESPACE::internal::DisableIf \
+        <RAPIDJSON_REMOVEFPTR_(cond), \
+         RAPIDJSON_REMOVEFPTR_(returntype)>::Type
+
+} // namespace internal
+RAPIDJSON_NAMESPACE_END
+//@endcond
+
+#if defined(_MSC_VER) && !defined(__clang__)
+RAPIDJSON_DIAG_POP
+#endif
+
+#ifdef __GNUC__
+RAPIDJSON_DIAG_POP
+#endif
+
+#endif // RAPIDJSON_INTERNAL_META_H_
