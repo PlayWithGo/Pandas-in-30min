@@ -46,4 +46,10 @@ inline double Pow10(int n) {
         1e+301,1e+302,1e+303,1e+304,1e+305,1e+306,1e+307,1e+308
     };
     RAPIDJSON_ASSERT(n >= 0 && n <= 308);
-    return e
+    return e[n];
+}
+
+} // namespace internal
+RAPIDJSON_NAMESPACE_END
+
+#endif // RAPIDJSON_POW10_
