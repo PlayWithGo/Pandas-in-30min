@@ -72,4 +72,61 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // GenericRegex
 
-static const SizeType kRe
+static const SizeType kRegexInvalidState = ~SizeType(0);  //!< Represents an invalid index in GenericRegex::State::out, out1
+static const SizeType kRegexInvalidRange = ~SizeType(0);
+
+template <typename Encoding, typename Allocator>
+class GenericRegexSearch;
+
+//! Regular expression engine with subset of ECMAscript grammar.
+/*!
+    Supported regular expression syntax:
+    - \c ab     Concatenation
+    - \c a|b    Alternation
+    - \c a?     Zero or one
+    - \c a*     Zero or more
+    - \c a+     One or more
+    - \c a{3}   Exactly 3 times
+    - \c a{3,}  At least 3 times
+    - \c a{3,5} 3 to 5 times
+    - \c (ab)   Grouping
+    - \c ^a     At the beginning
+    - \c a$     At the end
+    - \c .      Any character
+    - \c [abc]  Character classes
+    - \c [a-c]  Character class range
+    - \c [a-z0-9_] Character class combination
+    - \c [^abc] Negated character classes
+    - \c [^a-c] Negated character class range
+    - \c [\b]   Backspace (U+0008)
+    - \c \\| \\\\ ...  Escape characters
+    - \c \\f Form feed (U+000C)
+    - \c \\n Line feed (U+000A)
+    - \c \\r Carriage return (U+000D)
+    - \c \\t Tab (U+0009)
+    - \c \\v Vertical tab (U+000B)
+
+    \note This is a Thompson NFA engine, implemented with reference to 
+        Cox, Russ. "Regular Expression Matching Can Be Simple And Fast (but is slow in Java, Perl, PHP, Python, Ruby,...).", 
+        https://swtch.com/~rsc/regexp/regexp1.html 
+*/
+template <typename Encoding, typename Allocator = CrtAllocator>
+class GenericRegex {
+public:
+    typedef Encoding EncodingType;
+    typedef typename Encoding::Ch Ch;
+    template <typename, typename> friend class GenericRegexSearch;
+
+    GenericRegex(const Ch* source, Allocator* allocator = 0) : 
+        states_(allocator, 256), ranges_(allocator, 256), root_(kRegexInvalidState), stateCount_(), rangeCount_(), 
+        anchorBegin_(), anchorEnd_()
+    {
+        GenericStringStream<Encoding> ss(source);
+        DecodedStream<GenericStringStream<Encoding>, Encoding> ds(ss);
+        Parse(ds);
+    }
+
+    ~GenericRegex() {}
+
+    bool IsValid() const {
+        return root_ != kRegexInvalidState;
