@@ -130,3 +130,70 @@ public:
 
     bool IsValid() const {
         return root_ != kRegexInvalidState;
+    }
+
+private:
+    enum Operator {
+        kZeroOrOne,
+        kZeroOrMore,
+        kOneOrMore,
+        kConcatenation,
+        kAlternation,
+        kLeftParenthesis
+    };
+
+    static const unsigned kAnyCharacterClass = 0xFFFFFFFF;   //!< For '.'
+    static const unsigned kRangeCharacterClass = 0xFFFFFFFE;
+    static const unsigned kRangeNegationFlag = 0x80000000;
+
+    struct Range {
+        unsigned start; // 
+        unsigned end;
+        SizeType next;
+    };
+
+    struct State {
+        SizeType out;     //!< Equals to kInvalid for matching state
+        SizeType out1;    //!< Equals to non-kInvalid for split
+        SizeType rangeStart;
+        unsigned codepoint;
+    };
+
+    struct Frag {
+        Frag(SizeType s, SizeType o, SizeType m) : start(s), out(o), minIndex(m) {}
+        SizeType start;
+        SizeType out; //!< link-list of all output states
+        SizeType minIndex;
+    };
+
+    State& GetState(SizeType index) {
+        RAPIDJSON_ASSERT(index < stateCount_);
+        return states_.template Bottom<State>()[index];
+    }
+
+    const State& GetState(SizeType index) const {
+        RAPIDJSON_ASSERT(index < stateCount_);
+        return states_.template Bottom<State>()[index];
+    }
+
+    Range& GetRange(SizeType index) {
+        RAPIDJSON_ASSERT(index < rangeCount_);
+        return ranges_.template Bottom<Range>()[index];
+    }
+
+    const Range& GetRange(SizeType index) const {
+        RAPIDJSON_ASSERT(index < rangeCount_);
+        return ranges_.template Bottom<Range>()[index];
+    }
+
+    template <typename InputStream>
+    void Parse(DecodedStream<InputStream, Encoding>& ds) {
+        Allocator allocator;
+        Stack<Allocator> operandStack(&allocator, 256);     // Frag
+        Stack<Allocator> operatorStack(&allocator, 256);    // Operator
+        Stack<Allocator> atomCountStack(&allocator, 256);   // unsigned (Atom per parenthesis)
+
+        *atomCountStack.template Push<unsigned>() = 0;
+
+        unsigned codepoint;
+        while (ds.Peek() !=
