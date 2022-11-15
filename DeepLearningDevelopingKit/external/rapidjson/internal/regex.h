@@ -196,4 +196,57 @@ private:
         *atomCountStack.template Push<unsigned>() = 0;
 
         unsigned codepoint;
-        while (ds.Peek() !=
+        while (ds.Peek() != 0) {
+            switch (codepoint = ds.Take()) {
+                case '^':
+                    anchorBegin_ = true;
+                    break;
+
+                case '$':
+                    anchorEnd_ = true;
+                    break;
+
+                case '|':
+                    while (!operatorStack.Empty() && *operatorStack.template Top<Operator>() < kAlternation)
+                        if (!Eval(operandStack, *operatorStack.template Pop<Operator>(1)))
+                            return;
+                    *operatorStack.template Push<Operator>() = kAlternation;
+                    *atomCountStack.template Top<unsigned>() = 0;
+                    break;
+
+                case '(':
+                    *operatorStack.template Push<Operator>() = kLeftParenthesis;
+                    *atomCountStack.template Push<unsigned>() = 0;
+                    break;
+
+                case ')':
+                    while (!operatorStack.Empty() && *operatorStack.template Top<Operator>() != kLeftParenthesis)
+                        if (!Eval(operandStack, *operatorStack.template Pop<Operator>(1)))
+                            return;
+                    if (operatorStack.Empty())
+                        return;
+                    operatorStack.template Pop<Operator>(1);
+                    atomCountStack.template Pop<unsigned>(1);
+                    ImplicitConcatenation(atomCountStack, operatorStack);
+                    break;
+
+                case '?':
+                    if (!Eval(operandStack, kZeroOrOne))
+                        return;
+                    break;
+
+                case '*':
+                    if (!Eval(operandStack, kZeroOrMore))
+                        return;
+                    break;
+
+                case '+':
+                    if (!Eval(operandStack, kOneOrMore))
+                        return;
+                    break;
+
+                case '{':
+                    {
+                        unsigned n, m;
+                        if (!ParseUnsigned(ds, &n))
+                            re
