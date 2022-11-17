@@ -249,4 +249,57 @@ private:
                     {
                         unsigned n, m;
                         if (!ParseUnsigned(ds, &n))
-                            re
+                            return;
+
+                        if (ds.Peek() == ',') {
+                            ds.Take();
+                            if (ds.Peek() == '}')
+                                m = kInfinityQuantifier;
+                            else if (!ParseUnsigned(ds, &m) || m < n)
+                                return;
+                        }
+                        else
+                            m = n;
+
+                        if (!EvalQuantifier(operandStack, n, m) || ds.Peek() != '}')
+                            return;
+                        ds.Take();
+                    }
+                    break;
+
+                case '.':
+                    PushOperand(operandStack, kAnyCharacterClass);
+                    ImplicitConcatenation(atomCountStack, operatorStack);
+                    break;
+
+                case '[':
+                    {
+                        SizeType range;
+                        if (!ParseRange(ds, &range))
+                            return;
+                        SizeType s = NewState(kRegexInvalidState, kRegexInvalidState, kRangeCharacterClass);
+                        GetState(s).rangeStart = range;
+                        *operandStack.template Push<Frag>() = Frag(s, s, s);
+                    }
+                    ImplicitConcatenation(atomCountStack, operatorStack);
+                    break;
+
+                case '\\': // Escape character
+                    if (!CharacterEscape(ds, &codepoint))
+                        return; // Unsupported escape character
+                    // fall through to default
+
+                default: // Pattern character
+                    PushOperand(operandStack, codepoint);
+                    ImplicitConcatenation(atomCountStack, operatorStack);
+            }
+        }
+
+        while (!operatorStack.Empty())
+            if (!Eval(operandStack, *operatorStack.template Pop<Operator>(1)))
+                return;
+
+        // Link the operand to matching state.
+        if (operandStack.GetSize() == sizeof(Frag)) {
+            Frag* e = operandStack.template Pop<Frag>(1);
+         
