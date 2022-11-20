@@ -302,4 +302,61 @@ private:
         // Link the operand to matching state.
         if (operandStack.GetSize() == sizeof(Frag)) {
             Frag* e = operandStack.template Pop<Frag>(1);
-         
+            Patch(e->out, NewState(kRegexInvalidState, kRegexInvalidState, 0));
+            root_ = e->start;
+
+#if RAPIDJSON_REGEX_VERBOSE
+            printf("root: %d\n", root_);
+            for (SizeType i = 0; i < stateCount_ ; i++) {
+                State& s = GetState(i);
+                printf("[%2d] out: %2d out1: %2d c: '%c'\n", i, s.out, s.out1, (char)s.codepoint);
+            }
+            printf("\n");
+#endif
+        }
+    }
+
+    SizeType NewState(SizeType out, SizeType out1, unsigned codepoint) {
+        State* s = states_.template Push<State>();
+        s->out = out;
+        s->out1 = out1;
+        s->codepoint = codepoint;
+        s->rangeStart = kRegexInvalidRange;
+        return stateCount_++;
+    }
+
+    void PushOperand(Stack<Allocator>& operandStack, unsigned codepoint) {
+        SizeType s = NewState(kRegexInvalidState, kRegexInvalidState, codepoint);
+        *operandStack.template Push<Frag>() = Frag(s, s, s);
+    }
+
+    void ImplicitConcatenation(Stack<Allocator>& atomCountStack, Stack<Allocator>& operatorStack) {
+        if (*atomCountStack.template Top<unsigned>())
+            *operatorStack.template Push<Operator>() = kConcatenation;
+        (*atomCountStack.template Top<unsigned>())++;
+    }
+
+    SizeType Append(SizeType l1, SizeType l2) {
+        SizeType old = l1;
+        while (GetState(l1).out != kRegexInvalidState)
+            l1 = GetState(l1).out;
+        GetState(l1).out = l2;
+        return old;
+    }
+
+    void Patch(SizeType l, SizeType s) {
+        for (SizeType next; l != kRegexInvalidState; l = next) {
+            next = GetState(l).out;
+            GetState(l).out = s;
+        }
+    }
+
+    bool Eval(Stack<Allocator>& operandStack, Operator op) {
+        switch (op) {
+            case kConcatenation:
+                RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag) * 2);
+                {
+                    Frag e2 = *operandStack.template Pop<Frag>(1);
+                    Frag e1 = *operandStack.template Pop<Frag>(1);
+                    Patch(e1.out, e2.start);
+                 
