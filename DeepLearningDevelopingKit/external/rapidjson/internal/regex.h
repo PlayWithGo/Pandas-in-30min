@@ -359,4 +359,52 @@ private:
                     Frag e2 = *operandStack.template Pop<Frag>(1);
                     Frag e1 = *operandStack.template Pop<Frag>(1);
                     Patch(e1.out, e2.start);
-                 
+                    *operandStack.template Push<Frag>() = Frag(e1.start, e2.out, Min(e1.minIndex, e2.minIndex));
+                }
+                return true;
+
+            case kAlternation:
+                if (operandStack.GetSize() >= sizeof(Frag) * 2) {
+                    Frag e2 = *operandStack.template Pop<Frag>(1);
+                    Frag e1 = *operandStack.template Pop<Frag>(1);
+                    SizeType s = NewState(e1.start, e2.start, 0);
+                    *operandStack.template Push<Frag>() = Frag(s, Append(e1.out, e2.out), Min(e1.minIndex, e2.minIndex));
+                    return true;
+                }
+                return false;
+
+            case kZeroOrOne:
+                if (operandStack.GetSize() >= sizeof(Frag)) {
+                    Frag e = *operandStack.template Pop<Frag>(1);
+                    SizeType s = NewState(kRegexInvalidState, e.start, 0);
+                    *operandStack.template Push<Frag>() = Frag(s, Append(e.out, s), e.minIndex);
+                    return true;
+                }
+                return false;
+
+            case kZeroOrMore:
+                if (operandStack.GetSize() >= sizeof(Frag)) {
+                    Frag e = *operandStack.template Pop<Frag>(1);
+                    SizeType s = NewState(kRegexInvalidState, e.start, 0);
+                    Patch(e.out, s);
+                    *operandStack.template Push<Frag>() = Frag(s, s, e.minIndex);
+                    return true;
+                }
+                return false;
+
+            default: 
+                RAPIDJSON_ASSERT(op == kOneOrMore);
+                if (operandStack.GetSize() >= sizeof(Frag)) {
+                    Frag e = *operandStack.template Pop<Frag>(1);
+                    SizeType s = NewState(kRegexInvalidState, e.start, 0);
+                    Patch(e.out, s);
+                    *operandStack.template Push<Frag>() = Frag(e.start, s, e.minIndex);
+                    return true;
+                }
+                return false;
+        }
+    }
+
+    bool EvalQuantifier(Stack<Allocator>& operandStack, unsigned n, unsigned m) {
+        RAPIDJSON_ASSERT(n <= m);
+        RAPIDJSON_ASSERT(operandSta
