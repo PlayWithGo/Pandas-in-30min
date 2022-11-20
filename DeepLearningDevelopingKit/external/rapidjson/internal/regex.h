@@ -407,4 +407,50 @@ private:
 
     bool EvalQuantifier(Stack<Allocator>& operandStack, unsigned n, unsigned m) {
         RAPIDJSON_ASSERT(n <= m);
-        RAPIDJSON_ASSERT(operandSta
+        RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag));
+
+        if (n == 0) {
+            if (m == 0)                             // a{0} not support
+                return false;
+            else if (m == kInfinityQuantifier)
+                Eval(operandStack, kZeroOrMore);    // a{0,} -> a*
+            else {
+                Eval(operandStack, kZeroOrOne);         // a{0,5} -> a?
+                for (unsigned i = 0; i < m - 1; i++)
+                    CloneTopOperand(operandStack);      // a{0,5} -> a? a? a? a? a?
+                for (unsigned i = 0; i < m - 1; i++)
+                    Eval(operandStack, kConcatenation); // a{0,5} -> a?a?a?a?a?
+            }
+            return true;
+        }
+
+        for (unsigned i = 0; i < n - 1; i++)        // a{3} -> a a a
+            CloneTopOperand(operandStack);
+
+        if (m == kInfinityQuantifier)
+            Eval(operandStack, kOneOrMore);         // a{3,} -> a a a+
+        else if (m > n) {
+            CloneTopOperand(operandStack);          // a{3,5} -> a a a a
+            Eval(operandStack, kZeroOrOne);         // a{3,5} -> a a a a?
+            for (unsigned i = n; i < m - 1; i++)
+                CloneTopOperand(operandStack);      // a{3,5} -> a a a a? a?
+            for (unsigned i = n; i < m; i++)
+                Eval(operandStack, kConcatenation); // a{3,5} -> a a aa?a?
+        }
+
+        for (unsigned i = 0; i < n - 1; i++)
+            Eval(operandStack, kConcatenation);     // a{3} -> aaa, a{3,} -> aaa+, a{3.5} -> aaaa?a?
+
+        return true;
+    }
+
+    static SizeType Min(SizeType a, SizeType b) { return a < b ? a : b; }
+
+    void CloneTopOperand(Stack<Allocator>& operandStack) {
+        const Frag src = *operandStack.template Top<Frag>(); // Copy constructor to prevent invalidation
+        SizeType count = stateCount_ - src.minIndex; // Assumes top operand contains states in [src->minIndex, stateCount_)
+        State* s = states_.template Push<State>(count);
+        memcpy(s, &GetState(src.minIndex), count * sizeof(State));
+        for (SizeType j = 0; j < count; j++) {
+            if (s[j].out != kRegexInvalidState)
+               
