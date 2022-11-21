@@ -453,4 +453,62 @@ private:
         memcpy(s, &GetState(src.minIndex), count * sizeof(State));
         for (SizeType j = 0; j < count; j++) {
             if (s[j].out != kRegexInvalidState)
-               
+                s[j].out += count;
+            if (s[j].out1 != kRegexInvalidState)
+                s[j].out1 += count;
+        }
+        *operandStack.template Push<Frag>() = Frag(src.start + count, src.out + count, src.minIndex + count);
+        stateCount_ += count;
+    }
+
+    template <typename InputStream>
+    bool ParseUnsigned(DecodedStream<InputStream, Encoding>& ds, unsigned* u) {
+        unsigned r = 0;
+        if (ds.Peek() < '0' || ds.Peek() > '9')
+            return false;
+        while (ds.Peek() >= '0' && ds.Peek() <= '9') {
+            if (r >= 429496729 && ds.Peek() > '5') // 2^32 - 1 = 4294967295
+                return false; // overflow
+            r = r * 10 + (ds.Take() - '0');
+        }
+        *u = r;
+        return true;
+    }
+
+    template <typename InputStream>
+    bool ParseRange(DecodedStream<InputStream, Encoding>& ds, SizeType* range) {
+        bool isBegin = true;
+        bool negate = false;
+        int step = 0;
+        SizeType start = kRegexInvalidRange;
+        SizeType current = kRegexInvalidRange;
+        unsigned codepoint;
+        while ((codepoint = ds.Take()) != 0) {
+            if (isBegin) {
+                isBegin = false;
+                if (codepoint == '^') {
+                    negate = true;
+                    continue;
+                }
+            }
+
+            switch (codepoint) {
+            case ']':
+                if (start == kRegexInvalidRange)
+                    return false;   // Error: nothing inside []
+                if (step == 2) { // Add trailing '-'
+                    SizeType r = NewRange('-');
+                    RAPIDJSON_ASSERT(current != kRegexInvalidRange);
+                    GetRange(current).next = r;
+                }
+                if (negate)
+                    GetRange(start).start |= kRangeNegationFlag;
+                *range = start;
+                return true;
+
+            case '\\':
+                if (ds.Peek() == 'b') {
+                    ds.Take();
+                    codepoint = 0x0008; // Escape backspace character
+                }
+                else if (!Ch
