@@ -511,4 +511,68 @@ private:
                     ds.Take();
                     codepoint = 0x0008; // Escape backspace character
                 }
-                else if (!Ch
+                else if (!CharacterEscape(ds, &codepoint))
+                    return false;
+                // fall through to default
+
+            default:
+                switch (step) {
+                case 1:
+                    if (codepoint == '-') {
+                        step++;
+                        break;
+                    }
+                    // fall through to step 0 for other characters
+
+                case 0:
+                    {
+                        SizeType r = NewRange(codepoint);
+                        if (current != kRegexInvalidRange)
+                            GetRange(current).next = r;
+                        if (start == kRegexInvalidRange)
+                            start = r;
+                        current = r;
+                    }
+                    step = 1;
+                    break;
+
+                default:
+                    RAPIDJSON_ASSERT(step == 2);
+                    GetRange(current).end = codepoint;
+                    step = 0;
+                }
+            }
+        }
+        return false;
+    }
+    
+    SizeType NewRange(unsigned codepoint) {
+        Range* r = ranges_.template Push<Range>();
+        r->start = r->end = codepoint;
+        r->next = kRegexInvalidRange;
+        return rangeCount_++;
+    }
+
+    template <typename InputStream>
+    bool CharacterEscape(DecodedStream<InputStream, Encoding>& ds, unsigned* escapedCodepoint) {
+        unsigned codepoint;
+        switch (codepoint = ds.Take()) {
+            case '^':
+            case '$':
+            case '|':
+            case '(':
+            case ')':
+            case '?':
+            case '*':
+            case '+':
+            case '.':
+            case '[':
+            case ']':
+            case '{':
+            case '}':
+            case '\\':
+                *escapedCodepoint = codepoint; return true;
+            case 'f': *escapedCodepoint = 0x000C; return true;
+            case 'n': *escapedCodepoint = 0x000A; return true;
+            case 'r': *escapedCodepoint = 0x000D; return true;
+            case 't': *escapedCodepoint = 0x0009; return tr
