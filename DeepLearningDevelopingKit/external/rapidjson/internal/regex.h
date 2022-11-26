@@ -575,4 +575,76 @@ private:
             case 'f': *escapedCodepoint = 0x000C; return true;
             case 'n': *escapedCodepoint = 0x000A; return true;
             case 'r': *escapedCodepoint = 0x000D; return true;
-            case 't': *escapedCodepoint = 0x0009; return tr
+            case 't': *escapedCodepoint = 0x0009; return true;
+            case 'v': *escapedCodepoint = 0x000B; return true;
+            default:
+                return false; // Unsupported escape character
+        }
+    }
+
+    Stack<Allocator> states_;
+    Stack<Allocator> ranges_;
+    SizeType root_;
+    SizeType stateCount_;
+    SizeType rangeCount_;
+
+    static const unsigned kInfinityQuantifier = ~0u;
+
+    // For SearchWithAnchoring()
+    bool anchorBegin_;
+    bool anchorEnd_;
+};
+
+template <typename RegexType, typename Allocator = CrtAllocator>
+class GenericRegexSearch {
+public:
+    typedef typename RegexType::EncodingType Encoding;
+    typedef typename Encoding::Ch Ch;
+
+    GenericRegexSearch(const RegexType& regex, Allocator* allocator = 0) : 
+        regex_(regex), allocator_(allocator), ownAllocator_(0),
+        state0_(allocator, 0), state1_(allocator, 0), stateSet_()
+    {
+        RAPIDJSON_ASSERT(regex_.IsValid());
+        if (!allocator_)
+            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
+        stateSet_ = static_cast<unsigned*>(allocator_->Malloc(GetStateSetSize()));
+        state0_.template Reserve<SizeType>(regex_.stateCount_);
+        state1_.template Reserve<SizeType>(regex_.stateCount_);
+    }
+
+    ~GenericRegexSearch() {
+        Allocator::Free(stateSet_);
+        RAPIDJSON_DELETE(ownAllocator_);
+    }
+
+    template <typename InputStream>
+    bool Match(InputStream& is) {
+        return SearchWithAnchoring(is, true, true);
+    }
+
+    bool Match(const Ch* s) {
+        GenericStringStream<Encoding> is(s);
+        return Match(is);
+    }
+
+    template <typename InputStream>
+    bool Search(InputStream& is) {
+        return SearchWithAnchoring(is, regex_.anchorBegin_, regex_.anchorEnd_);
+    }
+
+    bool Search(const Ch* s) {
+        GenericStringStream<Encoding> is(s);
+        return Search(is);
+    }
+
+private:
+    typedef typename RegexType::State State;
+    typedef typename RegexType::Range Range;
+
+    template <typename InputStream>
+    bool SearchWithAnchoring(InputStream& is, bool anchorBegin, bool anchorEnd) {
+        DecodedStream<InputStream, Encoding> ds(is);
+
+        state0_.Clear();
+        Stack<Allocator> 
