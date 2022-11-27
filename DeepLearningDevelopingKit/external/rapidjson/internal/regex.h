@@ -647,4 +647,54 @@ private:
         DecodedStream<InputStream, Encoding> ds(is);
 
         state0_.Clear();
-        Stack<Allocator> 
+        Stack<Allocator> *current = &state0_, *next = &state1_;
+        const size_t stateSetSize = GetStateSetSize();
+        std::memset(stateSet_, 0, stateSetSize);
+
+        bool matched = AddState(*current, regex_.root_);
+        unsigned codepoint;
+        while (!current->Empty() && (codepoint = ds.Take()) != 0) {
+            std::memset(stateSet_, 0, stateSetSize);
+            next->Clear();
+            matched = false;
+            for (const SizeType* s = current->template Bottom<SizeType>(); s != current->template End<SizeType>(); ++s) {
+                const State& sr = regex_.GetState(*s);
+                if (sr.codepoint == codepoint ||
+                    sr.codepoint == RegexType::kAnyCharacterClass || 
+                    (sr.codepoint == RegexType::kRangeCharacterClass && MatchRange(sr.rangeStart, codepoint)))
+                {
+                    matched = AddState(*next, sr.out) || matched;
+                    if (!anchorEnd && matched)
+                        return true;
+                }
+                if (!anchorBegin)
+                    AddState(*next, regex_.root_);
+            }
+            internal::Swap(current, next);
+        }
+
+        return matched;
+    }
+
+    size_t GetStateSetSize() const {
+        return (regex_.stateCount_ + 31) / 32 * 4;
+    }
+
+    // Return whether the added states is a match state
+    bool AddState(Stack<Allocator>& l, SizeType index) {
+        RAPIDJSON_ASSERT(index != kRegexInvalidState);
+
+        const State& s = regex_.GetState(index);
+        if (s.out1 != kRegexInvalidState) { // Split
+            bool matched = AddState(l, s.out);
+            return AddState(l, s.out1) || matched;
+        }
+        else if (!(stateSet_[index >> 5] & (1u << (index & 31)))) {
+            stateSet_[index >> 5] |= (1u << (index & 31));
+            *l.template PushUnsafe<SizeType>() = index;
+        }
+        return s.out == kRegexInvalidState; // by using PushUnsafe() above, we can ensure s is not validated due to reallocation.
+    }
+
+    bool MatchRange(SizeType rangeIndex, unsigned codepoint) const {
+        bool yes = (regex_.GetRange(rangeIndex).start & RegexType::kR
