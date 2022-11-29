@@ -697,4 +697,36 @@ private:
     }
 
     bool MatchRange(SizeType rangeIndex, unsigned codepoint) const {
-        bool yes = (regex_.GetRange(rangeIndex).start & RegexType::kR
+        bool yes = (regex_.GetRange(rangeIndex).start & RegexType::kRangeNegationFlag) == 0;
+        while (rangeIndex != kRegexInvalidRange) {
+            const Range& r = regex_.GetRange(rangeIndex);
+            if (codepoint >= (r.start & ~RegexType::kRangeNegationFlag) && codepoint <= r.end)
+                return yes;
+            rangeIndex = r.next;
+        }
+        return !yes;
+    }
+
+    const RegexType& regex_;
+    Allocator* allocator_;
+    Allocator* ownAllocator_;
+    Stack<Allocator> state0_;
+    Stack<Allocator> state1_;
+    uint32_t* stateSet_;
+};
+
+typedef GenericRegex<UTF8<> > Regex;
+typedef GenericRegexSearch<Regex> RegexSearch;
+
+} // namespace internal
+RAPIDJSON_NAMESPACE_END
+
+#ifdef __GNUC__
+RAPIDJSON_DIAG_POP
+#endif
+
+#if defined(__clang__) || defined(_MSC_VER)
+RAPIDJSON_DIAG_POP
+#endif
+
+#endif // RAPIDJSON_INTERNAL_REGEX_H_
