@@ -62,4 +62,10 @@ struct MemoryStream {
     size_t size_;       //!< Size of the stream.
 };
 
-RAPIDJSON_NAMES
+RAPIDJSON_NAMESPACE_END
+
+#ifdef __clang__
+RAPIDJSON_DIAG_POP
+#endif
+
+#endif // RAPIDJSON_MEMORYBUFFER_H_
