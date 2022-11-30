@@ -39,4 +39,95 @@
 #endif // _MSC_VER ]
 
 #ifndef _MSC_INTTYPES_H_ // [
-#define _MSC_INTTYP
+#define _MSC_INTTYPES_H_
+
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include "stdint.h"
+
+// miloyip: VC supports inttypes.h since VC2013
+#if _MSC_VER >= 1800
+#include <inttypes.h>
+#else
+
+// 7.8 Format conversion of integer types
+
+typedef struct {
+   intmax_t quot;
+   intmax_t rem;
+} imaxdiv_t;
+
+// 7.8.1 Macros for format specifiers
+
+#if !defined(__cplusplus) || defined(__STDC_FORMAT_MACROS) // [   See footnote 185 at page 198
+
+// The fprintf macros for signed integers are:
+#define PRId8       "d"
+#define PRIi8       "i"
+#define PRIdLEAST8  "d"
+#define PRIiLEAST8  "i"
+#define PRIdFAST8   "d"
+#define PRIiFAST8   "i"
+
+#define PRId16       "hd"
+#define PRIi16       "hi"
+#define PRIdLEAST16  "hd"
+#define PRIiLEAST16  "hi"
+#define PRIdFAST16   "hd"
+#define PRIiFAST16   "hi"
+
+#define PRId32       "I32d"
+#define PRIi32       "I32i"
+#define PRIdLEAST32  "I32d"
+#define PRIiLEAST32  "I32i"
+#define PRIdFAST32   "I32d"
+#define PRIiFAST32   "I32i"
+
+#define PRId64       "I64d"
+#define PRIi64       "I64i"
+#define PRIdLEAST64  "I64d"
+#define PRIiLEAST64  "I64i"
+#define PRIdFAST64   "I64d"
+#define PRIiFAST64   "I64i"
+
+#define PRIdMAX     "I64d"
+#define PRIiMAX     "I64i"
+
+#define PRIdPTR     "Id"
+#define PRIiPTR     "Ii"
+
+// The fprintf macros for unsigned integers are:
+#define PRIo8       "o"
+#define PRIu8       "u"
+#define PRIx8       "x"
+#define PRIX8       "X"
+#define PRIoLEAST8  "o"
+#define PRIuLEAST8  "u"
+#define PRIxLEAST8  "x"
+#define PRIXLEAST8  "X"
+#define PRIoFAST8   "o"
+#define PRIuFAST8   "u"
+#define PRIxFAST8   "x"
+#define PRIXFAST8   "X"
+
+#define PRIo16       "ho"
+#define PRIu16       "hu"
+#define PRIx16       "hx"
+#define PRIX16       "hX"
+#define PRIoLEAST16  "ho"
+#define PRIuLEAST16  "hu"
+#define PRIxLEAST16  "hx"
+#define PRIXLEAST16  "hX"
+#define PRIoFAST16   "ho"
+#define PRIuFAST16   "hu"
+#define PRIxFAST16   "hx"
+#define PRIXFAST16   "hX"
+
+#define PRIo32       "I32o"
+#define PRIu32       "I32u"
+#define PRIx32       "I32x"
+#define PRIX32       "I32X"
+#define PRIoLEAST32  "I32o"
+#define PRIuL
