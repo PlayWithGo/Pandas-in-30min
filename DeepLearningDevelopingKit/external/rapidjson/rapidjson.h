@@ -112,4 +112,73 @@
 /*! \def RAPIDJSON_NAMESPACE_END
     \ingroup RAPIDJSON_CONFIG
     \brief   provide custom rapidjson namespace (closing expression)
-    \see
+    \see RAPIDJSON_NAMESPACE
+*/
+#ifndef RAPIDJSON_NAMESPACE
+#define RAPIDJSON_NAMESPACE rapidjson
+#endif
+#ifndef RAPIDJSON_NAMESPACE_BEGIN
+#define RAPIDJSON_NAMESPACE_BEGIN namespace RAPIDJSON_NAMESPACE {
+#endif
+#ifndef RAPIDJSON_NAMESPACE_END
+#define RAPIDJSON_NAMESPACE_END }
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_HAS_STDSTRING
+
+#ifndef RAPIDJSON_HAS_STDSTRING
+#ifdef RAPIDJSON_DOXYGEN_RUNNING
+#define RAPIDJSON_HAS_STDSTRING 1 // force generation of documentation
+#else
+#define RAPIDJSON_HAS_STDSTRING 0 // no std::string support by default
+#endif
+/*! \def RAPIDJSON_HAS_STDSTRING
+    \ingroup RAPIDJSON_CONFIG
+    \brief Enable RapidJSON support for \c std::string
+
+    By defining this preprocessor symbol to \c 1, several convenience functions for using
+    \ref rapidjson::GenericValue with \c std::string are enabled, especially
+    for construction and comparison.
+
+    \hideinitializer
+*/
+#endif // !defined(RAPIDJSON_HAS_STDSTRING)
+
+#if RAPIDJSON_HAS_STDSTRING
+#include <string>
+#endif // RAPIDJSON_HAS_STDSTRING
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_NO_INT64DEFINE
+
+/*! \def RAPIDJSON_NO_INT64DEFINE
+    \ingroup RAPIDJSON_CONFIG
+    \brief Use external 64-bit integer types.
+
+    RapidJSON requires the 64-bit integer types \c int64_t and  \c uint64_t types
+    to be available at global scope.
+
+    If users have their own definition, define RAPIDJSON_NO_INT64DEFINE to
+    prevent RapidJSON from defining its own types.
+*/
+#ifndef RAPIDJSON_NO_INT64DEFINE
+//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+#if defined(_MSC_VER) && (_MSC_VER < 1800)	// Visual Studio 2013
+#include "msinttypes/stdint.h"
+#include "msinttypes/inttypes.h"
+#else
+// Other compilers should have this.
+#include <stdint.h>
+#include <inttypes.h>
+#endif
+//!@endcond
+#ifdef RAPIDJSON_DOXYGEN_RUNNING
+#define RAPIDJSON_NO_INT64DEFINE
+#endif
+#endif // RAPIDJSON_NO_INT64TYPEDEF
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_FORCEINLINE
+
+#if
