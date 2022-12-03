@@ -181,4 +181,56 @@
 ///////////////////////////////////////////////////////////////////////////////
 // RAPIDJSON_FORCEINLINE
 
-#if
+#ifndef RAPIDJSON_FORCEINLINE
+//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+#if defined(_MSC_VER) && defined(NDEBUG)
+#define RAPIDJSON_FORCEINLINE __forceinline
+#elif defined(__GNUC__) && __GNUC__ >= 4 && defined(NDEBUG)
+#define RAPIDJSON_FORCEINLINE __attribute__((always_inline))
+#else
+#define RAPIDJSON_FORCEINLINE
+#endif
+//!@endcond
+#endif // RAPIDJSON_FORCEINLINE
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_ENDIAN
+#define RAPIDJSON_LITTLEENDIAN  0   //!< Little endian machine
+#define RAPIDJSON_BIGENDIAN     1   //!< Big endian machine
+
+//! Endianness of the machine.
+/*!
+    \def RAPIDJSON_ENDIAN
+    \ingroup RAPIDJSON_CONFIG
+
+    GCC 4.6 provided macro for detecting endianness of the target machine. But other
+    compilers may not have this. User can define RAPIDJSON_ENDIAN to either
+    \ref RAPIDJSON_LITTLEENDIAN or \ref RAPIDJSON_BIGENDIAN.
+
+    Default detection implemented with reference to
+    \li https://gcc.gnu.org/onlinedocs/gcc-4.6.0/cpp/Common-Predefined-Macros.html
+    \li http://www.boost.org/doc/libs/1_42_0/boost/detail/endian.hpp
+*/
+#ifndef RAPIDJSON_ENDIAN
+// Detect with GCC 4.6's macro
+#  ifdef __BYTE_ORDER__
+#    if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#      define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#    elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#      define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
+#    else
+#      error Unknown machine endianness detected. User needs to define RAPIDJSON_ENDIAN.
+#    endif // __BYTE_ORDER__
+// Detect with GLIBC's endian.h
+#  elif defined(__GLIBC__)
+#    include <endian.h>
+#    if (__BYTE_ORDER == __LITTLE_ENDIAN)
+#      define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#    elif (__BYTE_ORDER == __BIG_ENDIAN)
+#      define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
+#    else
+#      error Unknown machine endianness detected. User needs to define RAPIDJSON_ENDIAN.
+#   endif // __GLIBC__
+// Detect with _LITTLE_ENDIAN and _BIG_ENDIAN macro
+#  elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
+#    define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
