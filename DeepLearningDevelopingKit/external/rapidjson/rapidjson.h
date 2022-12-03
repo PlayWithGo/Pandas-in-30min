@@ -234,3 +234,51 @@
 // Detect with _LITTLE_ENDIAN and _BIG_ENDIAN macro
 #  elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
 #    define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#  elif defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
+#    define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
+// Detect with architecture macros
+#  elif defined(__sparc) || defined(__sparc__) || defined(_POWER) || defined(__powerpc__) || defined(__ppc__) || defined(__hpux) || defined(__hppa) || defined(_MIPSEB) || defined(_POWER) || defined(__s390__)
+#    define RAPIDJSON_ENDIAN RAPIDJSON_BIGENDIAN
+#  elif defined(__i386__) || defined(__alpha__) || defined(__ia64) || defined(__ia64__) || defined(_M_IX86) || defined(_M_IA64) || defined(_M_ALPHA) || defined(__amd64) || defined(__amd64__) || defined(_M_AMD64) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) || defined(__bfin__)
+#    define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#  elif defined(_MSC_VER) && (defined(_M_ARM) || defined(_M_ARM64))
+#    define RAPIDJSON_ENDIAN RAPIDJSON_LITTLEENDIAN
+#  elif defined(RAPIDJSON_DOXYGEN_RUNNING)
+#    define RAPIDJSON_ENDIAN
+#  else
+#    error Unknown machine endianness detected. User needs to define RAPIDJSON_ENDIAN.   
+#  endif
+#endif // RAPIDJSON_ENDIAN
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_64BIT
+
+//! Whether using 64-bit architecture
+#ifndef RAPIDJSON_64BIT
+#if defined(__LP64__) || (defined(__x86_64__) && defined(__ILP32__)) || defined(_WIN64) || defined(__EMSCRIPTEN__)
+#define RAPIDJSON_64BIT 1
+#else
+#define RAPIDJSON_64BIT 0
+#endif
+#endif // RAPIDJSON_64BIT
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_ALIGN
+
+//! Data alignment of the machine.
+/*! \ingroup RAPIDJSON_CONFIG
+    \param x pointer to align
+
+    Some machines require strict data alignment. Currently the default uses 4 bytes
+    alignment on 32-bit platforms and 8 bytes alignment for 64-bit platforms.
+    User can customize by defining the RAPIDJSON_ALIGN function macro.
+*/
+#ifndef RAPIDJSON_ALIGN
+#if RAPIDJSON_64BIT == 1
+#define RAPIDJSON_ALIGN(x) (((x) + static_cast<uint64_t>(7u)) & ~static_cast<uint64_t>(7u))
+#else
+#define RAPIDJSON_ALIGN(x) (((x) + 3u) & ~3u)
+#endif
+#endif
+
+/////////////////////////////////////////////
