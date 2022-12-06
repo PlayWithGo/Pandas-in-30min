@@ -390,4 +390,68 @@ typedef unsigned SizeType;
 RAPIDJSON_NAMESPACE_END
 #endif
 
-// always import std::size_
+// always import std::size_t to rapidjson namespace
+RAPIDJSON_NAMESPACE_BEGIN
+using std::size_t;
+RAPIDJSON_NAMESPACE_END
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_ASSERT
+
+//! Assertion.
+/*! \ingroup RAPIDJSON_CONFIG
+    By default, rapidjson uses C \c assert() for internal assertions.
+    User can override it by defining RAPIDJSON_ASSERT(x) macro.
+
+    \note Parsing errors are handled and can be customized by the
+          \ref RAPIDJSON_ERRORS APIs.
+*/
+#ifndef RAPIDJSON_ASSERT
+#include <cassert>
+#define RAPIDJSON_ASSERT(x) assert(x)
+#endif // RAPIDJSON_ASSERT
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_STATIC_ASSERT
+
+// Prefer C++11 static_assert, if available
+#ifndef RAPIDJSON_STATIC_ASSERT
+#if __cplusplus >= 201103L || ( defined(_MSC_VER) && _MSC_VER >= 1800 )
+#define RAPIDJSON_STATIC_ASSERT(x) \
+   static_assert(x, RAPIDJSON_STRINGIFY(x))
+#endif // C++11
+#endif // RAPIDJSON_STATIC_ASSERT
+
+// Adopt C++03 implementation from boost
+#ifndef RAPIDJSON_STATIC_ASSERT
+#ifndef __clang__
+//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+#endif
+RAPIDJSON_NAMESPACE_BEGIN
+template <bool x> struct STATIC_ASSERTION_FAILURE;
+template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+template <size_t x> struct StaticAssertTest {};
+RAPIDJSON_NAMESPACE_END
+
+#if defined(__GNUC__) || defined(__clang__)
+#define RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE __attribute__((unused))
+#else
+#define RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE 
+#endif
+#ifndef __clang__
+//!@endcond
+#endif
+
+/*! \def RAPIDJSON_STATIC_ASSERT
+    \brief (Internal) macro to check for conditions at compile-time
+    \param x compile-time condition
+    \hideinitializer
+ */
+#define RAPIDJSON_STATIC_ASSERT(x) \
+    typedef ::RAPIDJSON_NAMESPACE::StaticAssertTest< \
+      sizeof(::RAPIDJSON_NAMESPACE::STATIC_ASSERTION_FAILURE<bool(x) >)> \
+    RAPIDJSON_JOIN(StaticAssertTypedef, __LINE__) RAPIDJSON_STATIC_ASSERT_UNUSED_ATTRIBUTE
+#endif // RAPIDJSON_STATIC_ASSERT
+
+///////////////////////////////////////////////////////////////////////////////
+// RAPIDJSON_LIKELY, RAPIDJS
