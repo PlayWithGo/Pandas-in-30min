@@ -583,4 +583,46 @@ RAPIDJSON_NAMESPACE_END
 #define RAPIDJSON_HAS_CXX11_RANGE_FOR __has_feature(cxx_range_for)
 #elif (defined(RAPIDJSON_GNUC) && (RAPIDJSON_GNUC >= RAPIDJSON_VERSION_CODE(4,6,0)) && defined(__GXX_EXPERIMENTAL_CXX0X__)) || \
       (defined(_MSC_VER) && _MSC_VER >= 1700)
-#
+#define RAPIDJSON_HAS_CXX11_RANGE_FOR 1
+#else
+#define RAPIDJSON_HAS_CXX11_RANGE_FOR 0
+#endif
+#endif // RAPIDJSON_HAS_CXX11_RANGE_FOR
+
+//!@endcond
+
+///////////////////////////////////////////////////////////////////////////////
+// new/delete
+
+#ifndef RAPIDJSON_NEW
+///! customization point for global \c new
+#define RAPIDJSON_NEW(TypeName) new TypeName
+#endif
+#ifndef RAPIDJSON_DELETE
+///! customization point for global \c delete
+#define RAPIDJSON_DELETE(x) delete x
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// Type
+
+/*! \namespace rapidjson
+    \brief main RapidJSON namespace
+    \see RAPIDJSON_NAMESPACE
+*/
+RAPIDJSON_NAMESPACE_BEGIN
+
+//! Type of JSON value
+enum Type {
+    kNullType = 0,      //!< null
+    kFalseType = 1,     //!< false
+    kTrueType = 2,      //!< true
+    kObjectType = 3,    //!< object
+    kArrayType = 4,     //!< array 
+    kStringType = 5,    //!< string
+    kNumberType = 6     //!< number
+};
+
+RAPIDJSON_NAMESPACE_END
+
+#endif // RAPIDJSON_RAPIDJSON_H_
