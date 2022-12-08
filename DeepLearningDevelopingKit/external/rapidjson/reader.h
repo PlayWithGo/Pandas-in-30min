@@ -147,4 +147,55 @@ enum ParseFlag {
     kParseInsituFlag = 1,           //!< In-situ(destructive) parsing.
     kParseValidateEncodingFlag = 2, //!< Validate encoding of JSON strings.
     kParseIterativeFlag = 4,        //!< Iterative(constant complexity in terms of function call stack size) parsing.
-    kParseStopWhenDoneFlag = 8,     //!< After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate kParseErrorDocum
+    kParseStopWhenDoneFlag = 8,     //!< After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate kParseErrorDocumentRootNotSingular error.
+    kParseFullPrecisionFlag = 16,   //!< Parse number in full precision (but slower).
+    kParseCommentsFlag = 32,        //!< Allow one-line (//) and multi-line (/**/) comments.
+    kParseNumbersAsStringsFlag = 64,    //!< Parse all numbers (ints/doubles) as strings.
+    kParseTrailingCommasFlag = 128, //!< Allow trailing commas at the end of objects and arrays.
+    kParseNanAndInfFlag = 256,      //!< Allow parsing NaN, Inf, Infinity, -Inf and -Infinity as doubles.
+    kParseDefaultFlags = RAPIDJSON_PARSE_DEFAULT_FLAGS  //!< Default parse flags. Can be customized by defining RAPIDJSON_PARSE_DEFAULT_FLAGS
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Handler
+
+/*! \class rapidjson::Handler
+    \brief Concept for receiving events from GenericReader upon parsing.
+    The functions return true if no error occurs. If they return false,
+    the event publisher should terminate the process.
+\code
+concept Handler {
+    typename Ch;
+
+    bool Null();
+    bool Bool(bool b);
+    bool Int(int i);
+    bool Uint(unsigned i);
+    bool Int64(int64_t i);
+    bool Uint64(uint64_t i);
+    bool Double(double d);
+    /// enabled via kParseNumbersAsStringsFlag, string is not null-terminated (use length)
+    bool RawNumber(const Ch* str, SizeType length, bool copy);
+    bool String(const Ch* str, SizeType length, bool copy);
+    bool StartObject();
+    bool Key(const Ch* str, SizeType length, bool copy);
+    bool EndObject(SizeType memberCount);
+    bool StartArray();
+    bool EndArray(SizeType elementCount);
+};
+\endcode
+*/
+///////////////////////////////////////////////////////////////////////////////
+// BaseReaderHandler
+
+//! Default implementation of Handler.
+/*! This can be used as base class of any reader handler.
+    \note implements Handler concept
+*/
+template<typename Encoding = UTF8<>, typename Derived = void>
+struct BaseReaderHandler {
+    typedef typename Encoding::Ch Ch;
+
+    typedef typename internal::SelectIf<internal::IsSame<Derived, void>, BaseReaderHandler, Derived>::Type Override;
+
+    bool Def
