@@ -359,4 +359,61 @@ inline const char *SkipWhitespace_SIMD(const char* p) {
         __m128i x = _mm_cmpeq_epi8(s, w0);
         x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w1));
         x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w2));
-        x = _mm_or_si128(x, 
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w3));
+        unsigned short r = static_cast<unsigned short>(~_mm_movemask_epi8(x));
+        if (r != 0) {   // some of characters may be non-whitespace
+#ifdef _MSC_VER         // Find the index of first non-whitespace
+            unsigned long offset;
+            _BitScanForward(&offset, r);
+            return p + offset;
+#else
+            return p + __builtin_ffs(r) - 1;
+#endif
+        }
+    }
+}
+
+inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+    // Fast return for single non-whitespace
+    if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
+        ++p;
+    else
+        return p;
+
+    // The rest of string
+    #define C16(c) { c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c }
+    static const char whitespaces[4][16] = { C16(' '), C16('\n'), C16('\r'), C16('\t') };
+    #undef C16
+
+    const __m128i w0 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[0][0]));
+    const __m128i w1 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[1][0]));
+    const __m128i w2 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[2][0]));
+    const __m128i w3 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[3][0]));
+
+    for (; p <= end - 16; p += 16) {
+        const __m128i s = _mm_loadu_si128(reinterpret_cast<const __m128i *>(p));
+        __m128i x = _mm_cmpeq_epi8(s, w0);
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w1));
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w2));
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w3));
+        unsigned short r = static_cast<unsigned short>(~_mm_movemask_epi8(x));
+        if (r != 0) {   // some of characters may be non-whitespace
+#ifdef _MSC_VER         // Find the index of first non-whitespace
+            unsigned long offset;
+            _BitScanForward(&offset, r);
+            return p + offset;
+#else
+            return p + __builtin_ffs(r) - 1;
+#endif
+        }
+    }
+
+    return SkipWhitespace(p, end);
+}
+
+#elif defined(RAPIDJSON_NEON)
+
+//! Skip whitespace with ARM Neon instructions, testing 16 8-byte characters at once.
+inline const char *SkipWhitespace_SIMD(const char* p) {
+    // Fast return for single non-whitespace
+    if (*p == ' ' || *p == '\n' || *p == '\r' || *p 
