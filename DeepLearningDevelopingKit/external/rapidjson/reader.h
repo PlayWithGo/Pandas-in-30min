@@ -309,4 +309,54 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
     // Fast return for single non-whitespace
     if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
         ++p;
-    e
+    else
+        return p;
+
+    // The middle of string using SIMD
+    static const char whitespace[16] = " \n\r\t";
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespace[0]));
+
+    for (; p <= end - 16; p += 16) {
+        const __m128i s = _mm_loadu_si128(reinterpret_cast<const __m128i *>(p));
+        const int r = _mm_cmpistri(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_LEAST_SIGNIFICANT | _SIDD_NEGATIVE_POLARITY);
+        if (r != 16)    // some of characters is non-whitespace
+            return p + r;
+    }
+
+    return SkipWhitespace(p, end);
+}
+
+#elif defined(RAPIDJSON_SSE2)
+
+//! Skip whitespace with SSE2 instructions, testing 16 8-byte characters at once.
+inline const char *SkipWhitespace_SIMD(const char* p) {
+    // Fast return for single non-whitespace
+    if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+        ++p;
+    else
+        return p;
+
+    // 16-byte align to the next boundary
+    const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+    while (p != nextAligned)
+        if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+            ++p;
+        else
+            return p;
+
+    // The rest of string
+    #define C16(c) { c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c }
+    static const char whitespaces[4][16] = { C16(' '), C16('\n'), C16('\r'), C16('\t') };
+    #undef C16
+
+    const __m128i w0 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[0][0]));
+    const __m128i w1 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[1][0]));
+    const __m128i w2 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[2][0]));
+    const __m128i w3 = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespaces[3][0]));
+
+    for (;; p += 16) {
+        const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i *>(p));
+        __m128i x = _mm_cmpeq_epi8(s, w0);
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w1));
+        x = _mm_or_si128(x, _mm_cmpeq_epi8(s, w2));
+        x = _mm_or_si128(x, 
