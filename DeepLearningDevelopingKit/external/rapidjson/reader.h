@@ -198,4 +198,57 @@ struct BaseReaderHandler {
 
     typedef typename internal::SelectIf<internal::IsSame<Derived, void>, BaseReaderHandler, Derived>::Type Override;
 
-    bool Def
+    bool Default() { return true; }
+    bool Null() { return static_cast<Override&>(*this).Default(); }
+    bool Bool(bool) { return static_cast<Override&>(*this).Default(); }
+    bool Int(int) { return static_cast<Override&>(*this).Default(); }
+    bool Uint(unsigned) { return static_cast<Override&>(*this).Default(); }
+    bool Int64(int64_t) { return static_cast<Override&>(*this).Default(); }
+    bool Uint64(uint64_t) { return static_cast<Override&>(*this).Default(); }
+    bool Double(double) { return static_cast<Override&>(*this).Default(); }
+    /// enabled via kParseNumbersAsStringsFlag, string is not null-terminated (use length)
+    bool RawNumber(const Ch* str, SizeType len, bool copy) { return static_cast<Override&>(*this).String(str, len, copy); }
+    bool String(const Ch*, SizeType, bool) { return static_cast<Override&>(*this).Default(); }
+    bool StartObject() { return static_cast<Override&>(*this).Default(); }
+    bool Key(const Ch* str, SizeType len, bool copy) { return static_cast<Override&>(*this).String(str, len, copy); }
+    bool EndObject(SizeType) { return static_cast<Override&>(*this).Default(); }
+    bool StartArray() { return static_cast<Override&>(*this).Default(); }
+    bool EndArray(SizeType) { return static_cast<Override&>(*this).Default(); }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// StreamLocalCopy
+
+namespace internal {
+
+template<typename Stream, int = StreamTraits<Stream>::copyOptimization>
+class StreamLocalCopy;
+
+//! Do copy optimization.
+template<typename Stream>
+class StreamLocalCopy<Stream, 1> {
+public:
+    StreamLocalCopy(Stream& original) : s(original), original_(original) {}
+    ~StreamLocalCopy() { original_ = s; }
+
+    Stream s;
+
+private:
+    StreamLocalCopy& operator=(const StreamLocalCopy&) /* = delete */;
+
+    Stream& original_;
+};
+
+//! Keep reference.
+template<typename Stream>
+class StreamLocalCopy<Stream, 0> {
+public:
+    StreamLocalCopy(Stream& original) : s(original) {}
+
+    Stream& s;
+
+private:
+    StreamLocalCopy& operator=(const StreamLocalCopy&) /* = delete */;
+};
+
+} // namesp
