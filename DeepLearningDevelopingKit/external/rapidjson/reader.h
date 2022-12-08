@@ -251,4 +251,62 @@ private:
     StreamLocalCopy& operator=(const StreamLocalCopy&) /* = delete */;
 };
 
-} // namesp
+} // namespace internal
+
+///////////////////////////////////////////////////////////////////////////////
+// SkipWhitespace
+
+//! Skip the JSON white spaces in a stream.
+/*! \param is A input stream for skipping white spaces.
+    \note This function has SSE2/SSE4.2 specialization.
+*/
+template<typename InputStream>
+void SkipWhitespace(InputStream& is) {
+    internal::StreamLocalCopy<InputStream> copy(is);
+    InputStream& s(copy.s);
+
+    typename InputStream::Ch c;
+    while ((c = s.Peek()) == ' ' || c == '\n' || c == '\r' || c == '\t')
+        s.Take();
+}
+
+inline const char* SkipWhitespace(const char* p, const char* end) {
+    while (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
+        ++p;
+    return p;
+}
+
+#ifdef RAPIDJSON_SSE42
+//! Skip whitespace with SSE 4.2 pcmpistrm instruction, testing 16 8-byte characters at once.
+inline const char *SkipWhitespace_SIMD(const char* p) {
+    // Fast return for single non-whitespace
+    if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+        ++p;
+    else
+        return p;
+
+    // 16-byte align to the next boundary
+    const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+    while (p != nextAligned)
+        if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+            ++p;
+        else
+            return p;
+
+    // The rest of string using SIMD
+    static const char whitespace[16] = " \n\r\t";
+    const __m128i w = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&whitespace[0]));
+
+    for (;; p += 16) {
+        const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i *>(p));
+        const int r = _mm_cmpistri(w, s, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_LEAST_SIGNIFICANT | _SIDD_NEGATIVE_POLARITY);
+        if (r != 16)    // some of characters is non-whitespace
+            return p + r;
+    }
+}
+
+inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+    // Fast return for single non-whitespace
+    if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
+        ++p;
+    e
