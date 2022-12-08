@@ -525,4 +525,62 @@ RAPIDJSON_NAMESPACE_END
 #define RAPIDJSON_PRAGMA(x) __pragma(x)
 #define RAPIDJSON_DIAG_PRAGMA(x) RAPIDJSON_PRAGMA(warning(x))
 
-#define
+#define RAPIDJSON_DIAG_OFF(x) RAPIDJSON_DIAG_PRAGMA(disable: x)
+#define RAPIDJSON_DIAG_PUSH RAPIDJSON_DIAG_PRAGMA(push)
+#define RAPIDJSON_DIAG_POP  RAPIDJSON_DIAG_PRAGMA(pop)
+
+#else
+
+#define RAPIDJSON_DIAG_OFF(x) /* ignored */
+#define RAPIDJSON_DIAG_PUSH   /* ignored */
+#define RAPIDJSON_DIAG_POP    /* ignored */
+
+#endif // RAPIDJSON_DIAG_*
+
+///////////////////////////////////////////////////////////////////////////////
+// C++11 features
+
+#ifndef RAPIDJSON_HAS_CXX11_RVALUE_REFS
+#if defined(__clang__)
+#if __has_feature(cxx_rvalue_references) && \
+    (defined(_MSC_VER) || defined(_LIBCPP_VERSION) || defined(__GLIBCXX__) && __GLIBCXX__ >= 20080306)
+#define RAPIDJSON_HAS_CXX11_RVALUE_REFS 1
+#else
+#define RAPIDJSON_HAS_CXX11_RVALUE_REFS 0
+#endif
+#elif (defined(RAPIDJSON_GNUC) && (RAPIDJSON_GNUC >= RAPIDJSON_VERSION_CODE(4,3,0)) && defined(__GXX_EXPERIMENTAL_CXX0X__)) || \
+      (defined(_MSC_VER) && _MSC_VER >= 1600)
+
+#define RAPIDJSON_HAS_CXX11_RVALUE_REFS 1
+#else
+#define RAPIDJSON_HAS_CXX11_RVALUE_REFS 0
+#endif
+#endif // RAPIDJSON_HAS_CXX11_RVALUE_REFS
+
+#ifndef RAPIDJSON_HAS_CXX11_NOEXCEPT
+#if defined(__clang__)
+#define RAPIDJSON_HAS_CXX11_NOEXCEPT __has_feature(cxx_noexcept)
+#elif (defined(RAPIDJSON_GNUC) && (RAPIDJSON_GNUC >= RAPIDJSON_VERSION_CODE(4,6,0)) && defined(__GXX_EXPERIMENTAL_CXX0X__))
+//    (defined(_MSC_VER) && _MSC_VER >= ????) // not yet supported
+#define RAPIDJSON_HAS_CXX11_NOEXCEPT 1
+#else
+#define RAPIDJSON_HAS_CXX11_NOEXCEPT 0
+#endif
+#endif
+#if RAPIDJSON_HAS_CXX11_NOEXCEPT
+#define RAPIDJSON_NOEXCEPT noexcept
+#else
+#define RAPIDJSON_NOEXCEPT /* noexcept */
+#endif // RAPIDJSON_HAS_CXX11_NOEXCEPT
+
+// no automatic detection, yet
+#ifndef RAPIDJSON_HAS_CXX11_TYPETRAITS
+#define RAPIDJSON_HAS_CXX11_TYPETRAITS 0
+#endif
+
+#ifndef RAPIDJSON_HAS_CXX11_RANGE_FOR
+#if defined(__clang__)
+#define RAPIDJSON_HAS_CXX11_RANGE_FOR __has_feature(cxx_range_for)
+#elif (defined(RAPIDJSON_GNUC) && (RAPIDJSON_GNUC >= RAPIDJSON_VERSION_CODE(4,6,0)) && defined(__GXX_EXPERIMENTAL_CXX0X__)) || \
+      (defined(_MSC_VER) && _MSC_VER >= 1700)
+#
