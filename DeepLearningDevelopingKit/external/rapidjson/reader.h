@@ -93,4 +93,58 @@ RAPIDJSON_DIAG_OFF(effc++)
     #include "rapidjson/reader.h"
     \endcode
 
-    \see RAPID
+    \see RAPIDJSON_PARSE_ERROR, rapidjson::GenericReader::Parse
+ */
+#ifndef RAPIDJSON_PARSE_ERROR_NORETURN
+#define RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode, offset) \
+    RAPIDJSON_MULTILINEMACRO_BEGIN \
+    RAPIDJSON_ASSERT(!HasParseError()); /* Error can only be assigned once */ \
+    SetParseError(parseErrorCode, offset); \
+    RAPIDJSON_MULTILINEMACRO_END
+#endif
+
+/*! \def RAPIDJSON_PARSE_ERROR
+    \ingroup RAPIDJSON_ERRORS
+    \brief (Internal) macro to indicate and handle a parse error.
+    \param parseErrorCode \ref rapidjson::ParseErrorCode of the error
+    \param offset  position of the error in JSON input (\c size_t)
+
+    Invokes RAPIDJSON_PARSE_ERROR_NORETURN and stops the parsing.
+
+    \see RAPIDJSON_PARSE_ERROR_NORETURN
+    \hideinitializer
+ */
+#ifndef RAPIDJSON_PARSE_ERROR
+#define RAPIDJSON_PARSE_ERROR(parseErrorCode, offset) \
+    RAPIDJSON_MULTILINEMACRO_BEGIN \
+    RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode, offset); \
+    RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID; \
+    RAPIDJSON_MULTILINEMACRO_END
+#endif
+
+#include "error/error.h" // ParseErrorCode, ParseResult
+
+RAPIDJSON_NAMESPACE_BEGIN
+
+///////////////////////////////////////////////////////////////////////////////
+// ParseFlag
+
+/*! \def RAPIDJSON_PARSE_DEFAULT_FLAGS
+    \ingroup RAPIDJSON_CONFIG
+    \brief User-defined kParseDefaultFlags definition.
+
+    User can define this as any \c ParseFlag combinations.
+*/
+#ifndef RAPIDJSON_PARSE_DEFAULT_FLAGS
+#define RAPIDJSON_PARSE_DEFAULT_FLAGS kParseNoFlags
+#endif
+
+//! Combination of parseFlags
+/*! \see Reader::Parse, Document::Parse, Document::ParseInsitu, Document::ParseStream
+ */
+enum ParseFlag {
+    kParseNoFlags = 0,              //!< No flags are set.
+    kParseInsituFlag = 1,           //!< In-situ(destructive) parsing.
+    kParseValidateEncodingFlag = 2, //!< Validate encoding of JSON strings.
+    kParseIterativeFlag = 4,        //!< Iterative(constant complexity in terms of function call stack size) parsing.
+    kParseStopWhenDoneFlag = 8,     //!< After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate kParseErrorDocum
