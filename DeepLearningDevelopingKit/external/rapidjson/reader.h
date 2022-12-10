@@ -416,4 +416,65 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
 //! Skip whitespace with ARM Neon instructions, testing 16 8-byte characters at once.
 inline const char *SkipWhitespace_SIMD(const char* p) {
     // Fast return for single non-whitespace
-    if (*p == ' ' || *p == '\n' || *p == '\r' || *p 
+    if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+        ++p;
+    else
+        return p;
+
+    // 16-byte align to the next boundary
+    const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+    while (p != nextAligned)
+        if (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t')
+            ++p;
+        else
+            return p;
+
+    const uint8x16_t w0 = vmovq_n_u8(' ');
+    const uint8x16_t w1 = vmovq_n_u8('\n');
+    const uint8x16_t w2 = vmovq_n_u8('\r');
+    const uint8x16_t w3 = vmovq_n_u8('\t');
+
+    for (;; p += 16) {
+        const uint8x16_t s = vld1q_u8(reinterpret_cast<const uint8_t *>(p));
+        uint8x16_t x = vceqq_u8(s, w0);
+        x = vorrq_u8(x, vceqq_u8(s, w1));
+        x = vorrq_u8(x, vceqq_u8(s, w2));
+        x = vorrq_u8(x, vceqq_u8(s, w3));
+
+        x = vmvnq_u8(x);                       // Negate
+        x = vrev64q_u8(x);                     // Rev in 64
+        uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
+        uint64_t high = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 1);  // extract
+
+        if (low == 0) {
+            if (high != 0) {
+                int lz =__builtin_clzll(high);;
+                return p + 8 + (lz >> 3);
+            }
+        } else {
+            int lz = __builtin_clzll(low);;
+            return p + (lz >> 3);
+        }
+    }
+}
+
+inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
+    // Fast return for single non-whitespace
+    if (p != end && (*p == ' ' || *p == '\n' || *p == '\r' || *p == '\t'))
+        ++p;
+    else
+        return p;
+
+    const uint8x16_t w0 = vmovq_n_u8(' ');
+    const uint8x16_t w1 = vmovq_n_u8('\n');
+    const uint8x16_t w2 = vmovq_n_u8('\r');
+    const uint8x16_t w3 = vmovq_n_u8('\t');
+
+    for (; p <= end - 16; p += 16) {
+        const uint8x16_t s = vld1q_u8(reinterpret_cast<const uint8_t *>(p));
+        uint8x16_t x = vceqq_u8(s, w0);
+        x = vorrq_u8(x, vceqq_u8(s, w1));
+        x = vorrq_u8(x, vceqq_u8(s, w2));
+        x = vorrq_u8(x, vceqq_u8(s, w3));
+
+        x = vmvnq_u8(x);                       // N
