@@ -477,4 +477,60 @@ inline const char *SkipWhitespace_SIMD(const char* p, const char* end) {
         x = vorrq_u8(x, vceqq_u8(s, w2));
         x = vorrq_u8(x, vceqq_u8(s, w3));
 
-        x = vmvnq_u8(x);                       // N
+        x = vmvnq_u8(x);                       // Negate
+        x = vrev64q_u8(x);                     // Rev in 64
+        uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
+        uint64_t high = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 1);  // extract
+
+        if (low == 0) {
+            if (high != 0) {
+                int lz = __builtin_clzll(high);
+                return p + 8 + (lz >> 3);
+            }
+        } else {
+            int lz = __builtin_clzll(low);
+            return p + (lz >> 3);
+        }
+    }
+
+    return SkipWhitespace(p, end);
+}
+
+#endif // RAPIDJSON_NEON
+
+#ifdef RAPIDJSON_SIMD
+//! Template function specialization for InsituStringStream
+template<> inline void SkipWhitespace(InsituStringStream& is) {
+    is.src_ = const_cast<char*>(SkipWhitespace_SIMD(is.src_));
+}
+
+//! Template function specialization for StringStream
+template<> inline void SkipWhitespace(StringStream& is) {
+    is.src_ = SkipWhitespace_SIMD(is.src_);
+}
+
+template<> inline void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& is) {
+    is.is_.src_ = SkipWhitespace_SIMD(is.is_.src_, is.is_.end_);
+}
+#endif // RAPIDJSON_SIMD
+
+///////////////////////////////////////////////////////////////////////////////
+// GenericReader
+
+//! SAX-style JSON parser. Use \ref Reader for UTF8 encoding and default allocator.
+/*! GenericReader parses JSON text from a stream, and send events synchronously to an
+    object implementing Handler concept.
+
+    It needs to allocate a stack for storing a single decoded string during
+    non-destructive parsing.
+
+    For in-situ parsing, the decoded string is directly written to the source
+    text string, no temporary buffer is required.
+
+    A GenericReader object can be reused for parsing multiple JSON text.
+
+    \tparam SourceEncoding Encoding of the input stream.
+    \tparam TargetEncoding Encoding of the parse output.
+    \tparam StackAllocator Allocator type for stack.
+*/
+template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator
