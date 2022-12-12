@@ -579,4 +579,56 @@ public:
 
                 if (RAPIDJSON_UNLIKELY(is.Peek() != '\0')) {
                     RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorDocumentRootNotSingular, is.Tell());
-                    RAPIDJSON_PARSE_E
+                    RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+                }
+            }
+        }
+
+        return parseResult_;
+    }
+
+    //! Parse JSON text (with \ref kParseDefaultFlags)
+    /*! \tparam InputStream Type of input stream, implementing Stream concept
+        \tparam Handler Type of handler, implementing Handler concept.
+        \param is Input stream to be parsed.
+        \param handler The handler to receive events.
+        \return Whether the parsing is successful.
+    */
+    template <typename InputStream, typename Handler>
+    ParseResult Parse(InputStream& is, Handler& handler) {
+        return Parse<kParseDefaultFlags>(is, handler);
+    }
+
+    //! Initialize JSON text token-by-token parsing
+    /*!
+     */
+    void IterativeParseInit() {
+        parseResult_.Clear();
+        state_ = IterativeParsingStartState;
+    }
+    
+    //! Parse one token from JSON text
+    /*! \tparam InputStream Type of input stream, implementing Stream concept
+        \tparam Handler Type of handler, implementing Handler concept.
+        \param is Input stream to be parsed.
+        \param handler The handler to receive events.
+        \return Whether the parsing is successful.
+     */
+    template <unsigned parseFlags, typename InputStream, typename Handler>
+    bool IterativeParseNext(InputStream& is, Handler& handler) {
+        while (RAPIDJSON_LIKELY(is.Peek() != '\0')) {
+            SkipWhitespaceAndComments<parseFlags>(is);
+            
+            Token t = Tokenize(is.Peek());
+            IterativeParsingState n = Predict(state_, t);
+            IterativeParsingState d = Transit<parseFlags>(state_, t, n, is, handler);
+            
+            // If we've finished or hit an error...
+            if (RAPIDJSON_UNLIKELY(IsIterativeParsingCompleteState(d))) {
+                // Report errors.
+                if (d == IterativeParsingErrorState) {
+                    HandleError(state_, is);
+                    return false;
+                }
+            
+                // Transition to th
