@@ -533,4 +533,50 @@ template<> inline void SkipWhitespace(EncodedInputStream<UTF8<>, MemoryStream>& 
     \tparam TargetEncoding Encoding of the parse output.
     \tparam StackAllocator Allocator type for stack.
 */
-template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator
+template <typename SourceEncoding, typename TargetEncoding, typename StackAllocator = CrtAllocator>
+class GenericReader {
+public:
+    typedef typename SourceEncoding::Ch Ch; //!< SourceEncoding character type
+
+    //! Constructor.
+    /*! \param stackAllocator Optional allocator for allocating stack memory. (Only use for non-destructive parsing)
+        \param stackCapacity stack capacity in bytes for storing a single decoded string.  (Only use for non-destructive parsing)
+    */
+    GenericReader(StackAllocator* stackAllocator = 0, size_t stackCapacity = kDefaultStackCapacity) :
+        stack_(stackAllocator, stackCapacity), parseResult_(), state_(IterativeParsingStartState) {}
+
+    //! Parse JSON text.
+    /*! \tparam parseFlags Combination of \ref ParseFlag.
+        \tparam InputStream Type of input stream, implementing Stream concept.
+        \tparam Handler Type of handler, implementing Handler concept.
+        \param is Input stream to be parsed.
+        \param handler The handler to receive events.
+        \return Whether the parsing is successful.
+    */
+    template <unsigned parseFlags, typename InputStream, typename Handler>
+    ParseResult Parse(InputStream& is, Handler& handler) {
+        if (parseFlags & kParseIterativeFlag)
+            return IterativeParse<parseFlags>(is, handler);
+
+        parseResult_.Clear();
+
+        ClearStackOnExit scope(*this);
+
+        SkipWhitespaceAndComments<parseFlags>(is);
+        RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+
+        if (RAPIDJSON_UNLIKELY(is.Peek() == '\0')) {
+            RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorDocumentEmpty, is.Tell());
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+        }
+        else {
+            ParseValue<parseFlags>(is, handler);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+
+            if (!(parseFlags & kParseStopWhenDoneFlag)) {
+                SkipWhitespaceAndComments<parseFlags>(is);
+                RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+
+                if (RAPIDJSON_UNLIKELY(is.Peek() != '\0')) {
+                    RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorDocumentRootNotSingular, is.Tell());
+                    RAPIDJSON_PARSE_E
