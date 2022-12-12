@@ -631,4 +631,66 @@ public:
                     return false;
                 }
             
-                // Transition to th
+                // Transition to the finish state.
+                RAPIDJSON_ASSERT(d == IterativeParsingFinishState);
+                state_ = d;
+                
+                // If StopWhenDone is not set...
+                if (!(parseFlags & kParseStopWhenDoneFlag)) {
+                    // ... and extra non-whitespace data is found...
+                    SkipWhitespaceAndComments<parseFlags>(is);
+                    if (is.Peek() != '\0') {
+                        // ... this is considered an error.
+                        HandleError(state_, is);
+                        return false;
+                    }
+                }
+                
+                // Success! We are done!
+                return true;
+            }
+            
+            // Transition to the new state.
+            state_ = d;
+
+            // If we parsed anything other than a delimiter, we invoked the handler, so we can return true now.
+            if (!IsIterativeParsingDelimiterState(n))
+                return true;
+        }
+        
+        // We reached the end of file.
+        stack_.Clear();
+
+        if (state_ != IterativeParsingFinishState) {
+            HandleError(state_, is);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    //! Check if token-by-token parsing JSON text is complete
+    /*! \return Whether the JSON has been fully decoded.
+     */
+    RAPIDJSON_FORCEINLINE bool IterativeParseComplete() {
+        return IsIterativeParsingCompleteState(state_);
+    }
+
+    //! Whether a parse error has occurred in the last parsing.
+    bool HasParseError() const { return parseResult_.IsError(); }
+
+    //! Get the \ref ParseErrorCode of last parsing.
+    ParseErrorCode GetParseErrorCode() const { return parseResult_.Code(); }
+
+    //! Get the position of last parsing error in input, 0 otherwise.
+    size_t GetErrorOffset() const { return parseResult_.Offset(); }
+
+protected:
+    void SetParseError(ParseErrorCode code, size_t offset) { parseResult_.Set(code, offset); }
+
+private:
+    // Prohibit copy constructor & assignment operator.
+    GenericReader(const GenericReader&);
+    GenericReader& operator=(const GenericReader&);
+
+    void ClearStack() { stack_.Clea
