@@ -693,4 +693,58 @@ private:
     GenericReader(const GenericReader&);
     GenericReader& operator=(const GenericReader&);
 
-    void ClearStack() { stack_.Clea
+    void ClearStack() { stack_.Clear(); }
+
+    // clear stack on any exit from ParseStream, e.g. due to exception
+    struct ClearStackOnExit {
+        explicit ClearStackOnExit(GenericReader& r) : r_(r) {}
+        ~ClearStackOnExit() { r_.ClearStack(); }
+    private:
+        GenericReader& r_;
+        ClearStackOnExit(const ClearStackOnExit&);
+        ClearStackOnExit& operator=(const ClearStackOnExit&);
+    };
+
+    template<unsigned parseFlags, typename InputStream>
+    void SkipWhitespaceAndComments(InputStream& is) {
+        SkipWhitespace(is);
+
+        if (parseFlags & kParseCommentsFlag) {
+            while (RAPIDJSON_UNLIKELY(Consume(is, '/'))) {
+                if (Consume(is, '*')) {
+                    while (true) {
+                        if (RAPIDJSON_UNLIKELY(is.Peek() == '\0'))
+                            RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
+                        else if (Consume(is, '*')) {
+                            if (Consume(is, '/'))
+                                break;
+                        }
+                        else
+                            is.Take();
+                    }
+                }
+                else if (RAPIDJSON_LIKELY(Consume(is, '/')))
+                    while (is.Peek() != '\0' && is.Take() != '\n') {}
+                else
+                    RAPIDJSON_PARSE_ERROR(kParseErrorUnspecificSyntaxError, is.Tell());
+
+                SkipWhitespace(is);
+            }
+        }
+    }
+
+    // Parse object: { string : value, ... }
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseObject(InputStream& is, Handler& handler) {
+        RAPIDJSON_ASSERT(is.Peek() == '{');
+        is.Take();  // Skip '{'
+
+        if (RAPIDJSON_UNLIKELY(!handler.StartObject()))
+            RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+
+        SkipWhitespaceAndComments<parseFlags>(is);
+        RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+        if (Consume(is, '}')) {
+            if (RAPIDJSON_UNLIKELY(!handler.EndObject(0)))  // empty object
+                RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
