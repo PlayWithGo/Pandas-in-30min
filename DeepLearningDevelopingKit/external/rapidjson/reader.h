@@ -803,4 +803,59 @@ private:
 
     // Parse array: [ value, ... ]
     template<unsigned parseFlags, typename InputStream, typename Handler>
-    void ParseArray(InputStream& is,
+    void ParseArray(InputStream& is, Handler& handler) {
+        RAPIDJSON_ASSERT(is.Peek() == '[');
+        is.Take();  // Skip '['
+
+        if (RAPIDJSON_UNLIKELY(!handler.StartArray()))
+            RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+
+        SkipWhitespaceAndComments<parseFlags>(is);
+        RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+        if (Consume(is, ']')) {
+            if (RAPIDJSON_UNLIKELY(!handler.EndArray(0))) // empty array
+                RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+            return;
+        }
+
+        for (SizeType elementCount = 0;;) {
+            ParseValue<parseFlags>(is, handler);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            ++elementCount;
+            SkipWhitespaceAndComments<parseFlags>(is);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            if (Consume(is, ',')) {
+                SkipWhitespaceAndComments<parseFlags>(is);
+                RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            }
+            else if (Consume(is, ']')) {
+                if (RAPIDJSON_UNLIKELY(!handler.EndArray(elementCount)))
+                    RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+                return;
+            }
+            else
+                RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell());
+
+            if (parseFlags & kParseTrailingCommasFlag) {
+                if (is.Peek() == ']') {
+                    if (RAPIDJSON_UNLIKELY(!handler.EndArray(elementCount)))
+                        RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+                    is.Take();
+                    return;
+                }
+            }
+        }
+    }
+
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseNull(InputStream& is, Handler& handler) {
+        RAPIDJSON_ASSERT(is.Peek() == 'n');
+        is.Take();
+
+        if (RAPIDJSON_LIKELY(Consume(is, 'u') && Consume(is, 'l') && Consume(is, 'l'))) {
+            if (RAPIDJSON_UNLIKELY(!handler.Null()))
+                RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+  
