@@ -748,3 +748,59 @@ private:
         if (Consume(is, '}')) {
             if (RAPIDJSON_UNLIKELY(!handler.EndObject(0)))  // empty object
                 RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+            return;
+        }
+
+        for (SizeType memberCount = 0;;) {
+            if (RAPIDJSON_UNLIKELY(is.Peek() != '"'))
+                RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissName, is.Tell());
+
+            ParseString<parseFlags>(is, handler, true);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            SkipWhitespaceAndComments<parseFlags>(is);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            if (RAPIDJSON_UNLIKELY(!Consume(is, ':')))
+                RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissColon, is.Tell());
+
+            SkipWhitespaceAndComments<parseFlags>(is);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            ParseValue<parseFlags>(is, handler);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            SkipWhitespaceAndComments<parseFlags>(is);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+
+            ++memberCount;
+
+            switch (is.Peek()) {
+                case ',':
+                    is.Take();
+                    SkipWhitespaceAndComments<parseFlags>(is);
+                    RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+                    break;
+                case '}':
+                    is.Take();
+                    if (RAPIDJSON_UNLIKELY(!handler.EndObject(memberCount)))
+                        RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+                    return;
+                default:
+                    RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell()); break; // This useless break is only for making warning and coverage happy
+            }
+
+            if (parseFlags & kParseTrailingCommasFlag) {
+                if (is.Peek() == '}') {
+                    if (RAPIDJSON_UNLIKELY(!handler.EndObject(memberCount)))
+                        RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+                    is.Take();
+                    return;
+                }
+            }
+        }
+    }
+
+    // Parse array: [ value, ... ]
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseArray(InputStream& is,
