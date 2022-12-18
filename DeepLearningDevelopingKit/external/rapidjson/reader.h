@@ -858,4 +858,61 @@ private:
         if (RAPIDJSON_LIKELY(Consume(is, 'u') && Consume(is, 'l') && Consume(is, 'l'))) {
             if (RAPIDJSON_UNLIKELY(!handler.Null()))
                 RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
-  
+        }
+        else
+            RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, is.Tell());
+    }
+
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseTrue(InputStream& is, Handler& handler) {
+        RAPIDJSON_ASSERT(is.Peek() == 't');
+        is.Take();
+
+        if (RAPIDJSON_LIKELY(Consume(is, 'r') && Consume(is, 'u') && Consume(is, 'e'))) {
+            if (RAPIDJSON_UNLIKELY(!handler.Bool(true)))
+                RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+        }
+        else
+            RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, is.Tell());
+    }
+
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseFalse(InputStream& is, Handler& handler) {
+        RAPIDJSON_ASSERT(is.Peek() == 'f');
+        is.Take();
+
+        if (RAPIDJSON_LIKELY(Consume(is, 'a') && Consume(is, 'l') && Consume(is, 's') && Consume(is, 'e'))) {
+            if (RAPIDJSON_UNLIKELY(!handler.Bool(false)))
+                RAPIDJSON_PARSE_ERROR(kParseErrorTermination, is.Tell());
+        }
+        else
+            RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, is.Tell());
+    }
+
+    template<typename InputStream>
+    RAPIDJSON_FORCEINLINE static bool Consume(InputStream& is, typename InputStream::Ch expect) {
+        if (RAPIDJSON_LIKELY(is.Peek() == expect)) {
+            is.Take();
+            return true;
+        }
+        else
+            return false;
+    }
+
+    // Helper function to parse four hexadecimal digits in \uXXXX in ParseString().
+    template<typename InputStream>
+    unsigned ParseHex4(InputStream& is, size_t escapeOffset) {
+        unsigned codepoint = 0;
+        for (int i = 0; i < 4; i++) {
+            Ch c = is.Peek();
+            codepoint <<= 4;
+            codepoint += static_cast<unsigned>(c);
+            if (c >= '0' && c <= '9')
+                codepoint -= '0';
+            else if (c >= 'A' && c <= 'F')
+                codepoint -= 'A' - 10;
+            else if (c >= 'a' && c <= 'f')
+                codepoint -= 'a' - 10;
+            else {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorStringUnicodeEscapeInvalidHex, escapeOffset);
+         
