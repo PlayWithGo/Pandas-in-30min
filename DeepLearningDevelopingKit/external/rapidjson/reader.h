@@ -974,4 +974,43 @@ private:
         else {
             StackStream<typename TargetEncoding::Ch> stackStream(stack_);
             ParseStringToStream<parseFlags, SourceEncoding, TargetEncoding>(s, stackStream);
-            RAPIDJSON_PARSE_ERR
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            SizeType length = static_cast<SizeType>(stackStream.Length()) - 1;
+            const typename TargetEncoding::Ch* const str = stackStream.Pop();
+            success = (isKey ? handler.Key(str, length, true) : handler.String(str, length, true));
+        }
+        if (RAPIDJSON_UNLIKELY(!success))
+            RAPIDJSON_PARSE_ERROR(kParseErrorTermination, s.Tell());
+    }
+
+    // Parse string to an output is
+    // This function handles the prefix/suffix double quotes, escaping, and optional encoding validation.
+    template<unsigned parseFlags, typename SEncoding, typename TEncoding, typename InputStream, typename OutputStream>
+    RAPIDJSON_FORCEINLINE void ParseStringToStream(InputStream& is, OutputStream& os) {
+//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+#define Z16 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        static const char escape[256] = {
+            Z16, Z16, 0, 0,'\"', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,'/',
+            Z16, Z16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,'\\', 0, 0, 0,
+            0, 0,'\b', 0, 0, 0,'\f', 0, 0, 0, 0, 0, 0, 0,'\n', 0,
+            0, 0,'\r', 0,'\t', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            Z16, Z16, Z16, Z16, Z16, Z16, Z16, Z16
+        };
+#undef Z16
+//!@endcond
+
+        for (;;) {
+            // Scan and copy string before "\\\"" or < 0x20. This is an optional optimzation.
+            if (!(parseFlags & kParseValidateEncodingFlag))
+                ScanCopyUnescapedString(is, os);
+
+            Ch c = is.Peek();
+            if (RAPIDJSON_UNLIKELY(c == '\\')) {    // Escape
+                size_t escapeOffset = is.Tell();    // For invalid escaping, report the initial '\\' as error offset
+                is.Take();
+                Ch e = is.Peek();
+                if ((sizeof(Ch) == 1 || unsigned(e) < 256) && RAPIDJSON_LIKELY(escape[static_cast<unsigned char>(e)])) {
+                    is.Take();
+                    os.Put(static_cast<typename TEncoding::Ch>(escape[static_cast<unsigned char>(e)]));
+                }
+                else if (RAP
