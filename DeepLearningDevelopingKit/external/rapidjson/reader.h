@@ -1048,3 +1048,41 @@ private:
                 if (RAPIDJSON_UNLIKELY((parseFlags & kParseValidateEncodingFlag ?
                     !Transcoder<SEncoding, TEncoding>::Validate(is, os) :
                     !Transcoder<SEncoding, TEncoding>::Transcode(is, os))))
+                    RAPIDJSON_PARSE_ERROR(kParseErrorStringInvalidEncoding, offset);
+            }
+        }
+    }
+
+    template<typename InputStream, typename OutputStream>
+    static RAPIDJSON_FORCEINLINE void ScanCopyUnescapedString(InputStream&, OutputStream&) {
+            // Do nothing for generic version
+    }
+
+#if defined(RAPIDJSON_SSE2) || defined(RAPIDJSON_SSE42)
+    // StringStream -> StackStream<char>
+    static RAPIDJSON_FORCEINLINE void ScanCopyUnescapedString(StringStream& is, StackStream<char>& os) {
+        const char* p = is.src_;
+
+        // Scan one by one until alignment (unaligned load may cross page boundary and cause crash)
+        const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+        while (p != nextAligned)
+            if (RAPIDJSON_UNLIKELY(*p == '\"') || RAPIDJSON_UNLIKELY(*p == '\\') || RAPIDJSON_UNLIKELY(static_cast<unsigned>(*p) < 0x20)) {
+                is.src_ = p;
+                return;
+            }
+            else
+                os.Put(*p++);
+
+        // The rest of string using SIMD
+        static const char dquote[16] = { '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"' };
+        static const char bslash[16] = { '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\' };
+        static const char space[16]  = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
+        const __m128i dq = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&dquote[0]));
+        const __m128i bs = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&bslash[0]));
+        const __m128i sp = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&space[0]));
+
+        for (;; p += 16) {
+            const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i *>(p));
+            const __m128i t1 = _mm_cmpeq_epi8(s, dq);
+            const __m128i t2 = _mm_cmpeq_epi8(s, bs);
+            const __m128i t
