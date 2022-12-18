@@ -915,4 +915,63 @@ private:
                 codepoint -= 'a' - 10;
             else {
                 RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorStringUnicodeEscapeInvalidHex, escapeOffset);
-         
+                RAPIDJSON_PARSE_ERROR_EARLY_RETURN(0);
+            }
+            is.Take();
+        }
+        return codepoint;
+    }
+
+    template <typename CharType>
+    class StackStream {
+    public:
+        typedef CharType Ch;
+
+        StackStream(internal::Stack<StackAllocator>& stack) : stack_(stack), length_(0) {}
+        RAPIDJSON_FORCEINLINE void Put(Ch c) {
+            *stack_.template Push<Ch>() = c;
+            ++length_;
+        }
+
+        RAPIDJSON_FORCEINLINE void* Push(SizeType count) {
+            length_ += count;
+            return stack_.template Push<Ch>(count);
+        }
+
+        size_t Length() const { return length_; }
+
+        Ch* Pop() {
+            return stack_.template Pop<Ch>(length_);
+        }
+
+    private:
+        StackStream(const StackStream&);
+        StackStream& operator=(const StackStream&);
+
+        internal::Stack<StackAllocator>& stack_;
+        SizeType length_;
+    };
+
+    // Parse string and generate String event. Different code paths for kParseInsituFlag.
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseString(InputStream& is, Handler& handler, bool isKey = false) {
+        internal::StreamLocalCopy<InputStream> copy(is);
+        InputStream& s(copy.s);
+
+        RAPIDJSON_ASSERT(s.Peek() == '\"');
+        s.Take();  // Skip '\"'
+
+        bool success = false;
+        if (parseFlags & kParseInsituFlag) {
+            typename InputStream::Ch *head = s.PutBegin();
+            ParseStringToStream<parseFlags, SourceEncoding, SourceEncoding>(s, s);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+            size_t length = s.PutEnd(head) - 1;
+            RAPIDJSON_ASSERT(length <= 0xFFFFFFFF);
+            const typename TargetEncoding::Ch* const str = reinterpret_cast<typename TargetEncoding::Ch*>(head);
+            success = (isKey ? handler.Key(str, SizeType(length), false) : handler.String(str, SizeType(length), false));
+        }
+        else {
+            StackStream<typename TargetEncoding::Ch> stackStream(stack_);
+            ParseStringToStream<parseFlags, SourceEncoding, TargetEncoding>(s, stackStream);
+            RAPIDJSON_PARSE_ERR
