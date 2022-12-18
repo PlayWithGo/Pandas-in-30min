@@ -1013,4 +1013,38 @@ private:
                     is.Take();
                     os.Put(static_cast<typename TEncoding::Ch>(escape[static_cast<unsigned char>(e)]));
                 }
-                else if (RAP
+                else if (RAPIDJSON_LIKELY(e == 'u')) {    // Unicode
+                    is.Take();
+                    unsigned codepoint = ParseHex4(is, escapeOffset);
+                    RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+                    if (RAPIDJSON_UNLIKELY(codepoint >= 0xD800 && codepoint <= 0xDBFF)) {
+                        // Handle UTF-16 surrogate pair
+                        if (RAPIDJSON_UNLIKELY(!Consume(is, '\\') || !Consume(is, 'u')))
+                            RAPIDJSON_PARSE_ERROR(kParseErrorStringUnicodeSurrogateInvalid, escapeOffset);
+                        unsigned codepoint2 = ParseHex4(is, escapeOffset);
+                        RAPIDJSON_PARSE_ERROR_EARLY_RETURN_VOID;
+                        if (RAPIDJSON_UNLIKELY(codepoint2 < 0xDC00 || codepoint2 > 0xDFFF))
+                            RAPIDJSON_PARSE_ERROR(kParseErrorStringUnicodeSurrogateInvalid, escapeOffset);
+                        codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
+                    }
+                    TEncoding::Encode(os, codepoint);
+                }
+                else
+                    RAPIDJSON_PARSE_ERROR(kParseErrorStringEscapeInvalid, escapeOffset);
+            }
+            else if (RAPIDJSON_UNLIKELY(c == '"')) {    // Closing double quote
+                is.Take();
+                os.Put('\0');   // null-terminate the string
+                return;
+            }
+            else if (RAPIDJSON_UNLIKELY(static_cast<unsigned>(c) < 0x20)) { // RFC 4627: unescaped = %x20-21 / %x23-5B / %x5D-10FFFF
+                if (c == '\0')
+                    RAPIDJSON_PARSE_ERROR(kParseErrorStringMissQuotationMark, is.Tell());
+                else
+                    RAPIDJSON_PARSE_ERROR(kParseErrorStringInvalidEncoding, is.Tell());
+            }
+            else {
+                size_t offset = is.Tell();
+                if (RAPIDJSON_UNLIKELY((parseFlags & kParseValidateEncodingFlag ?
+                    !Transcoder<SEncoding, TEncoding>::Validate(is, os) :
+                    !Transcoder<SEncoding, TEncoding>::Transcode(is, os))))
