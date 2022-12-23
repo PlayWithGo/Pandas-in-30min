@@ -1264,4 +1264,61 @@ private:
                 if (length != 0) {
                     char* q = reinterpret_cast<char*>(os.Push(length));
                     for (size_t i = 0; i < length; i++)
-                       
+                        q[i] = p[i];
+
+                    p += length;
+                }
+                break;
+            }
+            vst1q_u8(reinterpret_cast<uint8_t *>(os.Push(16)), s);
+        }
+
+        is.src_ = p;
+    }
+
+    // InsituStringStream -> InsituStringStream
+    static RAPIDJSON_FORCEINLINE void ScanCopyUnescapedString(InsituStringStream& is, InsituStringStream& os) {
+        RAPIDJSON_ASSERT(&is == &os);
+        (void)os;
+
+        if (is.src_ == is.dst_) {
+            SkipUnescapedString(is);
+            return;
+        }
+
+        char* p = is.src_;
+        char *q = is.dst_;
+
+        // Scan one by one until alignment (unaligned load may cross page boundary and cause crash)
+        const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+        while (p != nextAligned)
+            if (RAPIDJSON_UNLIKELY(*p == '\"') || RAPIDJSON_UNLIKELY(*p == '\\') || RAPIDJSON_UNLIKELY(static_cast<unsigned>(*p) < 0x20)) {
+                is.src_ = p;
+                is.dst_ = q;
+                return;
+            }
+            else
+                *q++ = *p++;
+
+        // The rest of string using SIMD
+        const uint8x16_t s0 = vmovq_n_u8('"');
+        const uint8x16_t s1 = vmovq_n_u8('\\');
+        const uint8x16_t s2 = vmovq_n_u8('\b');
+        const uint8x16_t s3 = vmovq_n_u8(32);
+
+        for (;; p += 16, q += 16) {
+            const uint8x16_t s = vld1q_u8(reinterpret_cast<uint8_t *>(p));
+            uint8x16_t x = vceqq_u8(s, s0);
+            x = vorrq_u8(x, vceqq_u8(s, s1));
+            x = vorrq_u8(x, vceqq_u8(s, s2));
+            x = vorrq_u8(x, vcltq_u8(s, s3));
+
+            x = vrev64q_u8(x);                     // Rev in 64
+            uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
+            uint64_t high = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 1);  // extract
+
+            SizeType length = 0;
+            bool escaped = false;
+            if (low == 0) {
+                if (high != 0) {
+                    unsigned lz = (unsigned)__buil
