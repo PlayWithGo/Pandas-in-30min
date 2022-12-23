@@ -1177,4 +1177,44 @@ private:
         char* p = is.src_;
 
         // Scan one by one until alignment (unaligned load may cross page boundary and cause crash)
-        const char* nextAligned = reinterpret_cast<const
+        const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+        for (; p != nextAligned; p++)
+            if (RAPIDJSON_UNLIKELY(*p == '\"') || RAPIDJSON_UNLIKELY(*p == '\\') || RAPIDJSON_UNLIKELY(static_cast<unsigned>(*p) < 0x20)) {
+                is.src_ = is.dst_ = p;
+                return;
+            }
+
+        // The rest of string using SIMD
+        static const char dquote[16] = { '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"', '\"' };
+        static const char bslash[16] = { '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\', '\\' };
+        static const char space[16] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F };
+        const __m128i dq = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&dquote[0]));
+        const __m128i bs = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&bslash[0]));
+        const __m128i sp = _mm_loadu_si128(reinterpret_cast<const __m128i *>(&space[0]));
+
+        for (;; p += 16) {
+            const __m128i s = _mm_load_si128(reinterpret_cast<const __m128i *>(p));
+            const __m128i t1 = _mm_cmpeq_epi8(s, dq);
+            const __m128i t2 = _mm_cmpeq_epi8(s, bs);
+            const __m128i t3 = _mm_cmpeq_epi8(_mm_max_epu8(s, sp), sp); // s < 0x20 <=> max(s, 0x1F) == 0x1F
+            const __m128i x = _mm_or_si128(_mm_or_si128(t1, t2), t3);
+            unsigned short r = static_cast<unsigned short>(_mm_movemask_epi8(x));
+            if (RAPIDJSON_UNLIKELY(r != 0)) {   // some of characters is escaped
+                size_t length;
+#ifdef _MSC_VER         // Find the index of first escaped
+                unsigned long offset;
+                _BitScanForward(&offset, r);
+                length = offset;
+#else
+                length = static_cast<size_t>(__builtin_ffs(r) - 1);
+#endif
+                p += length;
+                break;
+            }
+        }
+
+        is.src_ = is.dst_ = p;
+    }
+#elif defined(RAPIDJSON_NEON)
+    // StringStream -> StackStream<char>
+    static RAPIDJSON_FORCEINLINE v
