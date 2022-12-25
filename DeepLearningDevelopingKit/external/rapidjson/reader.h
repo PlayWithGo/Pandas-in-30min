@@ -1321,4 +1321,54 @@ private:
             bool escaped = false;
             if (low == 0) {
                 if (high != 0) {
-                    unsigned lz = (unsigned)__buil
+                    unsigned lz = (unsigned)__builtin_clzll(high);
+                    length = 8 + (lz >> 3);
+                    escaped = true;
+                }
+            } else {
+                unsigned lz = (unsigned)__builtin_clzll(low);
+                length = lz >> 3;
+                escaped = true;
+            }
+            if (RAPIDJSON_UNLIKELY(escaped)) {   // some of characters is escaped
+                for (const char* pend = p + length; p != pend; ) {
+                    *q++ = *p++;
+                }
+                break;
+            }
+            vst1q_u8(reinterpret_cast<uint8_t *>(q), s);
+        }
+
+        is.src_ = p;
+        is.dst_ = q;
+    }
+
+    // When read/write pointers are the same for insitu stream, just skip unescaped characters
+    static RAPIDJSON_FORCEINLINE void SkipUnescapedString(InsituStringStream& is) {
+        RAPIDJSON_ASSERT(is.src_ == is.dst_);
+        char* p = is.src_;
+
+        // Scan one by one until alignment (unaligned load may cross page boundary and cause crash)
+        const char* nextAligned = reinterpret_cast<const char*>((reinterpret_cast<size_t>(p) + 15) & static_cast<size_t>(~15));
+        for (; p != nextAligned; p++)
+            if (RAPIDJSON_UNLIKELY(*p == '\"') || RAPIDJSON_UNLIKELY(*p == '\\') || RAPIDJSON_UNLIKELY(static_cast<unsigned>(*p) < 0x20)) {
+                is.src_ = is.dst_ = p;
+                return;
+            }
+
+        // The rest of string using SIMD
+        const uint8x16_t s0 = vmovq_n_u8('"');
+        const uint8x16_t s1 = vmovq_n_u8('\\');
+        const uint8x16_t s2 = vmovq_n_u8('\b');
+        const uint8x16_t s3 = vmovq_n_u8(32);
+
+        for (;; p += 16) {
+            const uint8x16_t s = vld1q_u8(reinterpret_cast<uint8_t *>(p));
+            uint8x16_t x = vceqq_u8(s, s0);
+            x = vorrq_u8(x, vceqq_u8(s, s1));
+            x = vorrq_u8(x, vceqq_u8(s, s2));
+            x = vorrq_u8(x, vcltq_u8(s, s3));
+
+            x = vrev64q_u8(x);                     // Rev in 64
+            uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
+            ui
