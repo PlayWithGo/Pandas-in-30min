@@ -1371,4 +1371,75 @@ private:
 
             x = vrev64q_u8(x);                     // Rev in 64
             uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
-            ui
+            uint64_t high = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 1);  // extract
+
+            if (low == 0) {
+                if (high != 0) {
+                    int lz = __builtin_clzll(high);
+                    p += 8 + (lz >> 3);
+                    break;
+                }
+            } else {
+                int lz = __builtin_clzll(low);
+                p += lz >> 3;
+                break;
+            }
+        }
+
+        is.src_ = is.dst_ = p;
+    }
+#endif // RAPIDJSON_NEON
+
+    template<typename InputStream, bool backup, bool pushOnTake>
+    class NumberStream;
+
+    template<typename InputStream>
+    class NumberStream<InputStream, false, false> {
+    public:
+        typedef typename InputStream::Ch Ch;
+
+        NumberStream(GenericReader& reader, InputStream& s) : is(s) { (void)reader;  }
+
+        RAPIDJSON_FORCEINLINE Ch Peek() const { return is.Peek(); }
+        RAPIDJSON_FORCEINLINE Ch TakePush() { return is.Take(); }
+        RAPIDJSON_FORCEINLINE Ch Take() { return is.Take(); }
+		  RAPIDJSON_FORCEINLINE void Push(char) {}
+
+        size_t Tell() { return is.Tell(); }
+        size_t Length() { return 0; }
+        const char* Pop() { return 0; }
+
+    protected:
+        NumberStream& operator=(const NumberStream&);
+
+        InputStream& is;
+    };
+
+    template<typename InputStream>
+    class NumberStream<InputStream, true, false> : public NumberStream<InputStream, false, false> {
+        typedef NumberStream<InputStream, false, false> Base;
+    public:
+        NumberStream(GenericReader& reader, InputStream& is) : Base(reader, is), stackStream(reader.stack_) {}
+
+        RAPIDJSON_FORCEINLINE Ch TakePush() {
+            stackStream.Put(static_cast<char>(Base::is.Peek()));
+            return Base::is.Take();
+        }
+
+        RAPIDJSON_FORCEINLINE void Push(char c) {
+            stackStream.Put(c);
+        }
+
+        size_t Length() { return stackStream.Length(); }
+
+        const char* Pop() {
+            stackStream.Put('\0');
+            return stackStream.Pop();
+        }
+
+    private:
+        StackStream<char> stackStream;
+    };
+
+    template<typename InputStream>
+    class NumberStr
