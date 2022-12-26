@@ -1442,4 +1442,55 @@ private:
     };
 
     template<typename InputStream>
-    class NumberStr
+    class NumberStream<InputStream, true, true> : public NumberStream<InputStream, true, false> {
+        typedef NumberStream<InputStream, true, false> Base;
+    public:
+        NumberStream(GenericReader& reader, InputStream& is) : Base(reader, is) {}
+
+        RAPIDJSON_FORCEINLINE Ch Take() { return Base::TakePush(); }
+    };
+
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseNumber(InputStream& is, Handler& handler) {
+        internal::StreamLocalCopy<InputStream> copy(is);
+        NumberStream<InputStream,
+            ((parseFlags & kParseNumbersAsStringsFlag) != 0) ?
+                ((parseFlags & kParseInsituFlag) == 0) :
+                ((parseFlags & kParseFullPrecisionFlag) != 0),
+            (parseFlags & kParseNumbersAsStringsFlag) != 0 &&
+                (parseFlags & kParseInsituFlag) == 0> s(*this, copy.s);
+
+        size_t startOffset = s.Tell();
+        double d = 0.0;
+        bool useNanOrInf = false;
+
+        // Parse minus
+        bool minus = Consume(s, '-');
+
+        // Parse int: zero / ( digit1-9 *DIGIT )
+        unsigned i = 0;
+        uint64_t i64 = 0;
+        bool use64bit = false;
+        int significandDigit = 0;
+        if (RAPIDJSON_UNLIKELY(s.Peek() == '0')) {
+            i = 0;
+            s.TakePush();
+        }
+        else if (RAPIDJSON_LIKELY(s.Peek() >= '1' && s.Peek() <= '9')) {
+            i = static_cast<unsigned>(s.TakePush() - '0');
+
+            if (minus)
+                while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                    if (RAPIDJSON_UNLIKELY(i >= 214748364)) { // 2^31 = 2147483648
+                        if (RAPIDJSON_LIKELY(i != 214748364 || s.Peek() > '8')) {
+                            i64 = i;
+                            use64bit = true;
+                            break;
+                        }
+                    }
+                    i = i * 10 + static_cast<unsigned>(s.TakePush() - '0');
+                    significandDigit++;
+                }
+            else
+                while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                    if (RAPIDJSON_UNLIKELY(i >= 429496729)) { // 2^32 - 1 = 4
