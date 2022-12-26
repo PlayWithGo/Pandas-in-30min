@@ -1493,4 +1493,48 @@ private:
                 }
             else
                 while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
-                    if (RAPIDJSON_UNLIKELY(i >= 429496729)) { // 2^32 - 1 = 4
+                    if (RAPIDJSON_UNLIKELY(i >= 429496729)) { // 2^32 - 1 = 4294967295
+                        if (RAPIDJSON_LIKELY(i != 429496729 || s.Peek() > '5')) {
+                            i64 = i;
+                            use64bit = true;
+                            break;
+                        }
+                    }
+                    i = i * 10 + static_cast<unsigned>(s.TakePush() - '0');
+                    significandDigit++;
+                }
+        }
+        // Parse NaN or Infinity here
+        else if ((parseFlags & kParseNanAndInfFlag) && RAPIDJSON_LIKELY((s.Peek() == 'I' || s.Peek() == 'N'))) {
+            if (Consume(s, 'N')) {
+                if (Consume(s, 'a') && Consume(s, 'N')) {
+                    d = std::numeric_limits<double>::quiet_NaN();
+                    useNanOrInf = true;
+                }
+            }
+            else if (RAPIDJSON_LIKELY(Consume(s, 'I'))) {
+                if (Consume(s, 'n') && Consume(s, 'f')) {
+                    d = (minus ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity());
+                    useNanOrInf = true;
+
+                    if (RAPIDJSON_UNLIKELY(s.Peek() == 'i' && !(Consume(s, 'i') && Consume(s, 'n')
+                                                                && Consume(s, 'i') && Consume(s, 't') && Consume(s, 'y')))) {
+                        RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, s.Tell());
+                    }
+                }
+            }
+            
+            if (RAPIDJSON_UNLIKELY(!useNanOrInf)) {
+                RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, s.Tell());
+            }
+        }
+        else
+            RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, s.Tell());
+
+        // Parse 64bit int
+        bool useDouble = false;
+        if (use64bit) {
+            if (minus)
+                while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                     if (RAPIDJSON_UNLIKELY(i64 >= RAPIDJSON_UINT64_C2(0x0CCCCCCC, 0xCCCCCCCC))) // 2^63 = 9223372036854775808
+                        if (RAPIDJSON_LIKELY(i64 != RAPIDJSON_UINT64_C2(0x0CCCCCCC, 0xCCCCCCCC) || s.Peek() > '8')) {
