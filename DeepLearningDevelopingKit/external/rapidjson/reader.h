@@ -1538,3 +1538,51 @@ private:
                 while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
                      if (RAPIDJSON_UNLIKELY(i64 >= RAPIDJSON_UINT64_C2(0x0CCCCCCC, 0xCCCCCCCC))) // 2^63 = 9223372036854775808
                         if (RAPIDJSON_LIKELY(i64 != RAPIDJSON_UINT64_C2(0x0CCCCCCC, 0xCCCCCCCC) || s.Peek() > '8')) {
+                            d = static_cast<double>(i64);
+                            useDouble = true;
+                            break;
+                        }
+                    i64 = i64 * 10 + static_cast<unsigned>(s.TakePush() - '0');
+                    significandDigit++;
+                }
+            else
+                while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                    if (RAPIDJSON_UNLIKELY(i64 >= RAPIDJSON_UINT64_C2(0x19999999, 0x99999999))) // 2^64 - 1 = 18446744073709551615
+                        if (RAPIDJSON_LIKELY(i64 != RAPIDJSON_UINT64_C2(0x19999999, 0x99999999) || s.Peek() > '5')) {
+                            d = static_cast<double>(i64);
+                            useDouble = true;
+                            break;
+                        }
+                    i64 = i64 * 10 + static_cast<unsigned>(s.TakePush() - '0');
+                    significandDigit++;
+                }
+        }
+
+        // Force double for big integer
+        if (useDouble) {
+            while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                if (RAPIDJSON_UNLIKELY(d >= 1.7976931348623157e307)) // DBL_MAX / 10.0
+                    RAPIDJSON_PARSE_ERROR(kParseErrorNumberTooBig, startOffset);
+                d = d * 10 + (s.TakePush() - '0');
+            }
+        }
+
+        // Parse frac = decimal-point 1*DIGIT
+        int expFrac = 0;
+        size_t decimalPosition;
+        if (Consume(s, '.')) {
+            decimalPosition = s.Length();
+
+            if (RAPIDJSON_UNLIKELY(!(s.Peek() >= '0' && s.Peek() <= '9')))
+                RAPIDJSON_PARSE_ERROR(kParseErrorNumberMissFraction, s.Tell());
+
+            if (!useDouble) {
+#if RAPIDJSON_64BIT
+                // Use i64 to store significand in 64-bit architecture
+                if (!use64bit)
+                    i64 = i;
+
+                while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                    if (i64 > RAPIDJSON_UINT64_C2(0x1FFFFF, 0xFFFFFFFF)) // 2^53 - 1 for fast path
+                        break;
+          
