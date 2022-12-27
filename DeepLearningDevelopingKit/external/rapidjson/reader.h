@@ -1585,4 +1585,59 @@ private:
                 while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
                     if (i64 > RAPIDJSON_UINT64_C2(0x1FFFFF, 0xFFFFFFFF)) // 2^53 - 1 for fast path
                         break;
-          
+                    else {
+                        i64 = i64 * 10 + static_cast<unsigned>(s.TakePush() - '0');
+                        --expFrac;
+                        if (i64 != 0)
+                            significandDigit++;
+                    }
+                }
+
+                d = static_cast<double>(i64);
+#else
+                // Use double to store significand in 32-bit architecture
+                d = static_cast<double>(use64bit ? i64 : i);
+#endif
+                useDouble = true;
+            }
+
+            while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                if (significandDigit < 17) {
+                    d = d * 10.0 + (s.TakePush() - '0');
+                    --expFrac;
+                    if (RAPIDJSON_LIKELY(d > 0.0))
+                        significandDigit++;
+                }
+                else
+                    s.TakePush();
+            }
+        }
+        else
+            decimalPosition = s.Length(); // decimal position at the end of integer.
+
+        // Parse exp = e [ minus / plus ] 1*DIGIT
+        int exp = 0;
+        if (Consume(s, 'e') || Consume(s, 'E')) {
+            if (!useDouble) {
+                d = static_cast<double>(use64bit ? i64 : i);
+                useDouble = true;
+            }
+
+            bool expMinus = false;
+            if (Consume(s, '+'))
+                ;
+            else if (Consume(s, '-'))
+                expMinus = true;
+
+            if (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                exp = static_cast<int>(s.Take() - '0');
+                if (expMinus) {
+                    while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                        exp = exp * 10 + static_cast<int>(s.Take() - '0');
+                        if (exp >= 214748364) {                         // Issue #313: prevent overflow exponent
+                            while (RAPIDJSON_UNLIKELY(s.Peek() >= '0' && s.Peek() <= '9'))  // Consume the rest of exponent
+                                s.Take();
+                        }
+                    }
+                }
+                else {  // po
