@@ -1743,4 +1743,72 @@ private:
         IterativeParsingStartState,
 
         // Object states
-        IterativeParsingObjectInitial
+        IterativeParsingObjectInitialState,
+        IterativeParsingMemberKeyState,
+        IterativeParsingMemberValueState,
+        IterativeParsingObjectFinishState,
+
+        // Array states
+        IterativeParsingArrayInitialState,
+        IterativeParsingElementState,
+        IterativeParsingArrayFinishState,
+
+        // Single value state
+        IterativeParsingValueState,
+        
+        // Delimiter states (at bottom)
+        IterativeParsingElementDelimiterState,
+        IterativeParsingMemberDelimiterState,
+        IterativeParsingKeyValueDelimiterState,
+        
+        cIterativeParsingStateCount
+    };
+
+    // Tokens
+    enum Token {
+        LeftBracketToken = 0,
+        RightBracketToken,
+
+        LeftCurlyBracketToken,
+        RightCurlyBracketToken,
+
+        CommaToken,
+        ColonToken,
+
+        StringToken,
+        FalseToken,
+        TrueToken,
+        NullToken,
+        NumberToken,
+
+        kTokenCount
+    };
+
+    RAPIDJSON_FORCEINLINE Token Tokenize(Ch c) {
+
+//!@cond RAPIDJSON_HIDDEN_FROM_DOXYGEN
+#define N NumberToken
+#define N16 N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N
+        // Maps from ASCII to Token
+        static const unsigned char tokenMap[256] = {
+            N16, // 00~0F
+            N16, // 10~1F
+            N, N, StringToken, N, N, N, N, N, N, N, N, N, CommaToken, N, N, N, // 20~2F
+            N, N, N, N, N, N, N, N, N, N, ColonToken, N, N, N, N, N, // 30~3F
+            N16, // 40~4F
+            N, N, N, N, N, N, N, N, N, N, N, LeftBracketToken, N, RightBracketToken, N, N, // 50~5F
+            N, N, N, N, N, N, FalseToken, N, N, N, N, N, N, N, NullToken, N, // 60~6F
+            N, N, N, N, TrueToken, N, N, N, N, N, N, LeftCurlyBracketToken, N, RightCurlyBracketToken, N, N, // 70~7F
+            N16, N16, N16, N16, N16, N16, N16, N16 // 80~FF
+        };
+#undef N
+#undef N16
+//!@endcond
+
+        if (sizeof(Ch) == 1 || static_cast<unsigned>(c) < 256)
+            return static_cast<Token>(tokenMap[static_cast<unsigned char>(c)]);
+        else
+            return NumberToken;
+    }
+
+    RAPIDJSON_FORCEINLINE IterativeParsingState Pr
