@@ -1640,4 +1640,48 @@ private:
                         }
                     }
                 }
-                else {  // po
+                else {  // positive exp
+                    int maxExp = 308 - expFrac;
+                    while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
+                        exp = exp * 10 + static_cast<int>(s.Take() - '0');
+                        if (RAPIDJSON_UNLIKELY(exp > maxExp))
+                            RAPIDJSON_PARSE_ERROR(kParseErrorNumberTooBig, startOffset);
+                    }
+                }
+            }
+            else
+                RAPIDJSON_PARSE_ERROR(kParseErrorNumberMissExponent, s.Tell());
+
+            if (expMinus)
+                exp = -exp;
+        }
+
+        // Finish parsing, call event according to the type of number.
+        bool cont = true;
+
+        if (parseFlags & kParseNumbersAsStringsFlag) {
+            if (parseFlags & kParseInsituFlag) {
+                s.Pop();  // Pop stack no matter if it will be used or not.
+                typename InputStream::Ch* head = is.PutBegin();
+                const size_t length = s.Tell() - startOffset;
+                RAPIDJSON_ASSERT(length <= 0xFFFFFFFF);
+                // unable to insert the \0 character here, it will erase the comma after this number
+                const typename TargetEncoding::Ch* const str = reinterpret_cast<typename TargetEncoding::Ch*>(head);
+                cont = handler.RawNumber(str, SizeType(length), false);
+            }
+            else {
+                SizeType numCharsToCopy = static_cast<SizeType>(s.Length());
+                StringStream srcStream(s.Pop());
+                StackStream<typename TargetEncoding::Ch> dstStream(stack_);
+                while (numCharsToCopy--) {
+                    Transcoder<UTF8<>, TargetEncoding>::Transcode(srcStream, dstStream);
+                }
+                dstStream.Put('\0');
+                const typename TargetEncoding::Ch* str = dstStream.Pop();
+                const SizeType length = static_cast<SizeType>(dstStream.Length()) - 1;
+                cont = handler.RawNumber(str, SizeType(length), true);
+            }
+        }
+        else {
+           size_t length = s.Length();
+           const char* decimal = s.Pop();  // Pop stack no matter if it will be 
