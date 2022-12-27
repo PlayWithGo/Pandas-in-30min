@@ -1684,4 +1684,63 @@ private:
         }
         else {
            size_t length = s.Length();
-           const char* decimal = s.Pop();  // Pop stack no matter if it will be 
+           const char* decimal = s.Pop();  // Pop stack no matter if it will be used or not.
+
+           if (useDouble) {
+               int p = exp + expFrac;
+               if (parseFlags & kParseFullPrecisionFlag)
+                   d = internal::StrtodFullPrecision(d, p, decimal, length, decimalPosition, exp);
+               else
+                   d = internal::StrtodNormalPrecision(d, p);
+
+               cont = handler.Double(minus ? -d : d);
+           }
+           else if (useNanOrInf) {
+               cont = handler.Double(d);
+           }
+           else {
+               if (use64bit) {
+                   if (minus)
+                       cont = handler.Int64(static_cast<int64_t>(~i64 + 1));
+                   else
+                       cont = handler.Uint64(i64);
+               }
+               else {
+                   if (minus)
+                       cont = handler.Int(static_cast<int32_t>(~i + 1));
+                   else
+                       cont = handler.Uint(i);
+               }
+           }
+        }
+        if (RAPIDJSON_UNLIKELY(!cont))
+            RAPIDJSON_PARSE_ERROR(kParseErrorTermination, startOffset);
+    }
+
+    // Parse any JSON value
+    template<unsigned parseFlags, typename InputStream, typename Handler>
+    void ParseValue(InputStream& is, Handler& handler) {
+        switch (is.Peek()) {
+            case 'n': ParseNull  <parseFlags>(is, handler); break;
+            case 't': ParseTrue  <parseFlags>(is, handler); break;
+            case 'f': ParseFalse <parseFlags>(is, handler); break;
+            case '"': ParseString<parseFlags>(is, handler); break;
+            case '{': ParseObject<parseFlags>(is, handler); break;
+            case '[': ParseArray <parseFlags>(is, handler); break;
+            default :
+                      ParseNumber<parseFlags>(is, handler);
+                      break;
+
+        }
+    }
+
+    // Iterative Parsing
+
+    // States
+    enum IterativeParsingState {
+        IterativeParsingFinishState = 0, // sink states at top
+        IterativeParsingErrorState,      // sink states at top
+        IterativeParsingStartState,
+
+        // Object states
+        IterativeParsingObjectInitial
