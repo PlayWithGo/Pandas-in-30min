@@ -1845,4 +1845,43 @@ private:
                 IterativeParsingErrorState,         // Left bracket
                 IterativeParsingErrorState,         // Right bracket
                 IterativeParsingErrorState,         // Left curly bracket
-                IterativeParsingObjectFinishState,  // Righ
+                IterativeParsingObjectFinishState,  // Right curly bracket
+                IterativeParsingErrorState,         // Comma
+                IterativeParsingErrorState,         // Colon
+                IterativeParsingMemberKeyState,     // String
+                IterativeParsingErrorState,         // False
+                IterativeParsingErrorState,         // True
+                IterativeParsingErrorState,         // Null
+                IterativeParsingErrorState          // Number
+            },
+            // MemberKey
+            {
+                IterativeParsingErrorState,             // Left bracket
+                IterativeParsingErrorState,             // Right bracket
+                IterativeParsingErrorState,             // Left curly bracket
+                IterativeParsingErrorState,             // Right curly bracket
+                IterativeParsingErrorState,             // Comma
+                IterativeParsingKeyValueDelimiterState, // Colon
+                IterativeParsingErrorState,             // String
+                IterativeParsingErrorState,             // False
+                IterativeParsingErrorState,             // True
+                IterativeParsingErrorState,             // Null
+                IterativeParsingErrorState              // Number
+            },
+            // MemberValue
+            {
+                IterativeParsingErrorState,             // Left bracket
+                IterativeParsingErrorState,             // Right bracket
+                IterativeParsingErrorState,             // Left curly bracket
+                IterativeParsingObjectFinishState,      // Right curly bracket
+                IterativeParsingMemberDelimiterState,   // Comma
+                IterativeParsingErrorState,             // Colon
+                IterativeParsingErrorState,             // String
+                IterativeParsingErrorState,             // False
+                IterativeParsingErrorState,             // True
+                IterativeParsingErrorState,             // Null
+                IterativeParsingErrorState              // Number
+            },
+            // ObjectFinish(sink state)
+            {
+                IterativeParsingErrorState, IterativeParsingErrorState, I
