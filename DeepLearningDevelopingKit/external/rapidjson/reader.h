@@ -1811,4 +1811,38 @@ private:
             return NumberToken;
     }
 
-    RAPIDJSON_FORCEINLINE IterativeParsingState Pr
+    RAPIDJSON_FORCEINLINE IterativeParsingState Predict(IterativeParsingState state, Token token) {
+        // current state x one lookahead token -> new state
+        static const char G[cIterativeParsingStateCount][kTokenCount] = {
+            // Finish(sink state)
+            {
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState
+            },
+            // Error(sink state)
+            {
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState
+            },
+            // Start
+            {
+                IterativeParsingArrayInitialState,  // Left bracket
+                IterativeParsingErrorState,         // Right bracket
+                IterativeParsingObjectInitialState, // Left curly bracket
+                IterativeParsingErrorState,         // Right curly bracket
+                IterativeParsingErrorState,         // Comma
+                IterativeParsingErrorState,         // Colon
+                IterativeParsingValueState,         // String
+                IterativeParsingValueState,         // False
+                IterativeParsingValueState,         // True
+                IterativeParsingValueState,         // Null
+                IterativeParsingValueState          // Number
+            },
+            // ObjectInitial
+            {
+                IterativeParsingErrorState,         // Left bracket
+                IterativeParsingErrorState,         // Right bracket
+                IterativeParsingErrorState,         // Left curly bracket
+                IterativeParsingObjectFinishState,  // Righ
