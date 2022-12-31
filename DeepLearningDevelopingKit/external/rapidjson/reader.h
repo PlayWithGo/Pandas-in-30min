@@ -1918,4 +1918,39 @@ private:
             },
             // ArrayFinish(sink state)
             {
-                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState
+            },
+            // Single Value (sink state)
+            {
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState
+            },
+            // ElementDelimiter
+            {
+                IterativeParsingArrayInitialState,      // Left bracket(push Element state)
+                IterativeParsingArrayFinishState,       // Right bracket
+                IterativeParsingObjectInitialState,     // Left curly bracket(push Element state)
+                IterativeParsingErrorState,             // Right curly bracket
+                IterativeParsingErrorState,             // Comma
+                IterativeParsingErrorState,             // Colon
+                IterativeParsingElementState,           // String
+                IterativeParsingElementState,           // False
+                IterativeParsingElementState,           // True
+                IterativeParsingElementState,           // Null
+                IterativeParsingElementState            // Number
+            },
+            // MemberDelimiter
+            {
+                IterativeParsingErrorState,         // Left bracket
+                IterativeParsingErrorState,         // Right bracket
+                IterativeParsingErrorState,         // Left curly bracket
+                IterativeParsingObjectFinishState,  // Right curly bracket
+                IterativeParsingErrorState,         // Comma
+                IterativeParsingErrorState,         // Colon
+                IterativeParsingMemberKeyState,     // String
+                IterativeParsingErrorState,         // False
+                IterativeParsingErrorState,         // True
+                IterativeParsin
