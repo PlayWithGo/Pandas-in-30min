@@ -1884,4 +1884,38 @@ private:
             },
             // ObjectFinish(sink state)
             {
-                IterativeParsingErrorState, IterativeParsingErrorState, I
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState,
+                IterativeParsingErrorState
+            },
+            // ArrayInitial
+            {
+                IterativeParsingArrayInitialState,      // Left bracket(push Element state)
+                IterativeParsingArrayFinishState,       // Right bracket
+                IterativeParsingObjectInitialState,     // Left curly bracket(push Element state)
+                IterativeParsingErrorState,             // Right curly bracket
+                IterativeParsingErrorState,             // Comma
+                IterativeParsingErrorState,             // Colon
+                IterativeParsingElementState,           // String
+                IterativeParsingElementState,           // False
+                IterativeParsingElementState,           // True
+                IterativeParsingElementState,           // Null
+                IterativeParsingElementState            // Number
+            },
+            // Element
+            {
+                IterativeParsingErrorState,             // Left bracket
+                IterativeParsingArrayFinishState,       // Right bracket
+                IterativeParsingErrorState,             // Left curly bracket
+                IterativeParsingErrorState,             // Right curly bracket
+                IterativeParsingElementDelimiterState,  // Comma
+                IterativeParsingErrorState,             // Colon
+                IterativeParsingErrorState,             // String
+                IterativeParsingErrorState,             // False
+                IterativeParsingErrorState,             // True
+                IterativeParsingErrorState,             // Null
+                IterativeParsingErrorState              // Number
+            },
+            // ArrayFinish(sink state)
+            {
+                IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState, IterativeParsingErrorState
