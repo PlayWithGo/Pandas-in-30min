@@ -1953,4 +1953,43 @@ private:
                 IterativeParsingMemberKeyState,     // String
                 IterativeParsingErrorState,         // False
                 IterativeParsingErrorState,         // True
-                IterativeParsin
+                IterativeParsingErrorState,         // Null
+                IterativeParsingErrorState          // Number
+            },
+            // KeyValueDelimiter
+            {
+                IterativeParsingArrayInitialState,      // Left bracket(push MemberValue state)
+                IterativeParsingErrorState,             // Right bracket
+                IterativeParsingObjectInitialState,     // Left curly bracket(push MemberValue state)
+                IterativeParsingErrorState,             // Right curly bracket
+                IterativeParsingErrorState,             // Comma
+                IterativeParsingErrorState,             // Colon
+                IterativeParsingMemberValueState,       // String
+                IterativeParsingMemberValueState,       // False
+                IterativeParsingMemberValueState,       // True
+                IterativeParsingMemberValueState,       // Null
+                IterativeParsingMemberValueState        // Number
+            },
+        }; // End of G
+
+        return static_cast<IterativeParsingState>(G[state][token]);
+    }
+
+    // Make an advance in the token stream and state based on the candidate destination state which was returned by Transit().
+    // May return a new state on state pop.
+    template <unsigned parseFlags, typename InputStream, typename Handler>
+    RAPIDJSON_FORCEINLINE IterativeParsingState Transit(IterativeParsingState src, Token token, IterativeParsingState dst, InputStream& is, Handler& handler) {
+        (void)token;
+
+        switch (dst) {
+        case IterativeParsingErrorState:
+            return dst;
+
+        case IterativeParsingObjectInitialState:
+        case IterativeParsingArrayInitialState:
+        {
+            // Push the state(Element or MemeberValue) if we are nested in another array or value of member.
+            // In this way we can get the correct state on ObjectFinish or ArrayFinish by frame pop.
+            IterativeParsingState n = src;
+            if (src == IterativeParsingArrayInitialState || src == IterativeParsingElementDelimiterState)
+                n = IterativeParsingEl
