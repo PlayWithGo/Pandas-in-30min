@@ -1992,4 +1992,59 @@ private:
             // In this way we can get the correct state on ObjectFinish or ArrayFinish by frame pop.
             IterativeParsingState n = src;
             if (src == IterativeParsingArrayInitialState || src == IterativeParsingElementDelimiterState)
-                n = IterativeParsingEl
+                n = IterativeParsingElementState;
+            else if (src == IterativeParsingKeyValueDelimiterState)
+                n = IterativeParsingMemberValueState;
+            // Push current state.
+            *stack_.template Push<SizeType>(1) = n;
+            // Initialize and push the member/element count.
+            *stack_.template Push<SizeType>(1) = 0;
+            // Call handler
+            bool hr = (dst == IterativeParsingObjectInitialState) ? handler.StartObject() : handler.StartArray();
+            // On handler short circuits the parsing.
+            if (!hr) {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorTermination, is.Tell());
+                return IterativeParsingErrorState;
+            }
+            else {
+                is.Take();
+                return dst;
+            }
+        }
+
+        case IterativeParsingMemberKeyState:
+            ParseString<parseFlags>(is, handler, true);
+            if (HasParseError())
+                return IterativeParsingErrorState;
+            else
+                return dst;
+
+        case IterativeParsingKeyValueDelimiterState:
+            RAPIDJSON_ASSERT(token == ColonToken);
+            is.Take();
+            return dst;
+
+        case IterativeParsingMemberValueState:
+            // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+            ParseValue<parseFlags>(is, handler);
+            if (HasParseError()) {
+                return IterativeParsingErrorState;
+            }
+            return dst;
+
+        case IterativeParsingElementState:
+            // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+            ParseValue<parseFlags>(is, handler);
+            if (HasParseError()) {
+                return IterativeParsingErrorState;
+            }
+            return dst;
+
+        case IterativeParsingMemberDelimiterState:
+        case IterativeParsingElementDelimiterState:
+            is.Take();
+            // Update member/element count.
+            *stack_.template Top<SizeType>() = *stack_.template Top<SizeType>() + 1;
+            return dst;
+
+        case IterativeParsingObjectFinishSt
