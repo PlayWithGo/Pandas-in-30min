@@ -2047,4 +2047,47 @@ private:
             *stack_.template Top<SizeType>() = *stack_.template Top<SizeType>() + 1;
             return dst;
 
-        case IterativeParsingObjectFinishSt
+        case IterativeParsingObjectFinishState:
+        {
+            // Transit from delimiter is only allowed when trailing commas are enabled
+            if (!(parseFlags & kParseTrailingCommasFlag) && src == IterativeParsingMemberDelimiterState) {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorObjectMissName, is.Tell());
+                return IterativeParsingErrorState;
+            }
+            // Get member count.
+            SizeType c = *stack_.template Pop<SizeType>(1);
+            // If the object is not empty, count the last member.
+            if (src == IterativeParsingMemberValueState)
+                ++c;
+            // Restore the state.
+            IterativeParsingState n = static_cast<IterativeParsingState>(*stack_.template Pop<SizeType>(1));
+            // Transit to Finish state if this is the topmost scope.
+            if (n == IterativeParsingStartState)
+                n = IterativeParsingFinishState;
+            // Call handler
+            bool hr = handler.EndObject(c);
+            // On handler short circuits the parsing.
+            if (!hr) {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorTermination, is.Tell());
+                return IterativeParsingErrorState;
+            }
+            else {
+                is.Take();
+                return n;
+            }
+        }
+
+        case IterativeParsingArrayFinishState:
+        {
+            // Transit from delimiter is only allowed when trailing commas are enabled
+            if (!(parseFlags & kParseTrailingCommasFlag) && src == IterativeParsingElementDelimiterState) {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorValueInvalid, is.Tell());
+                return IterativeParsingErrorState;
+            }
+            // Get element count.
+            SizeType c = *stack_.template Pop<SizeType>(1);
+            // If the array is not empty, count the last element.
+            if (src == IterativeParsingElementState)
+                ++c;
+            // Restore the state.
+            IterativeParsingState n = static_cast<IterativeParsingState>(*stack_.temp
