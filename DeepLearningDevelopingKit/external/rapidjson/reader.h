@@ -2179,4 +2179,38 @@ private:
             state = d;
             
             // Do not further consume streams if a root JSON has been parsed.
-            if ((parseFlags & kParseStopWhenDo
+            if ((parseFlags & kParseStopWhenDoneFlag) && state == IterativeParsingFinishState)
+                break;
+            
+            SkipWhitespaceAndComments<parseFlags>(is);
+            RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+        }
+        
+        // Handle the end of file.
+        if (state != IterativeParsingFinishState)
+            HandleError(state, is);
+        
+        return parseResult_;
+    }
+
+    static const size_t kDefaultStackCapacity = 256;    //!< Default stack capacity in bytes for storing a single decoded string.
+    internal::Stack<StackAllocator> stack_;  //!< A stack for storing decoded string temporarily during non-destructive parsing.
+    ParseResult parseResult_;
+    IterativeParsingState state_;
+}; // class GenericReader
+
+//! Reader with UTF8 encoding and default allocator.
+typedef GenericReader<UTF8<>, UTF8<> > Reader;
+
+RAPIDJSON_NAMESPACE_END
+
+#if defined(__clang__) || defined(_MSC_VER)
+RAPIDJSON_DIAG_POP
+#endif
+
+
+#ifdef __GNUC__
+RAPIDJSON_DIAG_POP
+#endif
+
+#endif // RAPIDJSON_READER_H_
