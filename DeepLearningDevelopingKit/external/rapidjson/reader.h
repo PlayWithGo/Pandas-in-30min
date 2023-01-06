@@ -2138,4 +2138,45 @@ private:
 
         switch (src) {
         case IterativeParsingStartState:            RAPIDJSON_PARSE_ERROR(kParseErrorDocumentEmpty, is.Tell()); return;
-        case IterativeParsingFinishState:           RAPIDJSON_PARSE_ERROR(kParseErrorDocumentRootNot
+        case IterativeParsingFinishState:           RAPIDJSON_PARSE_ERROR(kParseErrorDocumentRootNotSingular, is.Tell()); return;
+        case IterativeParsingObjectInitialState:
+        case IterativeParsingMemberDelimiterState:  RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissName, is.Tell()); return;
+        case IterativeParsingMemberKeyState:        RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissColon, is.Tell()); return;
+        case IterativeParsingMemberValueState:      RAPIDJSON_PARSE_ERROR(kParseErrorObjectMissCommaOrCurlyBracket, is.Tell()); return;
+        case IterativeParsingKeyValueDelimiterState:
+        case IterativeParsingArrayInitialState:
+        case IterativeParsingElementDelimiterState: RAPIDJSON_PARSE_ERROR(kParseErrorValueInvalid, is.Tell()); return;
+        default: RAPIDJSON_ASSERT(src == IterativeParsingElementState); RAPIDJSON_PARSE_ERROR(kParseErrorArrayMissCommaOrSquareBracket, is.Tell()); return;
+        }
+    }
+
+    RAPIDJSON_FORCEINLINE bool IsIterativeParsingDelimiterState(IterativeParsingState s) {
+        return s >= IterativeParsingElementDelimiterState;
+    }
+    
+    RAPIDJSON_FORCEINLINE bool IsIterativeParsingCompleteState(IterativeParsingState s) {
+        return s <= IterativeParsingErrorState;
+    }
+    
+    template <unsigned parseFlags, typename InputStream, typename Handler>
+    ParseResult IterativeParse(InputStream& is, Handler& handler) {
+        parseResult_.Clear();
+        ClearStackOnExit scope(*this);
+        IterativeParsingState state = IterativeParsingStartState;
+        
+        SkipWhitespaceAndComments<parseFlags>(is);
+        RAPIDJSON_PARSE_ERROR_EARLY_RETURN(parseResult_);
+        while (is.Peek() != '\0') {
+            Token t = Tokenize(is.Peek());
+            IterativeParsingState n = Predict(state, t);
+            IterativeParsingState d = Transit<parseFlags>(state, t, n, is, handler);
+            
+            if (d == IterativeParsingErrorState) {
+                HandleError(state, is);
+                break;
+            }
+            
+            state = d;
+            
+            // Do not further consume streams if a root JSON has been parsed.
+            if ((parseFlags & kParseStopWhenDo
