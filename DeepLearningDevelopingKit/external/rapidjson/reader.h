@@ -2090,4 +2090,52 @@ private:
             if (src == IterativeParsingElementState)
                 ++c;
             // Restore the state.
-            IterativeParsingState n = static_cast<IterativeParsingState>(*stack_.temp
+            IterativeParsingState n = static_cast<IterativeParsingState>(*stack_.template Pop<SizeType>(1));
+            // Transit to Finish state if this is the topmost scope.
+            if (n == IterativeParsingStartState)
+                n = IterativeParsingFinishState;
+            // Call handler
+            bool hr = handler.EndArray(c);
+            // On handler short circuits the parsing.
+            if (!hr) {
+                RAPIDJSON_PARSE_ERROR_NORETURN(kParseErrorTermination, is.Tell());
+                return IterativeParsingErrorState;
+            }
+            else {
+                is.Take();
+                return n;
+            }
+        }
+
+        default:
+            // This branch is for IterativeParsingValueState actually.
+            // Use `default:` rather than
+            // `case IterativeParsingValueState:` is for code coverage.
+
+            // The IterativeParsingStartState is not enumerated in this switch-case.
+            // It is impossible for that case. And it can be caught by following assertion.
+
+            // The IterativeParsingFinishState is not enumerated in this switch-case either.
+            // It is a "derivative" state which cannot triggered from Predict() directly.
+            // Therefore it cannot happen here. And it can be caught by following assertion.
+            RAPIDJSON_ASSERT(dst == IterativeParsingValueState);
+
+            // Must be non-compound value. Or it would be ObjectInitial or ArrayInitial state.
+            ParseValue<parseFlags>(is, handler);
+            if (HasParseError()) {
+                return IterativeParsingErrorState;
+            }
+            return IterativeParsingFinishState;
+        }
+    }
+
+    template <typename InputStream>
+    void HandleError(IterativeParsingState src, InputStream& is) {
+        if (HasParseError()) {
+            // Error flag has been set.
+            return;
+        }
+
+        switch (src) {
+        case IterativeParsingStartState:            RAPIDJSON_PARSE_ERROR(kParseErrorDocumentEmpty, is.Tell()); return;
+        case IterativeParsingFinishState:           RAPIDJSON_PARSE_ERROR(kParseErrorDocumentRootNot
