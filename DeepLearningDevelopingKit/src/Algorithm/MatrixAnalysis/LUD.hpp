@@ -130,3 +130,11 @@ namespace MathLib
 		{
 			Matrix<double> L(3, 3, MatrixType::Random);
 			Matrix<double> U(3, 3, MatrixType::Random);
+			auto temp = MatrixDecomposition::Doolittle(_mat);
+			L = temp.first;
+			U = temp.second;
+			T det = U.Trace();
+			return det;
+		}
+	}
+}
