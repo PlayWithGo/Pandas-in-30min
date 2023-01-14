@@ -51,4 +51,97 @@ std::ostream & Neural::operator<<(std::ostream & _outstream, InputLayer & _layer
 }
 
 // Set the input of the layer.
-/// Which means set 
+/// Which means set the nodes` tempInput.
+void Neural::InputLayer::SetInput(const Vector<ElemType>& _vec)
+{
+	for (size_t i = 0; i < n; i++)
+	{
+		_nodes.at(i).tempInput = _vec(i);
+	}
+}
+
+// Set the activation function of the layer.
+void Neural::InputLayer::SetActivationFunction(const ActivationFunction _function)
+{
+	switch (_function)
+	{
+	case ActivationFunction::Sigmoid:
+		this->activationFunction = Sigmoid;
+		this->activationFunctionDerivative = SigmoidDerivative;
+		break;
+	case ActivationFunction::ReLU:
+		this->activationFunction = ReLU;
+		this->activationFunctionDerivative = ReLUDerivative;
+		break;
+	default:
+		this->activationFunction = Sigmoid;
+		this->activationFunctionDerivative = SigmoidDerivative;
+		break;
+	}
+}
+
+// Set the loss function of the layer.
+void Neural::InputLayer::SetLossFunction(const LossFunction _function)
+{
+	switch (_function)
+	{
+	case LossFunction::MES:
+		this->lossFunction = MES;
+		this->lossFunctionDerivative = MESDerivative;
+		break;
+	default:
+		this->lossFunction = MES;
+		this->lossFunctionDerivative = MESDerivative;
+		break;
+	}
+}
+
+// Get the output of the layer.
+/// Which means get the value of all nodes in Vector.
+Vector<Neural::ElemType> Neural::InputLayer::GetOutput(void)
+{
+	Vector<ElemType> temp(m);
+	for (size_t i = 0; i < m; i++)
+	{
+		temp(i) = _nodes.at(i).value;
+	}
+	return temp;
+}
+
+// ForwardPropagation Function
+/// Calculate the value of each node.
+void Neural::InputLayer::ForwardPropagation(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).value = _nodes.at(i).tempInput;
+	}
+}
+
+// BackwardPropagation Function
+/// Calculate the gradient(delta) of each node.
+Vector<Neural::ElemType> Neural::InputLayer::BackwardPropagation(const Vector<ElemType>& _vec)
+{
+	/// Calculate the partial derivative of loss to last layer value and return the expectation of last layer.
+	return _vec;
+}
+
+// Update Function
+/// Update the weight and bias of each node.
+void Neural::InputLayer::Update(void)
+{
+
+}
+
+// Sum up the delta of a batch.
+void Neural::InputLayer::BatchDeltaSumUpdate(const size_t _batchSize)
+{
+}
+
+// Clear the sumdelta of a batch.
+void Neural::InputLayer::BatchDeltaSumClear(void)
+{
+}
+
+
+/***********************
