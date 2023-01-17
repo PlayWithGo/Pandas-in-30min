@@ -378,4 +378,69 @@ Vector<Neural::ElemType> Neural::OutputLayer::GetOutput(void)
 	{
 		temp(i) = _nodes.at(i).value;
 	}
-	return temp
+	return temp;
+}
+
+// Get the estimated loss between output and expectation.
+Neural::ElemType Neural::OutputLayer::GetLoss(void)
+{
+	ElemType temp = 0;
+	for (size_t i = 0; i < m; i++)
+	{
+		temp += _nodes.at(i).lossSum;
+	}
+	temp = temp / n;
+	return temp;
+}
+
+// Get the exact error(Delta) between output and expectation.
+Vector<Neural::ElemType> Neural::OutputLayer::GetDelta(void)
+{
+	Vector<ElemType> temp(m);
+	for (size_t i = 0; i < m; i++)
+	{
+		temp(i) = _nodes.at(i).value - _nodes.at(i).expectation;
+	}
+	return temp;
+}
+
+// ForwardPropagation Function
+/// Calculate the value of each node.
+void Neural::OutputLayer::ForwardPropagation(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		/// θ(∑ X * W - B)
+		_nodes.at(i).value = activationFunction(Vector<double>::DotProduct(_nodes.at(i).tempInput, _nodes.at(i).weight) + _nodes.at(i).bias);
+	}
+}
+
+// BackwardPropagation Function
+/// Calculate the gradient(delta) of each node.
+Vector<Neural::ElemType> Neural::OutputLayer::BackwardPropagation(const Vector<ElemType> & _vec)
+{
+	SetExpectation(_vec);
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).valueDelta = _nodes.at(i).value - _nodes.at(i).expectation;
+		_nodes.at(i).weightDelta = _nodes.at(i).tempInput * lossFunctionDerivative(_nodes.at(i).value, _nodes.at(i).expectation) * activationFunctionDerivative(_nodes.at(i).value);
+		_nodes.at(i).biasDelta = lossFunctionDerivative(_nodes.at(i).value, _nodes.at(i).expectation) * activationFunctionDerivative(_nodes.at(i).value);
+	}
+
+	/// Calculate the partial derivative of loss to last layer value and return the expectation of last layer.
+	Vector<ElemType> tempVec(n);
+	for (size_t i = 0; i < n; i++)
+		for (size_t j = 0; j < m; j++)
+			tempVec(i) += lossFunctionDerivative(_nodes.at(j).value, _nodes.at(j).expectation) * activationFunctionDerivative(_nodes.at(j).value) * _nodes.at(j).weight(i);
+	tempVec += _nodes.at(0).tempInput;
+	return tempVec;
+}
+
+// Update Function
+/// Update the weight and bias of each node.
+void Neural::OutputLayer::Update(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).weight += _nodes.at(i).weightDeltaSum * learnRate;
+		_nodes.at(i).
