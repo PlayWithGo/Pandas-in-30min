@@ -85,4 +85,66 @@ namespace Neural
 	};
 
 	/***************************************************************************************************/
-	// Class : 
+	// Class : Convolutional Layer
+	/// Used for extracting features out of input.
+	class ConvolutionalLayer
+	{
+	public: // Constructors
+
+		// Invoke constructor
+		ConvolutionalLayer(const ConvLayerInitor & _initor);
+
+	public: // Getter
+
+		inline const ConvFeature GetFeature(const size_t _index) const { return _convNodes.at(_index).kernel; }
+		inline const std::vector<ConvFeature> GetFeatureAll(void) const {
+			std::vector<ConvFeature> features;
+			for (const ConvNode & node : _convNodes)
+				features.push_back(node.feature);
+			return features;
+		}
+
+		inline const ConvKernel GetKernel(const size_t _index) const { return _convNodes.at(_index).kernel; }
+		inline const std::vector<ConvKernel> GetKernelAll(void) const {
+			std::vector<ConvKernel> kernels;
+			for (const ConvNode & node : _convNodes)
+				kernels.push_back(node.kernel);
+			return kernels;
+		}
+
+		inline const std::vector<MathLib::Matrix<ElemType>> GetDelta(void) const { return _derivative; }
+
+
+	public: // Setter
+
+		// Set the input of the ConvLayer.
+		void SetInput(const std::vector<MathLib::Matrix<ElemType>> &  _input);
+		// Set the delta propagate back from next layer.
+		void SetDelta(const std::vector<MathLib::Matrix<ElemType>> & _delta);
+		// Set the learn rate of the ConvLayer.
+		void SetLearnRate(const double _learnRate);
+
+	public: // BackPropagation Algorithm
+
+		// ForwardPropagation function
+		void ForwardPropagation(void);
+		// BackwardPropagation function
+		void BackwardPropagation(void);
+		// Update function
+		void Update(void);
+		// Sum up the delta of a batch.
+		void BatchDeltaSumUpdate(const size_t _batchSize);
+		// Clear the deltaSum of a batch.
+		void BatchDeltaSumClear(void);
+
+	private: //  Inner working function
+
+		// Set the activation function of the layer.
+		void SetActivationFunction(const ActivationFunction _function);
+		// ConvolutionCal
+		MathLib::Matrix<ElemType> ConvolutionCal(const MathLib::Matrix<ElemType> & _mat1, const MathLib::Matrix<ElemType> &  _mat2);
+
+	private: //  Math stuff you know
+
+		// Convolution of two matrix.
+		MathLib::Matrix<ElemType> C
