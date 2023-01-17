@@ -143,3 +143,10 @@ namespace Neural
 			case Neural::PaddingNum::RandomPadding:
 				return MathLib::Random();
 				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+	};
+}
