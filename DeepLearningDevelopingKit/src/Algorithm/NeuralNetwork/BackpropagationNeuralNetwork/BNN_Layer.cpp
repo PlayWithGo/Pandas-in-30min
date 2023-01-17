@@ -232,4 +232,63 @@ Vector<Neural::ElemType> Neural::HiddenLayer::GetOutput(void)
 	return temp;
 }
 
-// ForwardPropagatio
+// ForwardPropagation Function
+/// Calculate the value of each node.
+void Neural::HiddenLayer::ForwardPropagation(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).value = activationFunction(Vector<double>::DotProduct(_nodes.at(i).tempInput, _nodes.at(i).weight) + _nodes.at(i).bias);
+	}
+}
+
+// BackwardPropagation Function
+/// Calculate the gradient(delta) of each node.
+Vector<Neural::ElemType> Neural::HiddenLayer::BackwardPropagation(const Vector<ElemType>& _vec)
+{
+	SetExpectation(_vec);
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).valueDelta = _nodes.at(i).value - _nodes.at(i).expectation;
+		_nodes.at(i).weightDelta = _nodes.at(i).tempInput * lossFunctionDerivative(_nodes.at(i).value, _nodes.at(i).expectation) * activationFunctionDerivative(_nodes.at(i).value);
+		_nodes.at(i).biasDelta = lossFunctionDerivative(_nodes.at(i).value, _nodes.at(i).expectation) * activationFunctionDerivative(_nodes.at(i).value);
+	}
+
+	/// Calculate the partial derivative of loss to last layer value and return the expectation of last layer.
+	Vector<ElemType> tempVec(n);
+	for (size_t i = 0; i < n; i++)
+		for (size_t j = 0; j < m; j++)
+			tempVec(i) += lossFunctionDerivative(_nodes.at(j).value, _nodes.at(j).expectation) * activationFunctionDerivative(_nodes.at(j).value) * _nodes.at(j).weight(i);
+	tempVec += _nodes.at(0).tempInput;
+	return tempVec;
+}
+
+// Update Function
+/// Update the weight and bias of each node.
+void Neural::HiddenLayer::Update(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).weight += _nodes.at(i).weightDeltaSum * learnRate;
+		_nodes.at(i).bias += _nodes.at(i).biasDeltaSum * learnRate;
+	}
+}
+
+// Sum up the delta of a batch.
+void Neural::HiddenLayer::BatchDeltaSumUpdate(const size_t _batchSize)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).weightDeltaSum += (_nodes.at(i).weightDelta * (1 / (double)_batchSize));
+		_nodes.at(i).biasDeltaSum += (_nodes.at(i).biasDelta * (1 / (double)_batchSize));
+	}
+}
+
+// Clear the sum of sum of delta.
+void Neural::HiddenLayer::BatchDeltaSumClear(void)
+{
+	for (size_t i = 0; i < m; i++)
+		for (size_t j = 0; j < n; j++)
+			_nodes.at(i).weightDeltaSum(j) = 0;
+
+	for (size_t i = 0; i < m
