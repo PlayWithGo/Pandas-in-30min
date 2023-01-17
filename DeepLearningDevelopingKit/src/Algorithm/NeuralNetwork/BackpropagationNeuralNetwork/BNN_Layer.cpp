@@ -291,4 +291,91 @@ void Neural::HiddenLayer::BatchDeltaSumClear(void)
 		for (size_t j = 0; j < n; j++)
 			_nodes.at(i).weightDeltaSum(j) = 0;
 
-	for (size_t i = 0; i < m
+	for (size_t i = 0; i < m; i++)
+		_nodes.at(i).biasDeltaSum = 0;
+}
+
+
+/***************************************************************************************************/
+// Class : OutputLayer
+/// Used for output data, quantify the loss of the output.
+
+// Constructor
+/// n is the input num of the layer.
+/// m is the output num of the layer, which of course is the node num in this layer.
+Neural::OutputLayer::OutputLayer(const size_t _n, const size_t _m)
+{
+	for (size_t i = 0; i < _m; i++)
+	{
+		OutputNode tempNode = *new OutputNode(_n);
+		this->_nodes.push_back(tempNode);
+	}
+	this->n = _n;
+	this->m = _m;
+}
+
+// Set the input of the layer.
+/// Which means set the nodes` tempInput.
+void Neural::OutputLayer::SetInput(const Vector<ElemType>& _vec)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).tempInput = _vec;
+	}
+}
+
+// Set the expectation of the OutputLayer.
+void Neural::OutputLayer::SetExpectation(const Vector<ElemType>& _vec)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).expectation = _vec(i);
+	}
+}
+
+// Set the activation function of the layer.
+void Neural::OutputLayer::SetActivationFunction(const ActivationFunction _function)
+{
+	switch (_function)
+	{
+	case ActivationFunction::Sigmoid:
+		this->activationFunction = Sigmoid;
+		this->activationFunctionDerivative = SigmoidDerivative;
+		break;
+	case ActivationFunction::ReLU:
+		this->activationFunction = ReLU;
+		this->activationFunctionDerivative = ReLUDerivative;
+		break;
+	default:
+		this->activationFunction = Sigmoid;
+		this->activationFunctionDerivative = SigmoidDerivative;
+		break;
+	}
+}
+
+// Set the loss function of the layer.
+void Neural::OutputLayer::SetLossFunction(const LossFunction _function)
+{
+	switch (_function)
+	{
+	case LossFunction::MES:
+		this->lossFunction = MES;
+		this->lossFunctionDerivative = MESDerivative;
+		break;
+	default:
+		this->lossFunction = MES;
+		this->lossFunctionDerivative = MESDerivative;
+		break;
+	}
+}
+
+// Get the output of the layer.
+/// Which means get the value pf all nodes in Vector.
+Vector<Neural::ElemType> Neural::OutputLayer::GetOutput(void)
+{
+	Vector<ElemType> temp(m);
+	for (size_t i = 0; i < m; i++)
+	{
+		temp(i) = _nodes.at(i).value;
+	}
+	return temp
