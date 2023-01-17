@@ -147,4 +147,57 @@ namespace Neural
 	private: //  Math stuff you know
 
 		// Convolution of two matrix.
-		MathLib::Matrix<ElemType> C
+		MathLib::Matrix<ElemType> Convolution(const MathLib::Matrix<ElemType> &  _mat1, const MathLib::Matrix<ElemType> &  _mat2);
+		ElemType ConvolutionSum(const MathLib::Matrix<ElemType> &  _mat1, const MathLib::Matrix<ElemType> &  _mat2, const size_t _m, const size_t _n);
+		// Cross-correlation of two matrix.
+		MathLib::Matrix<ElemType> Correlation(const MathLib::Matrix<ElemType> &  _mat1, const MathLib::Matrix<ElemType> &  _mat2);
+		// Sum of all elements of the Cross-correlation of two matrix.
+		ElemType CorrelationSum(const MathLib::Matrix<ElemType> &  _mat1, const MathLib::Matrix<ElemType> &  _mat2, const size_t _m, const size_t _n);
+
+		// Rotate a Matrix with 180° 
+		/// Cross-correlation(A, B) = rot180°(A * rot180°(B))
+		MathLib::Matrix<ElemType> Rot180(const MathLib::Matrix<ElemType> & _mat);
+
+		// Hadamard Product of two matrix.
+		MathLib::Matrix<Neural::ElemType> Hadamard(const MathLib::Matrix<ElemType>& _mat1, const MathLib::Matrix<ElemType>& _mat2);
+
+		public:
+
+		// Input of convolutional layer.
+		std::vector<MathLib::Matrix<ElemType>> _input;
+		std::vector<MathLib::Matrix<ElemType>> _paddedInput;
+
+		// Input size.
+		MathLib::Size _inputSize;
+		// Output size.
+		MathLib::Size _outputSize;
+
+		// Convolutional Node in the Layer.
+		/// Contains a kernal, a bias and features extracted by the node.
+		std::vector<ConvNode> _convNodes;
+		// The num of ConvNodes in the layer.
+		size_t _convNodeNum;
+		// The size of kernal.
+		MathLib::Size _kernelSize;
+		// The size of stride.
+		size_t _stride;
+
+		// Padding method
+		PaddingMethod _paddingMethod;
+		PaddingNum _paddingNum;
+		// Padding size
+		size_t _paddingM;
+		size_t _paddingN;
+
+		std::vector<MathLib::Matrix<ElemType>> _derivative;
+		std::vector<MathLib::Matrix<ElemType>> _derivativeLastLayer;
+
+		// Learning rate
+		/// Default value is 1
+		double learnRate = 1;
+
+		// Activation Function
+		ElemType(*activationFunction)(ElemType x);
+		ElemType(*activationFunctionDerivative)(ElemType x);
+	};
+}
