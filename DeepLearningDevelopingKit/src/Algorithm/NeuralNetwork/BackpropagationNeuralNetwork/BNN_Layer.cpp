@@ -443,4 +443,46 @@ void Neural::OutputLayer::Update(void)
 	for (size_t i = 0; i < m; i++)
 	{
 		_nodes.at(i).weight += _nodes.at(i).weightDeltaSum * learnRate;
-		_nodes.at(i).
+		_nodes.at(i).bias += _nodes.at(i).biasDeltaSum * learnRate;
+	}
+}
+
+// Sum up the delta of a batch.
+void Neural::OutputLayer::BatchDeltaSumUpdate(const size_t _batchSize)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).weightDeltaSum += (_nodes.at(i).weightDelta * (1 / (double)_batchSize));
+		_nodes.at(i).biasDeltaSum += (_nodes.at(i).biasDelta * (1 / (double)_batchSize));
+	}
+}
+
+// Clear the sum of sum of delta.
+void Neural::OutputLayer::BatchDeltaSumClear(void)
+{
+	for (size_t i = 0; i < m; i++)
+		for (size_t j = 0; j < n; j++)
+			_nodes.at(i).weightDeltaSum(j) = 0;
+
+	for (size_t i = 0; i < m; i++)
+		_nodes.at(i).biasDeltaSum = 0;
+}
+
+// Sum up the loss of a batch.
+void Neural::OutputLayer::LossSumUpdate(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).loss = lossFunction(_nodes.at(i).value, _nodes.at(i).expectation);
+		_nodes.at(i).lossSum += _nodes.at(i).loss;
+	}
+}
+
+// Clear the sum of loss od a batch.
+void Neural::OutputLayer::LossSumClear(void)
+{
+	for (size_t i = 0; i < m; i++)
+	{
+		_nodes.at(i).lossSum = 0;
+	}
+}
