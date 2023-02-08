@@ -240,4 +240,80 @@ namespace MathLib
 		}
 
 		/// Add another scalar to this Matrix.
-		void operator += (cons
+		void operator += (const T & _other)
+		{
+			Matrix<T> & self = *this;
+			if (self.m != _other.m || self.n != _other.n)
+			{
+				std::cerr << "ERROR : Invalid Matrix Addtion!" << std::endl;
+			}
+			for (size_t i = 0; i < self.m; i++)
+				for (size_t j = 0; j < self.n; j++)
+					self(i, j) = self(i, j) + _other;
+		}
+
+		// "-" operator
+		/// Substraction of two Matrixs.
+		Matrix<T> operator - (const Matrix<T> & _other) const
+		{
+			const Matrix<T> & self = *this;
+			Matrix<T> temp(m, n);
+			if (self.m != _other.m || self.n != _other.n)
+			{
+				cerr << "ERROR : Invalid Matrix Substraction!" << endl;
+				return temp;
+			}
+			for (size_t i = 0; i < self.m; i++)
+				for (size_t j = 0; j < self.n; j++)
+					temp(i, j) = self(i, j) - _other(i, j);
+			return temp;
+		}
+
+		/// Substraction of a matrix and a scalar.
+		/// Substract a scalar to each element in the matrix.
+		Matrix operator - (const T & _other) const
+		{
+			const Matrix<T> & self = *this;
+			Matrix<T> temp(m, n);
+			for (size_t i = 0; i < self.m; i++)
+				for (size_t j = 0; j < self.n; j++)
+					temp(i, j) = self(i, j) - _other;
+			return temp;
+		}
+
+		// "-=" operator
+		/// Substract another matrix to this matrix.
+		void operator -= (const Matrix<T> & _other)
+		{
+			Matrix<T> & self = *this;
+			if (self.m != _other.m || self.n != _other.n)
+			{
+				std::cerr << "ERROR : Invalid Matrix Addtion!" << std::endl;
+			}
+			for (size_t i = 0; i < self.m; i++)
+				for (size_t j = 0; j < self.n; j++)
+					self(i, j) = self(i, j) - _other(i, j);
+		}
+
+		/// Substract scalar to each element in this matrix.
+		void operator -= (const T & _other)
+		{
+			Matrix<T> & self = *this;
+			Matrix<T> temp(m, n);
+			for (size_t i = 0; i < self.m; i++)
+				for (size_t j = 0; j < self.n; j++)
+					self(i, j) = self(i, j) - _other;
+		}
+
+		// "*" operator
+		/// Multiplication of two matrixs.
+		Matrix<T> operator * (const Matrix<T> & _other) const
+		{
+			const Matrix<T> &self = *this;
+			Matrix<T> temp(self.m, _other.n);
+			if (self.n != _other.m)
+			{
+				std::cerr << "ERROR : Invalid Matrix Addtion!" << std::endl;
+				return temp;
+			}
+	
