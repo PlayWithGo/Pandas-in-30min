@@ -517,4 +517,108 @@ namespace MathLib
 				{
 					multiple = -1 * tempMat(k, i) / tempMat(i, i);
 					for (size_t u = 0; u < n; u++)
-						tempMat(k, u) += tempM
+						tempMat(k, u) += tempMat(i, u) * multiple;
+				}
+			}
+		}
+
+		det = tempMat.Trace();
+		if (iter % 2)
+			det = -det;
+		return det;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Trace(void) const
+	{
+		const Matrix<T> & self = *this;
+		T trace = 1;
+		for (size_t i = 0; i < n; i++)
+		{
+			trace = trace * self(i, i);
+		}
+		return trace;
+	}
+
+	template<class T>
+	inline void Matrix<T>::Clear(void)
+	{
+		Matrix<T> & self = *this;
+		for (size_t i = 0; i < m; i++)
+		{
+			for (size_t j = 0; j < n; j++)
+			{
+				self(i, j) = 0.f;
+			}
+		}
+	}
+
+	template<class T>
+	inline const Matrix<T> Matrix<T>::GaussianElimination(void) const
+	{
+		Matrix<T> tempMat = *this;
+		T multiple;
+
+		for (size_t i = 0; i < n; i++)
+		{
+			if (tempMat(i, i) == 0)
+			{
+				for (size_t j = i; j < n; j++)
+				{
+					if (tempMat(j, i) != 0)
+					{
+						tempMat.SwapColumn(i, j);
+					}
+				}
+			}
+			else
+			{
+				for (size_t k = i + 1; k < n; k++)
+				{
+					multiple = -1 * tempMat(k, i) / tempMat(i, i);
+					for (size_t u = 0; u < n; u++)
+						tempMat(k, u) += tempMat(i, u) * multiple;
+				}
+			}
+		}
+		return tempMat;
+	}
+
+	template<class T>
+	inline const Matrix<T> Matrix<T>::Transpostion(void) const
+	{
+		const Matrix<T> & self = *this;
+		Matrix<T> tempMat(n, n);
+		for (size_t i = 0; i < n; i++)
+			for (size_t j = 0; j < n; j++)
+				tempMat(i, j) = self(j, i);
+		return tempMat;
+	}
+
+	template<class T>
+	inline const Matrix<T> Matrix<T>::Adjoint(void) const
+	{
+		Matrix<T> self = *this;
+		Matrix<T> tempMat(n, n);
+		for (size_t i = 0; i < n; i++)
+			for (size_t j = 0; j < n; j++)
+				tempMat(i, j) = self.AlgebraicCofactor(j, i);
+		return tempMat;
+	}
+
+	template<class T>
+	inline const Matrix<T> Matrix<T>::Inverse(void) const
+	{
+		Matrix<T> self = *this;
+		Matrix<T> tempMat(n, n);
+		tempMat = self.Adjoint() * (1 / self.Determinant());
+		return tempMat;
+	}
+
+	template<class T>
+	inline const T MathLib::Matrix<T>::Cofactor(const size_t _i, const size_t _j) const
+	{
+		Matrix<T> tempMat = *this;
+		auto iter1 = tempMat._data.begin() + _i;
+		tempMat._data.erase(iter1);
+		for (size_t i = 0; i < m - 1; i++
