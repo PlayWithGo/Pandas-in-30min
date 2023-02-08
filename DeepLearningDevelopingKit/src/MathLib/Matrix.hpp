@@ -404,4 +404,117 @@ namespace MathLib
 				for (size_t j = 0; j < _n; j++)
 				{
 					T tempElem = 1.f;
-					tempVec.push_back(tempElem
+					tempVec.push_back(tempElem);
+				}
+				_data.push_back(tempVec);
+			}
+			break;
+		case MatrixType::Random:
+			for (size_t i = 0; i < _m; i++)
+			{
+				std::vector<T> tempVec;
+				for (size_t j = 0; j < _n; j++)
+				{
+					T tempElem = Random();
+					tempVec.push_back(tempElem);
+				}
+				_data.push_back(tempVec);
+			}
+			break;
+		case MatrixType::Identity:
+			for (size_t i = 0; i < _m; i++)
+			{
+				std::vector<T> tempVec;
+				for (size_t j = 0; j < _n; j++)
+				{
+					T tempElem;
+					if (i == j)
+						tempElem = 1.f;
+					else
+						tempElem = 0.f;
+					tempVec.push_back(tempElem);
+				}
+				_data.push_back(tempVec);
+			}
+			break;
+		default:
+			break;
+		}
+		m = _m;
+		n = _n;
+		size.m = _m;
+		size.n = _n;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Sum(void) const
+	{
+		const Matrix<T> & self = *this;
+		T Sum = 0;
+		for (size_t i = 0; i < m; i++)
+		{
+			for (size_t j = 0; j < n; j++)
+			{
+				Sum += self(i, j);
+			}
+		}
+		return Sum;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Average(void) const
+	{
+		return Sum() / (m*n);
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Max(void) const
+	{
+		const Matrix<T> & self = *this;
+		T temp = 0;
+		for (size_t i = 0; i < m; i++)
+			for (size_t j = 0; j < n; j++)
+				if (self(i, j) > temp)
+					temp = self(i, j);
+		return temp;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Min(void) const
+	{
+		const Matrix<T> & self = *this;
+		T temp = 0;
+		for (size_t i = 0; i < m; i++)
+			for (size_t j = 0; j < n; j++)
+				if (self(i, j) > temp)
+					temp = self(i, j);
+		return temp;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::Determinant(void) const
+	{
+		Matrix<T> tempMat = *this;
+		int iter = 0;
+		T det = 1, multiple;
+
+		for (size_t i = 0; i < n; i++)
+		{
+			if (tempMat(i, i) == 0)
+			{
+				for (size_t j = i; j < n; j++)
+				{ 
+					if (tempMat(j, i) != 0)
+					{
+						tempMat.SwapColumn(i, j);
+						iter++;
+					}
+				}
+			}
+			else
+			{
+				for (size_t k = i + 1; k < n; k++)
+				{
+					multiple = -1 * tempMat(k, i) / tempMat(i, i);
+					for (size_t u = 0; u < n; u++)
+						tempMat(k, u) += tempM
