@@ -86,4 +86,73 @@ namespace MathLib
 		/// Add up all the element in the Matrix.
 		const T Sum(void) const;
 		// Average function
-		/// Calculate 
+		/// Calculate the average value of all the element in the Matrix.
+		const T Average(void) const;
+		// Max function
+		/// Get the value of the max element in the Matrix.
+		const T Max(void) const;
+		// Min function
+		/// Get the value of the min element in the Matrix.
+		const T Min(void) const;
+
+	public: // Advanced Quantification
+
+		//	Determinant function
+		/// Calcutate the determinant of the Matrix.
+		const T Determinant(void) const;
+		// Trace
+		/// Calcutate the trace of the Matrix.
+		const T Trace(void) const;
+		// Cofactor function
+		/// Calcutate the cofactor of the Matrix.
+		const T Cofactor(const size_t _i, const size_t _j) const;
+		// Algebraic Cofactor function
+		/// Calcutate the algebraic cofactor of the Matrix.
+		const T AlgebraicCofactor(const size_t _i, const size_t _j) const;
+		// Rank function
+		/// Calcutate the rank of the Matrix.
+		const unsigned int Rank(void) const;
+		// 1-Norm
+		/// Calcutate the 1-norm of the Matrix.
+		const T OneNorm(void) const;
+		// Forbenivs Norm
+		/// Calcutate the Forbenivs norm of the Matrix.
+		const T ForbenivsNorm(void) const;
+		// P-Norm
+		/// Calcutate the P-Norm of the Matrix.
+		const T PNorm(const unsigned int _p) const;
+		
+	public: // Transformation
+
+		// Clear
+		void Clear(void);
+		// Gaussian Elimination
+		const Matrix<T> GaussianElimination(void) const;
+		// Transposition matrix
+		const Matrix<T> Transpostion(void) const;
+		// Adjoint matrix
+		const Matrix<T> Adjoint(void) const;
+		// Inverse matrix
+		const Matrix<T> Inverse(void) const;
+
+	private: // Inner woking functions
+
+		// Swap two columns
+		void SwapColumn(const size_t _i, const size_t _j);
+		// Resize the matrix
+		void Resize(const size_t _m, const size_t _n);
+
+	public: // Pointers
+
+		// Pointer
+		T * Data() { return this->_data[0]; }
+		// Const pointer
+		const T * Data() const { return this->_data[0]; }
+
+	public: // Operator Overloading 
+
+		// "( )" operator
+		/// Used for accessing the element in the Matrix.
+		inline T operator()(size_t _i, size_t _j) const
+		{
+			return this->_data[_i]
