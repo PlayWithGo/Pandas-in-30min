@@ -621,4 +621,88 @@ namespace MathLib
 		Matrix<T> tempMat = *this;
 		auto iter1 = tempMat._data.begin() + _i;
 		tempMat._data.erase(iter1);
-		for (size_t i = 0; i < m - 1; i++
+		for (size_t i = 0; i < m - 1; i++)
+		{
+			auto iter2 = tempMat._data.at(i).begin() + _j;
+			tempMat._data.at(i).erase(iter2);
+		}
+		tempMat.Resize(m - 1, n - 1);
+		return tempMat.Determinant();
+	}
+
+	template<class T>
+	inline const T MathLib::Matrix<T>::AlgebraicCofactor(const size_t _i, const size_t _j) const
+	{
+		T temp = Cofactor(_i, _j);
+		if (temp<DBL_EPSILON && temp >(-1)*DBL_EPSILON)
+			return 0.f;
+		else if ((_i + _j) % 2 == 0)
+			return temp;
+		else
+			return (-1) * temp;
+	}
+
+	template<class T>
+	inline const unsigned int Matrix<T>::Rank(void) const
+	{
+		Matrix<T> tempMat = *this;
+		tempMat = tempMat.GaussianElimination();
+		int rank = 0;
+		for (size_t i = 0; i < n; i++)
+			if (tempMat(i, i)!=0)
+				rank++;
+
+		return rank;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::OneNorm(void) const
+	{
+		const Matrix<T> & self = *this;
+		T tempMax{0.f}, sum{0.f};
+		for (size_t i = 0; i < n; i++)
+		{
+			for (size_t j = 0; j < n; j++)
+				sum += self(i, j);
+			if (sum>tempMax)
+				tempMax = sum;
+			sum = 0;
+		}
+		return tempMax;
+	}
+
+	template<class T>
+	inline const T Matrix<T>::ForbenivsNorm(void) const
+	{
+		const Matrix<T> & self = *this;
+		T sum{ 0.f };
+		for (size_t i = 0; i < n; i++)
+			for (size_t j = 0; j < n; j++)
+				sum += self(i, j) * self(i, j);
+		return std::sqrtf(sum);
+	}
+
+	template<class T>
+	inline const T Matrix<T>::PNorm(const unsigned int _p) const
+	{
+		const Matrix<T> & self = *this;
+		T sum{ 0.f };
+		for (size_t i = 0; i < n; i++)
+			for (size_t j = 0; j < n; j++)
+				sum += std::powf(self(i, j), _p);
+		return std::powf(sum, 1 / _p);
+	}
+
+	template<class T>
+	inline void Matrix<T>::SwapColumn(const size_t _i, const size_t _j)
+	{
+		swap(_data.at(_i), _data.at(_j));
+	}
+
+	template<class T>
+	inline void Matrix<T>::Resize(const size_t _m, const size_t _n)
+	{
+		m = _m;
+		n = _n;
+	}
+}
