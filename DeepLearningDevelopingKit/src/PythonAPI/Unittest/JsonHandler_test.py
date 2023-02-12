@@ -17,4 +17,13 @@ sys.path.append(str(dir_path + '\\src\\Json'))
 from JsonParser import VectorParser
 
 
-if __name__
+if __name__ == '__main__':
+    test_json_path = '\\data\\test\\test2.json'
+    vectors = VectorParser.deserialize(test_json_path)
+    for vec in vectors:
+        print(vec.data)
+    test_json_path = '\\data\\test\\test.json'
+    VectorParser.serialize(test_json_path, vectors)
+
+
+
