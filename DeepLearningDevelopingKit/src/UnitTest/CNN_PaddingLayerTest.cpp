@@ -31,4 +31,23 @@ int main(int argc, char ** argv)
 	std::cout << "--PaddingNum--" << std::endl;
 	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::ZeroPadding, 1, 1);
 	std::cout << "PaddingNum::ZeroPadding: \n" << result << std::endl;
-	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surr
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::OnePadding, 1, 1);
+	std::cout << "PaddingNum::OnePadding: \n" << result << std::endl;
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::RandomPadding, 1, 1);
+	std::cout << "PaddingNum::RandomPadding: \n" << result << std::endl;
+
+	std::cout << "--PaddingSize--" << std::endl;
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::ZeroPadding, 1, 1);
+	std::cout << "1, 1: \n" << result << std::endl;
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::ZeroPadding, 2, 2);
+	std::cout << "2, 2: \n" << result << std::endl;
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::ZeroPadding, 1, 2);
+	std::cout << "1, 2: \n" << result << std::endl;
+	result = Neural::Pad::Padding(testMat, Neural::PaddingMethod::Surround, Neural::PaddingNum::ZeroPadding, 0, 0);
+	std::cout << "0, 0: \n" << result << std::endl;
+
+	std::cout << "\n\nTest OK" << std::endl;
+
+	system("pause");
+	return 0;
+}*/
