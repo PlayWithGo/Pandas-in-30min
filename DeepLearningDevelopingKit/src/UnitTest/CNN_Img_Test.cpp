@@ -72,4 +72,14 @@ int main(int argc, char ** argv)
 	data = processOutput.at(0) + processOutput.at(1);
 	MathLib::Matrix<float> data2(data.ColumeSize(), data.RowSize());
 	for (size_t i = 0; i < data.ColumeSize(); i++)
-		for (si
+		for (size_t j = 0; j < data.RowSize(); j++)
+			data2(i, j) = data(i, j);
+	cv::Mat newImg = Visual::OpenCV::Matrix2Mat<float>(data2);
+	cv::normalize(newImg, newImg, 0, 1, cv::NORM_MINMAX);
+	cv::imshow("Rem", newImg);
+	cv::waitKey();
+
+	return 0;
+}
+
+#endif
