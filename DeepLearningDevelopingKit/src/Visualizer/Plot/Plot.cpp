@@ -97,4 +97,17 @@ void Visual::Plot2D::PerlinNoiseDemo(const size_t _m, const size_t _n)
 	}
 }
 
-cv::Mat Visual
+cv::Mat Visual::Plot2D::Scale(const cv::Mat _mat, unsigned n)
+{
+	MathLib::Matrix<double> data1(_mat.cols, _mat.rows);
+	MathLib::Matrix<double> data2(_mat.cols*n, _mat.rows*n);
+	data1 = OpenCV::Mat2Matrix<float>(_mat);
+	for (size_t i = 0; i < data2.ColumeSize(); i++)
+	{
+		for (size_t j = 0; j < data2.RowSize(); j++)
+		{
+			data2(i, j) = data1(i / n, j / n);
+		}
+	}
+	return OpenCV::Matrix2Mat(data2);
+}
