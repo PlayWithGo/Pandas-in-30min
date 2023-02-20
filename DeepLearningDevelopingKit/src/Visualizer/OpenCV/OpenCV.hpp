@@ -1,27 +1,17 @@
 ﻿/***************************************************************************************************/
 /*                                               Deep Learning Developing Kit                                                   */
-/*								        		 			  Json Parser 	                                                              */
+/*								        		 	              OpenCV    															       */
 /*                                                   www.tianshicangxie.com                                                        */
 /*                                      Copyright © 2015-2018 Celestial Tech Inc.                                          */
 /***************************************************************************************************/
-#pragma once
 
+// Header files
 #include <iostream>
-#include <string>
+
 #include "..\..\MathLib\MathLib.h"
-#include "JsonHandler.h"
-#include "..\..\Algorithm\NeuralNetwork\NeuralLib.h"
 
-using namespace Neural;
-
-class JsonParser {};
-
-class VectorParser : public JsonParser
-{
-public:
-
-	static void Serialize(const std::string & _filePath, const std::vector<MathLib::Vector<double>> & _vectors);
-	static std::vector<MathLib::Vector<double>> Deserialize(const std::string & _filePath);
-
-};
-
+// OpenCV
+#include "..\..\..\external\opencv\include\opencv2\core.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.h
