@@ -104,4 +104,47 @@ namespace Visual
 	}
 
 	template<class T>
-	inline static void Plot2D::Plot2DMatrixVec(const std::vector<MathLib::M
+	inline static void Plot2D::Plot2DMatrixVec(const std::vector<MathLib::Matrix<T>>& _mat, const std::string & _name, const Plot2DMode _mode, unsigned _x, unsigned _y, bool _normalize)
+	{
+		cv::Mat img;
+		for (const MathLib::Matrix<double> & mat : _mat)
+		{
+			MathLib::Matrix<float> data2(mat.ColumeSize(), mat.RowSize());
+			for (size_t i = 0; i < mat.ColumeSize(); i++)
+				for (size_t j = 0; j < mat.RowSize(); j++)
+					data2(i, j) = mat(i, j);
+			cv::Mat newImg = Visual::OpenCV::Matrix2Mat<float>(data2);
+			cv::normalize(newImg, newImg, 0, 1, cv::NORM_MINMAX);
+
+			cv::Mat img_temp(newImg.size(), CV_8UC3);
+			for (size_t i = 0; i < newImg.rows; i++)
+			{
+				for (size_t j = 0; j < newImg.cols; j++)
+				{
+					cv::Vec3b pixel;
+					pixel.val[0] = (1 - newImg.at<float>(i, j)) * 255; // B
+					pixel.val[1] = 0; // G
+					pixel.val[2] = newImg.at<float>(i, j) * 255; // R
+					img_temp.at<cv::Vec3b>(i, j) = pixel;
+				}
+			}
+			img.push_back(img_temp);
+
+			cv::Mat img_div(1, mat.RowSize(), CV_8UC3, cv::Scalar::all(0));
+			img.push_back(img_div);
+		}
+
+		resize(img, img, cv::Size(img.cols * 10, img.rows * 10), 0, 0, cv::INTER_NEAREST);
+
+		cv::namedWindow(_name, cv::WINDOW_AUTOSIZE);
+		cv::moveWindow(_name, _x, _y);
+		cv::imshow(_name, img);
+		cv::waitKey(1);
+	}
+
+	template<class T>
+	inline void Plot2D::PlotCNNTrainProcess(const std::vector<std::vector<MathLib::Matrix<T>>> _data, const std::string & _name)
+	{
+
+	}
+}
